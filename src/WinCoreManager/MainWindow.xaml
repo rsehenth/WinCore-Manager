@@ -1,0 +1,136 @@
+<Window Icon="pack://application:,,,/WinCoreManager;component/Assets/app.ico" x:Class="WinCoreManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:WinCoreManager.Localization"
+        Language="{Binding Language, Source={x:Static loc:LocalizationService.Current}}"
+        xmlns:vm="clr-namespace:WinCoreManager.ViewModels"
+        xmlns:views="clr-namespace:WinCoreManager.Views"
+        Title="WinCore Manager"
+        Width="1160"
+        Height="760"
+        MinWidth="840"
+        MinHeight="420"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        Background="{DynamicResource WindowBgBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        FontFamily="{StaticResource FontUi}"
+        FontSize="14">
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UpdatesViewModel}">
+            <views:UpdatesPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:MaintenanceViewModel}">
+            <views:MaintenancePage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UninstallersViewModel}">
+            <views:UninstallersPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StartupViewModel}">
+            <views:StartupPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CleanupViewModel}">
+            <views:CleanupPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TweaksViewModel}">
+            <views:TweaksPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HardwareViewModel}">
+            <views:HardwarePage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EssentialsViewModel}">
+            <views:EssentialsPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+            <views:HistoryPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AboutViewModel}">
+            <views:AboutPage />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource SidebarBgBrush}"
+                BorderBrush="{DynamicResource GridLineBrush}"
+                BorderThickness="0,0,1,0">
+            <DockPanel>
+                <!-- Marca -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="20,18,16,14">
+                    <Image Source="pack://application:,,,/WinCoreManager;component/Assets/app.ico" Width="28" Height="28"
+                           RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="WinCore Manager" />
+                    <TextBlock Text="WinCore Manager"
+                               Margin="12,0,0,0"
+                               VerticalAlignment="Center"
+                               FontFamily="{StaticResource FontDisplay}"
+                               FontSize="15"
+                               FontWeight="SemiBold" />
+                </StackPanel>
+
+                <!-- Rodapé -->
+                <Border DockPanel.Dock="Bottom"
+                        BorderBrush="{DynamicResource GridLineBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="0,4,0,14">
+                    <StackPanel x:Name="FooterNav">
+                        <TextBlock Text="{loc:Localized About.LinkMessage}" TextWrapping="Wrap" Margin="20,0"
+                                   AutomationProperties.LiveSetting="Polite">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button x:Name="FixMyPcLink" Content="{loc:Loc UI.TryFixMyPC}" Tag="&#xE8A7;"
+                                Command="{Binding About.OpenFixMyPcCommand}" Style="{StaticResource NavLinkButton}" />
+                        <RadioButton x:Name="AboutNav" Content="{loc:Localized AboutNavItem.Title}" Tag="{Binding AboutNavItem.Glyph}"
+                                     GroupName="nav" IsChecked="{Binding AboutNavItem.IsSelected, Mode=TwoWay}"
+                                     Style="{StaticResource NavRadioButton}" />
+                        <TextBlock x:Name="VersionLabel" Style="{StaticResource CaptionText}"
+                                   Margin="20,4,12,0" Foreground="{DynamicResource TextMutedBrush}">
+                            <Run Text="{loc:Loc UI.Version}" /><Run Text="{Binding AppVersion, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Navegação -->
+                <ScrollViewer x:Name="MainNavigationScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding NavItems}"
+                                  KeyboardNavigation.DirectionalNavigation="Cycle"
+                                  VerticalAlignment="Top">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Content="{loc:Localized Title}"
+                                             Tag="{Binding Glyph}"
+                                             GroupName="nav"
+                                             IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                             Style="{StaticResource NavRadioButton}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <ContentControl Grid.Column="1"
+                        Content="{Binding CurrentViewModel}"
+                        IsTabStop="False" />
+    </Grid>
+</Window>

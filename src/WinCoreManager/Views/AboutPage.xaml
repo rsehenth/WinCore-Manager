@@ -1,0 +1,146 @@
+<UserControl x:Class="WinCoreManager.Views.AboutPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:WinCoreManager.Localization">
+    <UserControl.Resources>
+        <!-- Módulo: nome + uma frase do que faz. -->
+        <Style x:Key="ModuleName" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="ModuleText" TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="860" HorizontalAlignment="Stretch">
+            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+            <TextBlock Text="{loc:Loc UI.WhatWinCoreManagerDoesAndWhoCreatedIt}"
+                       Style="{StaticResource PageSubtitleText}" Margin="0,4,0,18" />
+
+            <!-- Identidade -->
+            <Border Style="{StaticResource CardBorder}" Padding="22,20">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="pack://application:,,,/WinCoreManager;component/Assets/app.ico" Width="52" Height="52" VerticalAlignment="Top"
+                               RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="WinCore Manager" />
+                        <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding AppName}" Style="{StaticResource ValueText}" FontSize="22" />
+                            <TextBlock x:Name="AboutVersion" Text="{loc:Localized AppVersion, FormatKey=Common.Version}"
+                                       Style="{StaticResource CaptionText}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock TextWrapping="Wrap" Margin="0,18,0,0" FontSize="15"
+                               Text="{loc:Loc UI.OnePlaceToMaintainYourWindowsPCKeep}" />
+                    <TextBlock TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource TextSecondaryBrush}"
+                               Text="{loc:Loc UI.WinCoreManagerBringsWindowsToolsTogetherInOne}" />
+                </StackPanel>
+            </Border>
+
+            <!-- O que você encontra -->
+            <Border Style="{StaticResource CardBorder}" Padding="22,18" Margin="0,12,0,0">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc UI.Features}" Style="{StaticResource CardTitleText}" />
+                    <Border Style="{StaticResource Divider}" Margin="0,14,0,14" />
+                    <UniformGrid Columns="2">
+                        <StackPanel Margin="0,0,16,14">
+                            <TextBlock Text="{loc:Loc UI.Updates}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.FindAndInstallAppUpdatesThroughWinGet}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,14">
+                            <TextBlock Text="{loc:Loc UI.Maintenance}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.RunWindowsRepairToolsSuchAsSFCAnd}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,16,14">
+                            <TextBlock Text="{loc:Loc UI.Uninstaller}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.UninstallAppsAndReviewLeftoverFilesAndSettings}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,14">
+                            <TextBlock Text="{loc:Loc UI.Startup}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.SeeWhatRunsAtStartupAndEnableOr}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,16,14">
+                            <TextBlock Text="{loc:Loc UI.Cleanup}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.EstimateHowMuchSpaceYouCanReclaimAnd}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,14">
+                            <TextBlock Text="{loc:Loc UI.Tweaks}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.ViewAndAdjustPowerPerformanceAndFolderSettings}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{loc:Loc UI.MyComputer}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.ViewInformationAboutYourProcessorGraphicsMemoryDrives}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc UI.History}" Style="{StaticResource ModuleName}" />
+                            <TextBlock Text="{loc:Loc UI.KeepALocalRecordOfOperationsAndTheir}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Segurança -->
+            <Border Style="{StaticResource InfoBanner}" Margin="0,12,0,0" Padding="18,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" FontSize="14"
+                               Foreground="{DynamicResource AccentTextBrush}" VerticalAlignment="Top" Margin="0,1,12,0" />
+                    <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13"
+                               Text="{loc:Loc UI.WinCoreManagerRunsOnlyApprovedCommandsWithFixed}" />
+                </Grid>
+            </Border>
+
+            <!-- Autor -->
+            <Border Style="{StaticResource CardBorder}" Padding="22,18" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{loc:Loc UI.CreatedBy}" Style="{StaticResource FieldLabelText}" />
+                        <TextBlock x:Name="AboutAuthor" Text="{Binding AuthorName}" Style="{StaticResource ValueText}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button x:Name="AuthorLink" Grid.Column="1" Command="{Binding OpenAuthorCommand}"
+                            Style="{StaticResource GhostButton}" VerticalAlignment="Center"
+                            AutomationProperties.Name="{loc:Loc UI.OpenTheAuthorSGitHubProfile}" ToolTip="https://github.com/rsehenth">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE71B;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
+                            <TextBlock Text="{Binding AuthorProfileText}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Licenças e tecnologias -->
+            <Border Style="{StaticResource CardBorder}" Padding="22,18" Margin="0,12,0,0">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc UI.LicensesAndCredits}" Style="{StaticResource CardTitleText}" />
+                    <TextBlock x:Name="AboutLicense" TextWrapping="Wrap" Margin="0,10,0,0"
+                               Text="{loc:Loc UI.MitLicenseAndCopyright}" />
+                    <TextBlock TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextSecondaryBrush}"
+                               Text="{loc:Loc UI.IncludesCodeAdaptedFromBulkCrapUninstallerBy}" />
+                    <TextBlock Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,8,0,0"
+                               Text="{loc:Loc UI.SeeNOTICEBCUninstallerMdLICENSEBCUninstallerTxtAnd}" />
+                    <Border Style="{StaticResource Divider}" Margin="0,14,0,12" />
+                    <TextBlock Text="{loc:Loc UI.BuiltWithCAndWPFOnNET10}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <WrapPanel Margin="0,14,0,0">
+                <Button Content="{loc:Loc UI.TryFixMyPC}" Command="{Binding OpenFixMyPcCommand}"
+                        Margin="0,0,8,6" Padding="12,0" />
+            </WrapPanel>
+            <TextBlock Text="{loc:Localized LinkMessage}" Style="{StaticResource OptionalCaptionText}"
+                       AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

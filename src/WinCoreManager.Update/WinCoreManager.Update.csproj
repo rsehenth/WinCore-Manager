@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>WinCoreManager.Update</AssemblyName>
+    <Version>0.1.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>../WinCoreManager/app.manifest</ApplicationManifest>
+    <NeutralLanguage>pt-BR</NeutralLanguage>
+    <SatelliteResourceLanguages>en;en-US</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/UpdateVersion.cs" Link="UpdateVersion.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/GitHubReleases.cs" Link="GitHubReleases.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/PortablePackage.cs" Link="PortablePackage.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/PortableFileSystem.cs" Link="PortableFileSystem.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/RecoveryAuthorization.cs" Link="RecoveryAuthorization.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/PortableUpdateTransaction.cs" Link="PortableUpdateTransaction.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/Authenticode.cs" Link="Authenticode.cs" />
+    <Compile Include="../WinCoreManager/Services/SelfUpdate/ReleaseTrust.cs" Link="ReleaseTrust.cs" />
+    <EmbeddedResource Include="../WinCoreManager/Localization/Strings.resx"
+                      Link="Localization/Strings.resx" ManifestResourceName="WinCoreManager.Localization.Strings" />
+    <EmbeddedResource Include="../WinCoreManager/Localization/Strings.en-US.resx"
+                      Link="Localization/Strings.en-US.resx" ManifestResourceName="WinCoreManager.Localization.Strings.en-US" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(PortableRecoveryTestKeyFile)' != ''">
+    <EmbeddedResource Include="$(PortableRecoveryTestKeyFile)" LogicalName="WinCoreManager.Recovery.TestPublicKey" />
+  </ItemGroup>
+</Project>

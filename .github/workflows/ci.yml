@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore WinCoreManager.sln
+      - run: dotnet build WinCoreManager.sln -c Release --no-restore
+      # Cross-volume tests skip themselves; nothing is installed or maintained on the runner.
+      - run: dotnet test WinCoreManager.sln -c Release --no-build -- xUnit.ParallelizeTestCollections=false

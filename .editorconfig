@@ -1,0 +1,22 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{csproj,props,targets,xml,json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Verbatim third-party texts and Visual Studio files keep their own formatting.
+[{LICENSE-BCUninstaller.txt,WinCoreManager.sln,distribution/**,src/WinCoreManager/ThirdParty/**}]
+charset = unset
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = unset
+insert_final_newline = unset

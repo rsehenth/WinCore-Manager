@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>WinCoreManager</RootNamespace>
+    <AssemblyName>WinCoreManager</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <Version>0.1.0</Version>
+    <Product>WinCore Manager</Product>
+    <Description>Gerenciador de atualizações (WinGet) e ferramentas de manutenção do Windows</Description>
+    <NeutralLanguage>pt-BR</NeutralLanguage>
+    <SatelliteResourceLanguages>en;en-US</SatelliteResourceLanguages>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+    <!-- Fixa o binário nativo do SQLite (>= 3.50.2) acima do transitivo vulnerável (CVE-2025-6965). -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.14" />
+    <PackageReference Include="YamlDotNet" Version="18.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <None Update="ThirdParty\YamlDotNet.LICENSE.txt" TargetPath="Licencas\YamlDotNet.LICENSE.txt" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Licenças no pacote publicado. Na raiz o verificador de pacote só aceita os arquivos do BCUninstaller; o restante vai em Licencas\. -->
+    <None Include="..\..\LICENSE" TargetPath="Licencas\WinCoreManager-LICENSE.txt" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" TargetPath="Licencas\THIRD-PARTY-NOTICES.md" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\distribution\Licencas\*" TargetPath="Licencas\%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\LICENSE-BCUninstaller.txt;..\..\NOTICE-BCUninstaller.md" TargetPath="%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    <InternalsVisibleTo Include="WinCoreManager.Tests" />
+    <InternalsVisibleTo Include="WinGetFixture" />
+    <InternalsVisibleTo Include="VisualHarness" />
+  </ItemGroup>
+
+</Project>

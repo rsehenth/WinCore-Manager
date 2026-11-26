@@ -1,0 +1,271 @@
+<UserControl x:Class="WinCoreManager.Views.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:WinCoreManager.Localization">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="UpdateVisibility" />
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="780" HorizontalAlignment="Left">
+
+            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+            <TextBlock Text="{loc:Loc UI.AppPreferencesAppearanceAndDataStorage}"
+                       Style="{StaticResource PageSubtitleText}"
+                       Margin="0,4,0,0" />
+            <TextBlock Text="{loc:Localized StatusNote}"
+                       Style="{StaticResource PageSubtitleText}"
+                       Foreground="{DynamicResource AccentTextBrush}"
+                       AutomationProperties.LiveSetting="Polite"
+                       Margin="0,6,0,0" />
+
+            <!-- Aparência -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,20,0,16">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource IconTile}" VerticalAlignment="Top">
+                            <TextBlock Text="&#xE790;" Style="{StaticResource IconText}"
+                                       Foreground="{DynamicResource AccentTextBrush}"
+                                       HorizontalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc UI.Appearance}" Style="{StaticResource CardTitleText}" />
+                            <TextBlock Text="{loc:Loc UI.CustomizeTheAppearanceOfWinCoreManager}"
+                                       Style="{StaticResource CaptionText}"
+                                       FontSize="13"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                    <Border Style="{StaticResource Divider}" Margin="0,16,0,16" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc UI.Theme}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc UI.AppliesImmediatelyToWinCoreManagerYourWindowsTheme}"
+                                       Style="{StaticResource CaptionText}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,3,16,0" />
+                        </StackPanel>
+                        <ComboBox x:Name="ThemeSelector"
+                                  Grid.Column="1"
+                                  ItemsSource="{Binding ThemeOptions}"
+                                  SelectedItem="{Binding SelectedThemeOption, Mode=TwoWay}"
+                                  ItemTemplate="{StaticResource LocalizedLabelTemplate}"
+                                  AutomationProperties.Name="{loc:Loc UI.AppTheme}"
+                                  MinWidth="180"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{loc:Loc Settings.Language}" Style="{StaticResource CardTitleText}" />
+                        <TextBlock Text="{loc:Loc Settings.LanguageDescription}" Style="{StaticResource CaptionText}"
+                                   TextWrapping="Wrap" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <ComboBox x:Name="LanguageSelector" Grid.Column="1"
+                              ItemsSource="{Binding Languages}"
+                              SelectedItem="{Binding SelectedLanguageOption, Mode=TwoWay}"
+                              DisplayMemberPath="Label" MinWidth="200"
+                              AutomationProperties.Name="{loc:Loc Settings.Language}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
+                <DockPanel>
+                    <ComboBox x:Name="WinGetInactivitySelector" DockPanel.Dock="Right" MinWidth="100" VerticalAlignment="Center"
+                              ItemsSource="{Binding WinGetInactivityOptions}" SelectedItem="{Binding WinGetInactivitySeconds}"
+                              AutomationProperties.Name="{loc:Loc UpdateOperation.InactivitySetting}" />
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Text="{loc:Loc UpdateOperation.InactivitySetting}" Style="{StaticResource CardTitleText}" />
+                        <TextBlock Text="{loc:Loc UpdateOperation.InactivityDescription}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16" DataContext="{Binding SelfUpdate}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc Updater.Title}" Style="{StaticResource CardTitleText}" />
+                    <TextBlock Text="{loc:Localized InstalledVersion, FormatKey=Updater.InstalledVersion, Translate=False}"
+                               Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                    <TextBlock Text="{loc:Localized StatusText}" TextWrapping="Wrap" Margin="0,8,0,0"
+                               AutomationProperties.LiveSetting="Polite" />
+                    <StackPanel Visibility="{Binding HasOffer, Converter={StaticResource UpdateVisibility}}" Margin="0,8,0,0">
+                        <TextBlock Text="{loc:Localized AvailableVersion, FormatKey=Updater.AvailableVersion, Translate=False}" />
+                        <TextBlock Text="{loc:Localized PackageMiB, FormatKey=Updater.PackageSize, NumberFormat=N1}" Margin="0,3,0,0" />
+                        <StackPanel Visibility="{Binding HasReleaseNotes, Converter={StaticResource UpdateVisibility}}" Margin="0,9,0,0">
+                            <TextBlock Text="{loc:Loc Updater.ReleaseNotes}" FontWeight="SemiBold" />
+                            <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{Binding ReleaseNotes}" TextWrapping="Wrap" Margin="0,5,0,0" />
+                            </ScrollViewer>
+                        </StackPanel>
+                    </StackPanel>
+                    <ProgressBar Value="{Binding Progress, Mode=OneWay}" Maximum="1" Height="8" Margin="0,10,0,0"
+                                 AutomationProperties.Name="{loc:Loc Updater.DownloadProgress}"
+                                 Visibility="{Binding IsDownloading, Converter={StaticResource UpdateVisibility}}" />
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="{loc:Loc Updater.Check}" Command="{Binding CheckCommand}" Margin="0,0,8,4" />
+                        <Button Content="{loc:Loc Updater.Install}" Command="{Binding UpdateCommand}" Margin="0,0,8,4"
+                                Visibility="{Binding HasOffer, Converter={StaticResource UpdateVisibility}}" />
+                        <Button Content="{loc:Loc UI.Cancel}" Command="{Binding CancelCommand}" Margin="0,0,8,4">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding HasOffer}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="{loc:Loc Updater.OpenRelease}" Command="{Binding OpenReleaseCommand}" Margin="0,0,8,4"
+                                Visibility="{Binding HasReleasePage, Converter={StaticResource UpdateVisibility}}" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Armazenamento -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc UI.Storage}" Style="{StaticResource CardTitleText}" />
+                    <TextBlock Text="{loc:Loc UI.WhereHistoryAndSettingsAreStored}"
+                               Style="{StaticResource CaptionText}"
+                               FontSize="13"
+                               Margin="0,3,0,0" />
+                    <Border Style="{StaticResource Divider}" Margin="0,16,0,16" />
+                    <CheckBox Content="{loc:Loc UI.PortableModeSaveDataNextToTheExecutable}"
+                              Style="{StaticResource ToggleSwitch}"
+                              IsChecked="{Binding PortableMode, Mode=TwoWay}" />
+                    <TextBlock Text="{loc:Loc UI.TheChangeTakesEffectTheNextTimeYou}"
+                               Style="{StaticResource CaptionText}"
+                               TextWrapping="Wrap"
+                               Margin="52,6,0,0" />
+                    <Border Background="{DynamicResource InsetBgBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}"
+                            Padding="12,8"
+                            Margin="0,16,0,0">
+                        <TextBlock Text="{loc:Localized DataDirectoryText, FormatKey=Settings.DataDirectory, Translate=False}"
+                                   Style="{StaticResource MonoText}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Histórico -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc UI.History}" Style="{StaticResource CardTitleText}" />
+                    <TextBlock Text="{loc:Loc UI.HowLongToKeepOperationHistory}"
+                               Style="{StaticResource CaptionText}"
+                               FontSize="13"
+                               Margin="0,3,0,0" />
+                    <Border Style="{StaticResource Divider}" Margin="0,16,0,16" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{loc:Loc UI.AutomaticallyRemoveRecordsOlderThan}"
+                                   VerticalAlignment="Center" />
+                        <TextBox Text="{Binding RetentionDaysText, UpdateSourceTrigger=LostFocus}"
+                                 Width="72"
+                                 TextAlignment="Center"
+                                 AutomationProperties.Name="{loc:Loc UI.HistoryRetentionInDays}"
+                                 Margin="10,0" />
+                        <TextBlock Text="{loc:Loc UI.Days}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="{loc:Loc UI.Enter0ToKeepAllRecordsDatabaseLocation}"
+                               Style="{StaticResource CaptionText}"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,0" />
+                    <Border Background="{DynamicResource InsetBgBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}"
+                            Padding="12,8"
+                            Margin="0,8,0,0">
+                        <TextBlock Text="{Binding HistoryDatabaseText}"
+                                   Style="{StaticResource MonoText}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+                    <Button Content="{loc:Loc UI.ClearHistoryNow}"
+                            Style="{StaticResource DangerOutlineButton}"
+                            Command="{Binding ClearHistoryCommand}"
+                            HorizontalAlignment="Left"
+                            Margin="0,16,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- WinGet e segurança -->
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc UI.WinGetAndSecurity}" Style="{StaticResource CardTitleText}" />
+                    <TextBlock Text="{loc:Localized AppVersionText, FormatKey=Settings.AppVersion}"
+                               Style="{StaticResource CaptionText}"
+                               FontSize="13"
+                               Margin="0,3,0,0" />
+                    <Border Style="{StaticResource Divider}" Margin="0,16,0,16" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Localized WingetVersionText, FormatKey=Settings.WinGet}"
+                                       Style="{StaticResource CaptionText}"
+                                       FontSize="13" />
+                            <TextBlock Text="{loc:Localized WingetPathText, FormatKey=Common.Path, Translate=False}"
+                                       Style="{StaticResource MonoText}"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding WingetPathText}"
+                                       Margin="0,6,0,0" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Content="{loc:Loc UI.DetectAgain}"
+                                Command="{Binding DetectWingetCommand}"
+                                Margin="16,0,0,0"
+                                VerticalAlignment="Center" />
+                    </Grid>
+
+                    <Border Style="{StaticResource InfoBanner}" Margin="0,20,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE946;"
+                                       Style="{StaticResource IconText}"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource AccentTextBrush}"
+                                       VerticalAlignment="Top"
+                                       Margin="0,1,12,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{loc:Loc UI.ThisAppRunsOnlyApprovedCommandsSfcDism}"
+                                       Style="{StaticResource CaptionText}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       FontSize="13"
+                                       TextWrapping="Wrap" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

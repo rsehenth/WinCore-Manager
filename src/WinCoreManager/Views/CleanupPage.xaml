@@ -1,0 +1,109 @@
+<UserControl x:Class="WinCoreManager.Views.CleanupPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:WinCoreManager.Localization">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    <ScrollViewer x:Name="CleanupScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1040">
+            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+            <TextBlock Text="{loc:Loc UI.SeeHowMuchSpaceYouCanReclaimOn}"
+                       Style="{StaticResource PageSubtitleText}" TextWrapping="Wrap" Margin="0,4,0,12" />
+
+            <!-- Volume do Windows -->
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource IconTile}">
+                            <TextBlock Text="&#xEDA2;" Style="{StaticResource IconText}" Foreground="{DynamicResource AccentTextBrush}" HorizontalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Localized VolumeText}" Style="{StaticResource CardTitleText}" />
+                            <TextBlock Text="{loc:Localized EstimateText, BinarySizes=True}" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AccentTextBrush}" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Margin="0,16,0,0" Visibility="{Binding HasUsage, Converter={StaticResource BoolToVis}}">
+                        <ProgressBar Maximum="100" Value="{Binding UsedPercent, Mode=OneWay}" Height="8"
+                                     AutomationProperties.Name="{loc:Loc UI.UsedSpaceOnTheVolume}" />
+                    </StackPanel>
+                    <TextBlock Text="{loc:Localized CapacityText, BinarySizes=True}" TextWrapping="Wrap" Margin="0,10,0,0" Typography.NumeralAlignment="Tabular" />
+                    <WrapPanel Margin="0,14,0,0">
+                        <Button Content="{loc:Loc UI.Refresh}" Command="{Binding RefreshCommand}" Margin="0,0,8,4" />
+                        <Button x:Name="OpenDiskCleanup" Content="{loc:Loc UI.OpenWindowsDiskCleanup}"
+                                Command="{Binding OpenNativeCommand}" Margin="0,0,0,4" />
+                    </WrapPanel>
+                    <TextBlock Text="{loc:Loc UI.UseWindowsDiskCleanupToSelectOtherCategories}"
+                               Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    <TextBlock Text="{loc:Localized Status}" Style="{StaticResource OptionalText}" Foreground="{DynamicResource WarningBrush}"
+                               AutomationProperties.LiveSetting="Polite" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Ação irreversível -->
+            <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="&#xE7BA;" Style="{StaticResource IconText}" FontSize="14"
+                               Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Top" Margin="0,1,12,0" />
+                    <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13"
+                               Text="{loc:Loc UI.EmptyingTheRecycleBinPermanentlyDeletesItsFiles}" />
+                </Grid>
+            </Border>
+
+            <WrapPanel Margin="0,12,0,0">
+                <TextBlock Text="{loc:Localized SelectionText, BinarySizes=True}" VerticalAlignment="Center" Margin="0,0,12,6"
+                           AutomationProperties.LiveSetting="Polite" />
+                <Button x:Name="EmptyRecycleButton" Content="{loc:Loc UI.EmptySelectedRecycleBin}" Command="{Binding EmptyCommand}"
+                        Style="{StaticResource DangerOutlineButton}" Margin="0,0,0,6" />
+            </WrapPanel>
+            <TextBlock Text="{loc:Localized Message}" Style="{StaticResource OptionalText}" AutomationProperties.LiveSetting="Polite" />
+            <TextBlock Text="{loc:Loc UI.DiskCleanupCategories}" Style="{StaticResource CardTitleText}" Margin="0,16,0,4" />
+            <TextBlock Text="{loc:Loc UI.WindowsMayHideRegisteredCategoriesDependingOnThe}"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+            <Border Style="{StaticResource CardBorder}" Padding="0">
+                <ItemsControl x:Name="CleanupCategories" ItemsSource="{Binding Categories}" IsEnabled="{Binding CanInteract}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="18,12" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource GridLineBrush}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" AutomationProperties.Name="{loc:Localized Name}"
+                                              Visibility="{Binding Selectable, Converter={StaticResource BoolToVis}}"
+                                              Margin="0,0,10,0" VerticalAlignment="Top" />
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{loc:Localized Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{loc:Localized Description}" Style="{StaticResource CaptionText}"
+                                                   TextWrapping="Wrap" Margin="0,4,0,0" />
+                                        <TextBlock Style="{StaticResource CaptionText}" TextWrapping="Wrap">
+                                            <Run Text="{loc:Localized Category.Availability}" /><Run Text=" · " /><Run Text="{loc:Localized Category.Elevation}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Margin="12,0,0,0" MaxWidth="136">
+                                        <TextBlock Text="{loc:Localized Size, BinarySizes=True}" TextWrapping="Wrap" TextAlignment="Right" FontWeight="SemiBold" Typography.NumeralAlignment="Tabular" />
+                                        <TextBlock Text="{loc:Localized Attention}" Style="{StaticResource CaptionText}"
+                                                   TextWrapping="Wrap" TextAlignment="Right" Margin="0,4,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

@@ -1,0 +1,82 @@
+<UserControl x:Class="WinCoreManager.Views.SensorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:WinCoreManager.Localization">
+    <Grid Margin="24,16,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,12,0">
+                <TextBlock Text="{loc:Loc UI.Sensors}" Style="{StaticResource PageTitleText}" />
+                <TextBlock Text="{loc:Localized LastUpdate}" Style="{StaticResource PageSubtitleText}" Margin="0,4,0,0" />
+                <TextBlock Text="{loc:Localized Status}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+            <Button x:Name="SensorPauseButton" Grid.Column="1" Content="{loc:Localized PauseLabel}" Command="{Binding TogglePauseCommand}"
+                    MinWidth="96" VerticalAlignment="Top" />
+        </Grid>
+        <ScrollViewer x:Name="SensorScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <ItemsControl x:Name="SensorGroups" ItemsSource="{Binding Groups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,10" Padding="18,14">
+                                <StackPanel>
+                                    <TextBlock Text="{loc:Localized Name}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" Margin="0,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding Readings}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,5">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" MinWidth="120" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="{loc:Localized Label}" Style="{StaticResource CaptionText}" FontSize="13" TextWrapping="Wrap"
+                                                               VerticalAlignment="Center" Margin="0,0,12,0" />
+                                                    <TextBlock Grid.Column="1" Text="{loc:Localized .}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                                               TextAlignment="Right" Typography.NumeralAlignment="Tabular" ToolTip="{loc:Localized SampleSource}" />
+                                                    <ProgressBar Grid.Row="1" Grid.ColumnSpan="2" Maximum="100" Value="{Binding Percentage, TargetNullValue=0, Mode=OneWay}"
+                                                                 Height="4" Margin="0,5,0,0" HorizontalAlignment="Stretch"
+                                                                 IsTabStop="False" AutomationProperties.Name="{loc:Localized Label}">
+                                                        <ProgressBar.Style>
+                                                            <Style TargetType="ProgressBar" BasedOn="{StaticResource {x:Type ProgressBar}}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Percentage}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ProgressBar.Style>
+                                                    </ProgressBar>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ItemsControl ItemsSource="{Binding Notices}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock TextWrapping="Wrap" Style="{StaticResource CaptionText}" Margin="0,0,0,7">
+                                <Run Text="{loc:Localized Category}" FontWeight="SemiBold" /><Run Text=" · " />
+                                <Run Text="{loc:Localized Status}" /><Run Text=". " /><Run Text="{loc:Localized Reason}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

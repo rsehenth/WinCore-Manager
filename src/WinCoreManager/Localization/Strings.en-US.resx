@@ -1,0 +1,3968 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Common.Command" xml:space="preserve">
+    <value>Command: {0}</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Common.OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common.Path" xml:space="preserve">
+    <value>Path: {0}</value>
+  </data>
+  <data name="Common.SelectedCount" xml:space="preserve">
+    <value>{0} selected</value>
+  </data>
+  <data name="Common.Version" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="Message.01IncompleteScan" xml:space="preserve">
+    <value>{0}{1}: incomplete scan.</value>
+  </data>
+  <data name="Message.01PartialStatus" xml:space="preserve">
+    <value>{0}{1}: partial status.</value>
+  </data>
+  <data name="Message.01UnreadableOrInvalidStartupValues" xml:space="preserve">
+    <value>{0}{1}: unreadable or invalid startup values.</value>
+  </data>
+  <data name="Message.0AFileCouldNotBeRead" xml:space="preserve">
+    <value>{0}: a file could not be read.</value>
+  </data>
+  <data name="Message.0AWindowsRestartIsRequired" xml:space="preserve">
+    <value>{0} (a Windows restart is required)</value>
+  </data>
+  <data name="Message.0AnotherInstallationWasInProgress" xml:space="preserve">
+    <value>{0} (another installation was in progress)</value>
+  </data>
+  <data name="Message.0Apps1TechnicalComponentsHidden" xml:space="preserve">
+    <value>{0} apps · {1} technical components hidden</value>
+  </data>
+  <data name="Message.0Canceled" xml:space="preserve">
+    <value>=== {0} canceled ===</value>
+  </data>
+  <data name="Message.0CategorySelectedEstimatedSize1" xml:space="preserve">
+    <value>{0} category selected · estimated size {1}</value>
+  </data>
+  <data name="Message.0CouldNotVerifyThePath" xml:space="preserve">
+    <value>{0}: could not verify the path.</value>
+  </data>
+  <data name="Message.0Current1New2" xml:space="preserve">
+    <value>{0}
+
+Current   {1}
+New   {2}</value>
+  </data>
+  <data name="Message.0DISM1SFC" xml:space="preserve">
+    <value>{0} (DISM) + {1} (SFC)</value>
+  </data>
+  <data name="Message.0EntriesFound" xml:space="preserve">
+    <value>{0} entries found</value>
+  </data>
+  <data name="Message.0Finished1HHMmSs2" xml:space="preserve">
+    <value>=== {0} finished ({1:T}) — {2} ===</value>
+  </data>
+  <data name="Message.0Hours" xml:space="preserve">
+    <value>{0} hours</value>
+  </data>
+  <data name="Message.0IncompleteScan" xml:space="preserve">
+    <value>{0}: incomplete scan.</value>
+  </data>
+  <data name="Message.0InstallationCanceledByTheUser" xml:space="preserve">
+    <value>{0} (installation canceled by the user)</value>
+  </data>
+  <data name="Message.0IsARegistryLinkRemovalWasBlocked" xml:space="preserve">
+    <value>'{0}' is a registry link. Removal was blocked.</value>
+  </data>
+  <data name="Message.0Min" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="Message.0Minutes" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="Message.0OperationCanceled" xml:space="preserve">
+    <value>{0}: operation canceled.</value>
+  </data>
+  <data name="Message.0PartialStatus" xml:space="preserve">
+    <value>{0}: partial status.</value>
+  </data>
+  <data name="Message.0ReplacedDuringRestore" xml:space="preserve">
+    <value>{0} (replaced during restore)</value>
+  </data>
+  <data name="Message.0Restore1" xml:space="preserve">
+    <value>{0}
+
+Restore   {1}</value>
+  </data>
+  <data name="Message.0Seconds" xml:space="preserve">
+    <value>{0} seconds</value>
+  </data>
+  <data name="Message.0Shown" xml:space="preserve">
+    <value> · {0} shown</value>
+  </data>
+  <data name="Message.0Source1" xml:space="preserve">
+    <value>{0} — source: {1}</value>
+  </data>
+  <data name="Message.0Started1HHMmSs" xml:space="preserve">
+    <value>=== {0} started ({1:T}) ===</value>
+  </data>
+  <data name="Message.0StartupFor12TheChangeTakes" xml:space="preserve">
+    <value>{0} startup for {1}?
+
+{2} The change takes effect at the next sign-in.</value>
+  </data>
+  <data name="Message.0Succeeded1Failed2Canceled3Not" xml:space="preserve">
+    <value>{0} succeeded, {1} failed, {2} canceled, {3} not started.</value>
+  </data>
+  <data name="Message.0TechnicalComponentsShown1AppsHidden" xml:space="preserve">
+    <value>{0} technical components shown · {1} apps hidden</value>
+  </data>
+  <data name="Message.0TechnicalInventoryEntries1ComponentsOrDependencies" xml:space="preserve">
+    <value>{0} technical inventory entries · {1} components or dependencies</value>
+  </data>
+  <data name="Message.0TheInstallerInitiatedAWindowsRestart" xml:space="preserve">
+    <value>{0} (the installer initiated a Windows restart)</value>
+  </data>
+  <data name="Message.0TheRegistryKeyWasKeptBackupPreserved" xml:space="preserve">
+    <value>{0} The registry key was kept (backup preserved).</value>
+  </data>
+  <data name="Message.0x0X8WinGetOrInstallerErrorSee" xml:space="preserve">
+    <value>0x{0:X8} (WinGet or installer error, see the operation log)</value>
+  </data>
+  <data name="Message.0x8A15002BNoApplicablePackageUpdate" xml:space="preserve">
+    <value>0x8A15002B (no applicable package update)</value>
+  </data>
+  <data name="Message.0x8A150107InstallationRequiresAnInternetConnection" xml:space="preserve">
+    <value>0x8A150107 (installation requires an internet connection)</value>
+  </data>
+  <data name="Message.0x8A15010AInstallationFailedRestartWindowsAndTryAgain" xml:space="preserve">
+    <value>0x8A15010A (installation failed, restart Windows and try again)</value>
+  </data>
+  <data name="Message.10To20Minutes" xml:space="preserve">
+    <value>10 to 20 minutes</value>
+  </data>
+  <data name="Message.10To30Minutes" xml:space="preserve">
+    <value>10 to 30 minutes</value>
+  </data>
+  <data name="Message.15To40Minutes" xml:space="preserve">
+    <value>15 to 40 minutes</value>
+  </data>
+  <data name="Message.1605ThePackageIsNotInstalledForThis" xml:space="preserve">
+    <value>1605 (the package is not installed for this user)</value>
+  </data>
+  <data name="Message.1EntryFound" xml:space="preserve">
+    <value>1 entry found</value>
+  </data>
+  <data name="Message.1Hour" xml:space="preserve">
+    <value>1 hour</value>
+  </data>
+  <data name="Message.1Minute" xml:space="preserve">
+    <value>1 minute</value>
+  </data>
+  <data name="Message.1Second" xml:space="preserve">
+    <value>1 second</value>
+  </data>
+  <data name="Message.5To20Minutes" xml:space="preserve">
+    <value>5 to 20 minutes</value>
+  </data>
+  <data name="Message.ABackupIsLinkedToAnotherStartupFolder" xml:space="preserve">
+    <value>A backup is linked to another Startup folder.</value>
+  </data>
+  <data name="Message.AFewSeconds" xml:space="preserve">
+    <value>A few seconds</value>
+  </data>
+  <data name="Message.AFolderSharedByWindowsOrMultipleApps" xml:space="preserve">
+    <value>A folder shared by Windows or multiple apps.</value>
+  </data>
+  <data name="Message.AMaintenanceOperationIsAlreadyRunningWaitFor" xml:space="preserve">
+    <value>A maintenance operation is already running. Wait for it to finish before starting another.</value>
+  </data>
+  <data name="Message.APreviousChangeNeedsReviewItsRecoveryRecord" xml:space="preserve">
+    <value>A previous change needs review. Its recovery record was preserved.</value>
+  </data>
+  <data name="Message.APreviousWriteHasAnUncertainResultCheck" xml:space="preserve">
+    <value>A previous write has an uncertain result. Check the original setting in Windows.</value>
+  </data>
+  <data name="Message.AResourceUsedByWinCoreManager" xml:space="preserve">
+    <value>A resource used by WinCore Manager.</value>
+  </data>
+  <data name="Message.ASafeBackupLocationIsUnavailable" xml:space="preserve">
+    <value>A safe backup location is unavailable.</value>
+  </data>
+  <data name="Message.ASafeBackupLocationIsUnavailableForThis" xml:space="preserve">
+    <value>A safe backup location is unavailable for this folder.</value>
+  </data>
+  <data name="Message.ASystemFolderOnTheDrive" xml:space="preserve">
+    <value>A system folder on the drive.</value>
+  </data>
+  <data name="Message.About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Message.Activation" xml:space="preserve">
+    <value>Activation</value>
+  </data>
+  <data name="Message.Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Message.Adapter" xml:space="preserve">
+    <value>Adapter</value>
+  </data>
+  <data name="Message.AdapterType" xml:space="preserve">
+    <value>Adapter type</value>
+  </data>
+  <data name="Message.AdjustForBestAppearance" xml:space="preserve">
+    <value>Adjust for best appearance</value>
+  </data>
+  <data name="Message.AdjustForBestPerformance" xml:space="preserve">
+    <value>Adjust for best performance</value>
+  </data>
+  <data name="Message.AdministratorApprovalNotRequired" xml:space="preserve">
+    <value>Administrator approval not required</value>
+  </data>
+  <data name="Message.AdministratorApprovalWasCanceled" xml:space="preserve">
+    <value>Administrator approval was canceled.</value>
+  </data>
+  <data name="Message.AdvancedLeftoverCleanup" xml:space="preserve">
+    <value>Advanced leftover cleanup</value>
+  </data>
+  <data name="Message.All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Message.AllCategories" xml:space="preserve">
+    <value>All categories</value>
+  </data>
+  <data name="Message.AllConfidenceLevels" xml:space="preserve">
+    <value>All confidence levels</value>
+  </data>
+  <data name="Message.AllResults" xml:space="preserve">
+    <value>All results</value>
+  </data>
+  <data name="Message.AllSources" xml:space="preserve">
+    <value>All sources</value>
+  </data>
+  <data name="Message.AllTypes" xml:space="preserve">
+    <value>All types</value>
+  </data>
+  <data name="Message.AllowedWithConfirmation" xml:space="preserve">
+    <value>Allowed with confirmation</value>
+  </data>
+  <data name="Message.Ambiguous" xml:space="preserve">
+    <value>Ambiguous</value>
+  </data>
+  <data name="Message.AnHKCURunBackupIsUnreadableOrCorrupt" xml:space="preserve">
+    <value>An HKCU Run backup is unreadable or corrupt. The file was preserved.</value>
+  </data>
+  <data name="Message.AnIsolatedApplicationRegistryHiveIsRequired" xml:space="preserve">
+    <value>An isolated application registry hive is required.</value>
+  </data>
+  <data name="Message.AnItemAlreadyExistsAtTheOriginalLocation" xml:space="preserve">
+    <value>An item already exists at the original location. If you confirm, it will be quarantined before restoring the original.</value>
+  </data>
+  <data name="Message.AnItemAlreadyExistsAtTheOriginalLocation2" xml:space="preserve">
+    <value>An item already exists at the original location:
+
+{0}
+
+Quarantine the current item and restore the previous one?</value>
+  </data>
+  <data name="Message.AnOfficialUninstallerIsRegisteredForTheApp" xml:space="preserve">
+    <value>An official uninstaller is registered for the app.</value>
+  </data>
+  <data name="Message.AnUpdateCheckHasYetToRun" xml:space="preserve">
+    <value>An update check has yet to run.</value>
+  </data>
+  <data name="Message.AnimateControls" xml:space="preserve">
+    <value>Animate controls</value>
+  </data>
+  <data name="Message.AnimateMenus" xml:space="preserve">
+    <value>Animate menus</value>
+  </data>
+  <data name="Message.AnimateWindowsWhenMinimizingAndMaximizing" xml:space="preserve">
+    <value>Animate windows when minimizing and maximizing</value>
+  </data>
+  <data name="Message.AnotherUserSData" xml:space="preserve">
+    <value>Another user's data.</value>
+  </data>
+  <data name="Message.AnotherValueUsesTheOriginalRegistryName" xml:space="preserve">
+    <value>Another value uses the original registry name.</value>
+  </data>
+  <data name="Message.AnotherVersionOfThisProductIsAlreadyInstalled" xml:space="preserve">
+    <value>Another version of this product is already installed.</value>
+  </data>
+  <data name="Message.AnotherWindowsInstallerOperationIsInProgressTry" xml:space="preserve">
+    <value>Another Windows Installer operation is in progress. Try again later.</value>
+  </data>
+  <data name="Message.App" xml:space="preserve">
+    <value>App</value>
+  </data>
+  <data name="Message.AppEnteredManually" xml:space="preserve">
+    <value>(app entered manually)</value>
+  </data>
+  <data name="Message.ApplyChange" xml:space="preserve">
+    <value>Apply change</value>
+  </data>
+  <data name="Message.Apps" xml:space="preserve">
+    <value>Apps</value>
+  </data>
+  <data name="Message.AppsListed01" xml:space="preserve">
+    <value>Apps listed: {0} · {1}.</value>
+  </data>
+  <data name="Message.Attention0" xml:space="preserve">
+    <value>Attention: {0}</value>
+  </data>
+  <data name="Message.Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="Message.AutomaticRemovalOfOldRecordsIsOff" xml:space="preserve">
+    <value>Automatic removal of old records is off.</value>
+  </data>
+  <data name="Message.Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="Message.AvailableOnThisVolume" xml:space="preserve">
+    <value>Available on this volume</value>
+  </data>
+  <data name="Message.AvailableUpdates0LastChecked1HHMm" xml:space="preserve">
+    <value>Available updates: {0} · last checked {1:T}</value>
+  </data>
+  <data name="Message.AverageClockReportedByWindows" xml:space="preserve">
+    <value>Average clock reported by Windows</value>
+  </data>
+  <data name="Message.Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Message.BackupLocationUnavailable" xml:space="preserve">
+    <value>Backup location unavailable.</value>
+  </data>
+  <data name="Message.Balanced" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
+  <data name="Message.BatchInterrupted0" xml:space="preserve">
+    <value>Batch interrupted: {0}</value>
+  </data>
+  <data name="Message.Battery" xml:space="preserve">
+    <value>Battery</value>
+  </data>
+  <data name="Message.Blocked" xml:space="preserve">
+    <value>blocked</value>
+  </data>
+  <data name="Message.Blocked01" xml:space="preserve">
+    <value>Blocked: {0} — {1}</value>
+  </data>
+  <data name="Message.BlockedByProtectionPolicy" xml:space="preserve">
+    <value>Blocked by protection policy </value>
+  </data>
+  <data name="Message.BoardVersion" xml:space="preserve">
+    <value>Board version</value>
+  </data>
+  <data name="Message.BootMode" xml:space="preserve">
+    <value>Boot mode</value>
+  </data>
+  <data name="Message.Build" xml:space="preserve">
+    <value>Build</value>
+  </data>
+  <data name="Message.BuiltInWindowsAntimalware" xml:space="preserve">
+    <value>Built-in Windows antimalware.</value>
+  </data>
+  <data name="Message.BuiltInWindowsComponent" xml:space="preserve">
+    <value>Built-in Windows component.</value>
+  </data>
+  <data name="Message.BusType" xml:space="preserve">
+    <value>Bus type</value>
+  </data>
+  <data name="Message.CHKDSKFoundAndRepairedErrors" xml:space="preserve">
+    <value>CHKDSK found and repaired errors.</value>
+  </data>
+  <data name="Message.CHKDSKMayFixErrorsDuringTheOnlineScan" xml:space="preserve">
+    <value>CHKDSK may fix errors during the online scan. This operation uses the /scan option.</value>
+  </data>
+  <data name="Message.CPU" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="Message.CacheUsedToDistributeUpdates" xml:space="preserve">
+    <value>Cache used to distribute updates.</value>
+  </data>
+  <data name="Message.CancelScan" xml:space="preserve">
+    <value>Cancel scan</value>
+  </data>
+  <data name="Message.Canceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="Message.Canceled0CanceledByTheUser" xml:space="preserve">
+    <value>[Canceled] {0}: canceled by the user.</value>
+  </data>
+  <data name="Message.Canceled2" xml:space="preserve">
+    <value>canceled</value>
+  </data>
+  <data name="Message.CanceledByTheUser" xml:space="preserve">
+    <value>Canceled by the user.</value>
+  </data>
+  <data name="Message.CancellationRequestedTheCurrentStepFinishedBeforeMaintenance" xml:space="preserve">
+    <value>Cancellation requested. The current step finished before maintenance was released.</value>
+  </data>
+  <data name="Message.CancellationRequestedTheCurrentStepMayNeedTo" xml:space="preserve">
+    <value>Cancellation requested. The current step may need to finish.</value>
+  </data>
+  <data name="Message.CancellationRequestedWaitingForTheProcessToFinish" xml:space="preserve">
+    <value>Cancellation requested. Waiting for the process to finish.</value>
+  </data>
+  <data name="Message.Capacity" xml:space="preserve">
+    <value>Capacity</value>
+  </data>
+  <data name="Message.Capacity0Used1Free2" xml:space="preserve">
+    <value>Capacity {0} · Used {1} · Free {2}</value>
+  </data>
+  <data name="Message.CapacityUsedSpaceAndFreeSpaceWillAppear" xml:space="preserve">
+    <value>Capacity, used space, and free space will appear after the scan.</value>
+  </data>
+  <data name="Message.ChangeAppliedAndVerified" xml:space="preserve">
+    <value>Change applied and verified.</value>
+  </data>
+  <data name="Message.ChangeCanceled" xml:space="preserve">
+    <value>Change canceled.</value>
+  </data>
+  <data name="Message.ChangesComponentsInTheWindowsImageAndMay" xml:space="preserve">
+    <value>Changes components in the Windows image and may replace corrupted system files. Uses Windows Update as needed. The app never restarts Windows automatically.</value>
+  </data>
+  <data name="Message.ChangesTakeEffectAtTheNextSignIn" xml:space="preserve">
+    <value>Changes take effect at the next sign-in.</value>
+  </data>
+  <data name="Message.CheckAvailabilityInWindows" xml:space="preserve">
+    <value>Check availability in Windows</value>
+  </data>
+  <data name="Message.CheckFinishedAvailableUpdates0" xml:space="preserve">
+    <value>=== Check finished. Available updates: {0} ===</value>
+  </data>
+  <data name="Message.CheckPermissionsInWindows" xml:space="preserve">
+    <value>Check permissions in Windows</value>
+  </data>
+  <data name="Message.CheckTheProtectionStatusOfEachVolumeIn" xml:space="preserve">
+    <value>Check the protection status of each volume in Windows.</value>
+  </data>
+  <data name="Message.Checking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="Message.CheckingForAvailableUpdates" xml:space="preserve">
+    <value>Checking for available updates…</value>
+  </data>
+  <data name="Message.CheckingRestorePoints" xml:space="preserve">
+    <value>Checking restore points…</value>
+  </data>
+  <data name="Message.CheckingTheWindowsVolume" xml:space="preserve">
+    <value>Checking the Windows volume…</value>
+  </data>
+  <data name="Message.CheckingWinGet" xml:space="preserve">
+    <value>Checking WinGet…</value>
+  </data>
+  <data name="Message.ChecksForCorruptedSystemFilesAndRepairsThem" xml:space="preserve">
+    <value>Checks for corrupted system files and repairs them using healthy copies from the Windows component store.</value>
+  </data>
+  <data name="Message.ChecksTheFileSystemOnAFixedNTFS" xml:space="preserve">
+    <value>Checks the file system on a fixed NTFS drive while it is in use.</value>
+  </data>
+  <data name="Message.ChecksTheIntegrityOfAllProtectedSystemFiles" xml:space="preserve">
+    <value>Checks the integrity of all protected system files without repairing them.</value>
+  </data>
+  <data name="Message.Chipset" xml:space="preserve">
+    <value>Chipset</value>
+  </data>
+  <data name="Message.ChipsetIdentificationUnavailable" xml:space="preserve">
+    <value>Chipset identification unavailable</value>
+  </data>
+  <data name="Message.ChooseAnAvailableOption" xml:space="preserve">
+    <value>Choose an available option.</value>
+  </data>
+  <data name="Message.ClassificationIsUncertainReviewTheItemManuallyBefore" xml:space="preserve">
+    <value>Classification is uncertain. Review the item manually before uninstalling.</value>
+  </data>
+  <data name="Message.CleanUp0LeftoverItemsFrom1" xml:space="preserve">
+    <value>Clean up {0} leftover items from '{1}'?</value>
+  </data>
+  <data name="Message.Cleanup" xml:space="preserve">
+    <value>Cleanup</value>
+  </data>
+  <data name="Message.CleanupAttentionHigh" xml:space="preserve">
+    <value>High impact</value>
+  </data>
+  <data name="Message.CleanupAttentionLow" xml:space="preserve">
+    <value>Low impact</value>
+  </data>
+  <data name="Message.CleanupAttentionNormal" xml:space="preserve">
+    <value>Standard impact</value>
+  </data>
+  <data name="Message.CleanupAttentionReview" xml:space="preserve">
+    <value>Review recommended</value>
+  </data>
+  <data name="Message.CleanupCanceled" xml:space="preserve">
+    <value>Cleanup canceled.</value>
+  </data>
+  <data name="Message.CleanupCanceledByTheUserCompletedItemsWere" xml:space="preserve">
+    <value>=== Cleanup canceled by the user. Completed items were preserved. ===</value>
+  </data>
+  <data name="Message.CleanupCanceledCompletedItemsWerePreserved" xml:space="preserve">
+    <value>Cleanup canceled. Completed items were preserved.</value>
+  </data>
+  <data name="Message.CleanupCanceledInWindows" xml:space="preserve">
+    <value>Cleanup canceled in Windows.</value>
+  </data>
+  <data name="Message.CleanupFailed0" xml:space="preserve">
+    <value>Cleanup failed: {0}</value>
+  </data>
+  <data name="Message.CleanupFinishedBackedUpAndRemoved0" xml:space="preserve">
+    <value>Cleanup finished. Backed up and removed: {0}.</value>
+  </data>
+  <data name="Message.CleanupPartiallyCompleted0Removed1Failed2" xml:space="preserve">
+    <value>Cleanup partially completed: {0} removed, {1} failed, {2} blocked or canceled.</value>
+  </data>
+  <data name="Message.CleanupRequiresAWindowsVolumeWithADrive" xml:space="preserve">
+    <value> Cleanup requires a Windows volume with a drive letter.</value>
+  </data>
+  <data name="Message.CleanupStartedItems0" xml:space="preserve">
+    <value>=== Cleanup started. Items: {0} ===</value>
+  </data>
+  <data name="Message.ClearHistory" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="Message.ClearsTheLocalDNSCacheWithoutRemovingUser" xml:space="preserve">
+    <value>Clears the local DNS cache without removing user data.</value>
+  </data>
+  <data name="Message.ClearsTheWindowsDNSResolverCache" xml:space="preserve">
+    <value>Clears the Windows DNS resolver cache.</value>
+  </data>
+  <data name="Message.Complete" xml:space="preserve">
+    <value>Complete.</value>
+  </data>
+  <data name="Message.Complete0" xml:space="preserve">
+    <value>Complete: {0}</value>
+  </data>
+  <data name="Message.Complete0Removed1Failed2BlockedOr" xml:space="preserve">
+    <value>=== Complete: {0} removed, {1} failed, {2} blocked or canceled ===</value>
+  </data>
+  <data name="Message.Complete0Succeeded1Failed2Canceled3" xml:space="preserve">
+    <value>=== Complete: {0} succeeded, {1} failed, {2} canceled, {3} unsupported ===</value>
+  </data>
+  <data name="Message.CompleteRestartingWindowsIsRecommended" xml:space="preserve">
+    <value>Complete. Restarting Windows is recommended.</value>
+  </data>
+  <data name="Message.CompleteTheInstallerRequestedARestart" xml:space="preserve">
+    <value>Complete. The installer requested a restart.</value>
+  </data>
+  <data name="Message.Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="Message.ComputerRegistry" xml:space="preserve">
+    <value>Computer registry</value>
+  </data>
+  <data name="Message.ComputerRegistry32Bit" xml:space="preserve">
+    <value>Computer registry (32-bit)</value>
+  </data>
+  <data name="Message.ConfiguredSpeed" xml:space="preserve">
+    <value>Configured speed</value>
+  </data>
+  <data name="Message.ConfiguredSpeeds" xml:space="preserve">
+    <value>Configured speeds</value>
+  </data>
+  <data name="Message.Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Message.Confirmed" xml:space="preserve">
+    <value>Confirmed</value>
+  </data>
+  <data name="Message.Conflict" xml:space="preserve">
+    <value>Conflict</value>
+  </data>
+  <data name="Message.Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Message.ContainsAProtectedWindowsOrAppFolder" xml:space="preserve">
+    <value>Contains a protected Windows or app folder.</value>
+  </data>
+  <data name="Message.ContainsExecutablesThatAnotherAppMayUseReview" xml:space="preserve">
+    <value>Contains executables that another app may use. Review the item manually.</value>
+  </data>
+  <data name="Message.ContainsSubkey0WhichIsAssociatedWithAnother" xml:space="preserve">
+    <value>Contains subkey '{0}', which is associated with another installed app.</value>
+  </data>
+  <data name="Message.ContainsTheFolderFor0AnAppThat" xml:space="preserve">
+    <value>Contains the folder for '{0}', an app that is still installed.</value>
+  </data>
+  <data name="Message.CouldNotBuildASafeUninstallCommandFor" xml:space="preserve">
+    <value>Could not build a safe uninstall command for this entry.</value>
+  </data>
+  <data name="Message.CouldNotCheck" xml:space="preserve">
+    <value>Could not check</value>
+  </data>
+  <data name="Message.CouldNotCheckRestorePoints0" xml:space="preserve">
+    <value>Could not check restore points. {0}</value>
+  </data>
+  <data name="Message.CouldNotCheckWinGet" xml:space="preserve">
+    <value>Could not check WinGet.</value>
+  </data>
+  <data name="Message.CouldNotCheckWinGet2" xml:space="preserve">
+    <value>Could not check WinGet.</value>
+  </data>
+  <data name="Message.CouldNotClearHistory0" xml:space="preserve">
+    <value>Could not clear history: {0}</value>
+  </data>
+  <data name="Message.CouldNotCompleteTheBackup0" xml:space="preserve">
+    <value>Could not complete the backup: {0}</value>
+  </data>
+  <data name="Message.CouldNotConfirmTheRegistryWriteWasSaved" xml:space="preserve">
+    <value>Could not confirm the registry write was saved to disk.</value>
+  </data>
+  <data name="Message.CouldNotDetectLeftoversFor01" xml:space="preserve">
+    <value>Could not detect leftovers for '{0}': {1}</value>
+  </data>
+  <data name="Message.CouldNotDetectTheWinGetVersion0" xml:space="preserve">
+    <value>Could not detect the WinGet version ({0}).</value>
+  </data>
+  <data name="Message.CouldNotEmptyTheRecycleBin0x0" xml:space="preserve">
+    <value>Could not empty the Recycle Bin (0x{0:X8}).</value>
+  </data>
+  <data name="Message.CouldNotEnumerateUninstallKeys012" xml:space="preserve">
+    <value>Could not enumerate uninstall keys ({0}/{1}): {2}</value>
+  </data>
+  <data name="Message.CouldNotFinishChangingTheEntry" xml:space="preserve">
+    <value>Could not finish changing the entry.</value>
+  </data>
+  <data name="Message.CouldNotFinishEmptyingTheRecycleBin" xml:space="preserve">
+    <value>Could not finish emptying the Recycle Bin.</value>
+  </data>
+  <data name="Message.CouldNotIdentifyTheQuarantineVolume" xml:space="preserve">
+    <value>Could not identify the quarantine volume.</value>
+  </data>
+  <data name="Message.CouldNotInspectTheItem" xml:space="preserve">
+    <value>Could not inspect the item.</value>
+  </data>
+  <data name="Message.CouldNotLoadHistory0" xml:space="preserve">
+    <value>Could not load history: {0}</value>
+  </data>
+  <data name="Message.CouldNotMoveTheItem0" xml:space="preserve">
+    <value>Could not move the item: {0}</value>
+  </data>
+  <data name="Message.CouldNotOpen0ForBackup" xml:space="preserve">
+    <value>Could not open '{0}' for backup.</value>
+  </data>
+  <data name="Message.CouldNotOpenKey01" xml:space="preserve">
+    <value>Could not open key {0}: {1}</value>
+  </data>
+  <data name="Message.CouldNotOpenTheDefaultBrowser" xml:space="preserve">
+    <value>Could not open the default browser.</value>
+  </data>
+  <data name="Message.CouldNotOpenTheFileLocationRefreshThe" xml:space="preserve">
+    <value>Could not open the file location. Refresh the list to check the path.</value>
+  </data>
+  <data name="Message.CouldNotOpenTheInstallationLog" xml:space="preserve">
+    <value>Could not open the installation log.</value>
+  </data>
+  <data name="Message.CouldNotOpenTheWindowsTool" xml:space="preserve">
+    <value>Could not open the Windows tool.</value>
+  </data>
+  <data name="Message.CouldNotRead0ForBackup1" xml:space="preserve">
+    <value>Could not read '{0}' for backup: {1}</value>
+  </data>
+  <data name="Message.CouldNotReadAStartupBackup" xml:space="preserve">
+    <value>Could not read a startup backup.</value>
+  </data>
+  <data name="Message.CouldNotReadAllBackups" xml:space="preserve">
+    <value>Could not read all backups.</value>
+  </data>
+  <data name="Message.CouldNotReadEntry01" xml:space="preserve">
+    <value>Could not read entry {0}: {1}</value>
+  </data>
+  <data name="Message.CouldNotReadOutputFromTheAdministratorMaintenance" xml:space="preserve">
+    <value>Could not read output from the administrator maintenance task.</value>
+  </data>
+  <data name="Message.CouldNotReadTheFile" xml:space="preserve">
+    <value>Could not read the file.</value>
+  </data>
+  <data name="Message.CouldNotReadTheFullRegistryKey0" xml:space="preserve">
+    <value>Could not read the full registry key: {0}</value>
+  </data>
+  <data name="Message.CouldNotReadTheItemSData0" xml:space="preserve">
+    <value>Could not read the item's data: {0}</value>
+  </data>
+  <data name="Message.CouldNotReadValue0" xml:space="preserve">
+    <value>Could not read value '{0}'.</value>
+  </data>
+  <data name="Message.CouldNotRecordLeftoverCleanupInHistory0" xml:space="preserve">
+    <value>Could not record leftover cleanup in history: {0}</value>
+  </data>
+  <data name="Message.CouldNotRecordTheUninstallInHistory0" xml:space="preserve">
+    <value>Could not record the uninstall in history: {0}</value>
+  </data>
+  <data name="Message.CouldNotRecreate01" xml:space="preserve">
+    <value>Could not recreate '{0}': {1}</value>
+  </data>
+  <data name="Message.CouldNotRefreshTheList" xml:space="preserve">
+    <value>Could not refresh the list.</value>
+  </data>
+  <data name="Message.CouldNotRefreshTheListCheckHistoryAnd" xml:space="preserve">
+    <value>Could not refresh the list. Check history and select Refresh.</value>
+  </data>
+  <data name="Message.CouldNotRemoveTheRegistryKey0Backup" xml:space="preserve">
+    <value>Could not remove the registry key: {0} (backup preserved).</value>
+  </data>
+  <data name="Message.CouldNotRemoveTheTemporaryFile0" xml:space="preserve">
+    <value>Could not remove the temporary file: {0}</value>
+  </data>
+  <data name="Message.CouldNotRestoreValue01" xml:space="preserve">
+    <value>Could not restore value '{0}': {1}</value>
+  </data>
+  <data name="Message.CouldNotSafelyInterpretTheUninstallCommand" xml:space="preserve">
+    <value>Could not safely interpret the uninstall command.</value>
+  </data>
+  <data name="Message.CouldNotSafelyOpenTheItem0" xml:space="preserve">
+    <value>Could not safely open the item: {0}</value>
+  </data>
+  <data name="Message.CouldNotSaveSettings0" xml:space="preserve">
+    <value>Could not save settings: {0}</value>
+  </data>
+  <data name="Message.CouldNotSaveTheResultToHistory" xml:space="preserve">
+    <value>Could not save the result to history.</value>
+  </data>
+  <data name="Message.CouldNotSaveToHistory" xml:space="preserve">
+    <value> Could not save to history.</value>
+  </data>
+  <data name="Message.CouldNotScanInstalledApps0" xml:space="preserve">
+    <value>Could not scan installed apps: {0}</value>
+  </data>
+  <data name="Message.CouldNotSeparateTheExecutableFromItsArguments" xml:space="preserve">
+    <value>Could not separate the executable from its arguments: </value>
+  </data>
+  <data name="Message.CouldNotStartMaintenanceWithAdministratorPrivileges" xml:space="preserve">
+    <value>Could not start maintenance with administrator privileges.</value>
+  </data>
+  <data name="Message.CouldNotStartOrRefreshMonitoringSelectPause" xml:space="preserve">
+    <value>Could not start or refresh monitoring. Select Pause and then Resume to try again.</value>
+  </data>
+  <data name="Message.CouldNotStartTheUninstaller0" xml:space="preserve">
+    <value>Could not start the uninstaller: {0}</value>
+  </data>
+  <data name="Message.CouldNotStartWinGet" xml:space="preserve">
+    <value>Could not start WinGet.</value>
+  </data>
+  <data name="Message.CouldNotUpdateTheManifest0" xml:space="preserve">
+    <value>Could not update the manifest: {0}</value>
+  </data>
+  <data name="Message.CouldNotValidateTheItemsAgain0" xml:space="preserve">
+    <value>Could not validate the items again: {0}</value>
+  </data>
+  <data name="Message.CouldNotVerify0Error1" xml:space="preserve">
+    <value>Could not verify '{0}' (error {1}).</value>
+  </data>
+  <data name="Message.CouldNotVerifyTheRegistryKeyAfterBackup" xml:space="preserve">
+    <value>Could not verify the registry key after backup: {0}</value>
+  </data>
+  <data name="Message.CouldNotVerifyTheRequestedSettingTheRecovery" xml:space="preserve">
+    <value>Could not verify the requested setting. The recovery record was preserved.</value>
+  </data>
+  <data name="Message.CouldNotVerifyTheSavedSnapshot" xml:space="preserve">
+    <value>Could not verify the saved snapshot.</value>
+  </data>
+  <data name="Message.CouldNotVerifyTheToolSDestination" xml:space="preserve">
+    <value>Could not verify the tool's destination.</value>
+  </data>
+  <data name="Message.Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="Message.CriticalRegistryKeySOFTWARE0" xml:space="preserve">
+    <value>Critical registry key (SOFTWARE\{0}).</value>
+  </data>
+  <data name="Message.CriticalRegistryKeySOFTWAREWow6432Node" xml:space="preserve">
+    <value>Critical registry key (SOFTWARE\Wow6432Node).</value>
+  </data>
+  <data name="Message.Current0" xml:space="preserve">
+    <value>Current · {0}</value>
+  </data>
+  <data name="Message.CurrentProfile" xml:space="preserve">
+    <value>Current profile</value>
+  </data>
+  <data name="Message.Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Message.CustomProfile" xml:space="preserve">
+    <value>Custom profile</value>
+  </data>
+  <data name="Message.DISMFailedTheSFCStepWasSkipped" xml:space="preserve">
+    <value>DISM failed. The SFC step was skipped.</value>
+  </data>
+  <data name="Message.Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Message.Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Message.Dedicated" xml:space="preserve">
+    <value>Dedicated</value>
+  </data>
+  <data name="Message.DedicatedVideoMemory" xml:space="preserve">
+    <value>Dedicated video memory</value>
+  </data>
+  <data name="Message.DeliveryOptimizationFiles" xml:space="preserve">
+    <value>Delivery Optimization Files</value>
+  </data>
+  <data name="Message.DesktopResolution" xml:space="preserve">
+    <value>Desktop resolution</value>
+  </data>
+  <data name="Message.DetectingWinGet" xml:space="preserve">
+    <value>Detecting WinGet…</value>
+  </data>
+  <data name="Message.DevelopmentTool" xml:space="preserve">
+    <value>Development tool</value>
+  </data>
+  <data name="Message.DeviceDriverPackages" xml:space="preserve">
+    <value>Device driver packages</value>
+  </data>
+  <data name="Message.DeviceDriverSharedByHardware" xml:space="preserve">
+    <value>Device driver shared by hardware.</value>
+  </data>
+  <data name="Message.DeviceName" xml:space="preserve">
+    <value>Device name</value>
+  </data>
+  <data name="Message.Dialog" xml:space="preserve">
+    <value>Dialog</value>
+  </data>
+  <data name="Message.DirectXShaderCache" xml:space="preserve">
+    <value>DirectX Shader Cache</value>
+  </data>
+  <data name="Message.Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="Message.DisableStartupEntry" xml:space="preserve">
+    <value>Disable startup entry</value>
+  </data>
+  <data name="Message.Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Message.Disabled2" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Message.DisabledByWinCore" xml:space="preserve">
+    <value>Disabled by WinCore</value>
+  </data>
+  <data name="Message.DisabledInWindows" xml:space="preserve">
+    <value>Disabled in Windows</value>
+  </data>
+  <data name="Message.Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="Message.Display" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="Message.Displays" xml:space="preserve">
+    <value>Displays</value>
+  </data>
+  <data name="Message.Done0" xml:space="preserve">
+    <value>=== Done: {0} ===</value>
+  </data>
+  <data name="Message.Downloads" xml:space="preserve">
+    <value>Downloads</value>
+  </data>
+  <data name="Message.Drive" xml:space="preserve">
+    <value>Drive</value>
+  </data>
+  <data name="Message.Drive0" xml:space="preserve">
+    <value>Drive {0}</value>
+  </data>
+  <data name="Message.Drive01" xml:space="preserve">
+    <value>Drive {0} · {1}</value>
+  </data>
+  <data name="Message.Drive0ModelUnavailable" xml:space="preserve">
+    <value>Drive {0} · model unavailable</value>
+  </data>
+  <data name="Message.DriveNumber" xml:space="preserve">
+    <value>Drive number</value>
+  </data>
+  <data name="Message.DrivePresentedByWindows" xml:space="preserve">
+    <value>Drive presented by Windows</value>
+  </data>
+  <data name="Message.DriveRoot" xml:space="preserve">
+    <value>Drive root.</value>
+  </data>
+  <data name="Message.DriveSize" xml:space="preserve">
+    <value>Drive size</value>
+  </data>
+  <data name="Message.Edition" xml:space="preserve">
+    <value>Edition</value>
+  </data>
+  <data name="Message.EmptyOnThisVolume" xml:space="preserve">
+    <value>Empty on this volume</value>
+  </data>
+  <data name="Message.EmptyRecycleBin" xml:space="preserve">
+    <value>Empty Recycle Bin</value>
+  </data>
+  <data name="Message.EmptyingTheRecycleBinPermanentlyDeletesFilesYou" xml:space="preserve">
+    <value>Emptying the Recycle Bin permanently deletes files you might still want to restore.</value>
+  </data>
+  <data name="Message.Enable" xml:space="preserve">
+    <value>Enable</value>
+  </data>
+  <data name="Message.Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Message.Enabled2" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Message.Enabled3" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Message.EnterANumberOfDays0TurnsOff" xml:space="preserve">
+    <value>Enter a number of days (0 turns off automatic removal).</value>
+  </data>
+  <data name="Message.EnterTheAppName" xml:space="preserve">
+    <value>Enter the app name.</value>
+  </data>
+  <data name="Message.EntryDisabledAndSavedTheChangeTakesEffect" xml:space="preserve">
+    <value>Entry disabled and saved. The change takes effect at the next sign-in.</value>
+  </data>
+  <data name="Message.Error" xml:space="preserve">
+    <value>[Error] </value>
+  </data>
+  <data name="Message.Error01" xml:space="preserve">
+    <value>[Error] {0}: {1}</value>
+  </data>
+  <data name="Message.ErrorCouldNotSaveTheResultFor0" xml:space="preserve">
+    <value>[Error] Could not save the result for {0} to history.</value>
+  </data>
+  <data name="Message.EstimatedRemainingCharge" xml:space="preserve">
+    <value>Estimated remaining charge</value>
+  </data>
+  <data name="Message.Executable" xml:space="preserve">
+    <value>Executable</value>
+  </data>
+  <data name="Message.ExecutableFileThatMayBelongToAnotherApp" xml:space="preserve">
+    <value>Executable file that may belong to another app. Review it manually.</value>
+  </data>
+  <data name="Message.Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Message.Failed0" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="Message.Failed01" xml:space="preserve">
+    <value>Failed: {0} — {1}</value>
+  </data>
+  <data name="Message.Failed012" xml:space="preserve">
+    <value>[Failed] {0}: {1}</value>
+  </data>
+  <data name="Message.Failed2" xml:space="preserve">
+    <value>failed</value>
+  </data>
+  <data name="Message.Fan0" xml:space="preserve">
+    <value>Fan {0}</value>
+  </data>
+  <data name="Message.Fan0TargetSpeed" xml:space="preserve">
+    <value>Fan {0} · target speed</value>
+  </data>
+  <data name="Message.File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Message.FileBackedVirtualDrive" xml:space="preserve">
+    <value>File-backed virtual drive</value>
+  </data>
+  <data name="Message.FileExplorerDidNotSaveThePreference" xml:space="preserve">
+    <value>File Explorer did not save the preference.</value>
+  </data>
+  <data name="Message.FileExplorerRebuildsThumbnailsAsNeeded" xml:space="preserve">
+    <value>File Explorer rebuilds thumbnails as needed.</value>
+  </data>
+  <data name="Message.FileMovedToQuarantine" xml:space="preserve">
+    <value>File moved to quarantine.</value>
+  </data>
+  <data name="Message.FileSystem" xml:space="preserve">
+    <value>File system</value>
+  </data>
+  <data name="Message.Files" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="Message.FilesAndFoldersWillBeMovedToQuarantine" xml:space="preserve">
+    <value>Files and folders will be moved to quarantine. Registry items will be backed up to a .reg file and snapshot before removal. Cleanup skips any item it cannot back up.</value>
+  </data>
+  <data name="Message.FilesDiscardedByTheUpdate" xml:space="preserve">
+    <value>Files discarded by the update</value>
+  </data>
+  <data name="Message.FilesIdentifiedByWindowsDiskCleanupReviewThem" xml:space="preserve">
+    <value>Files identified by Windows Disk Cleanup. Review them in the Windows tool.</value>
+  </data>
+  <data name="Message.FilesRecoveredByCHKDSK" xml:space="preserve">
+    <value>Files recovered by CHKDSK</value>
+  </data>
+  <data name="Message.FilesRemaining0In1Subfolders" xml:space="preserve">
+    <value>Files remaining: {0} in {1} subfolders.</value>
+  </data>
+  <data name="Message.Finished" xml:space="preserve">
+    <value>Finished</value>
+  </data>
+  <data name="Message.FirmwareDate" xml:space="preserve">
+    <value>Firmware date</value>
+  </data>
+  <data name="Message.FirmwareVersion" xml:space="preserve">
+    <value>Firmware version</value>
+  </data>
+  <data name="Message.Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Message.FolderMovedToQuarantine" xml:space="preserve">
+    <value>Folder moved to quarantine.</value>
+  </data>
+  <data name="Message.FolderRegisteredAsTheAppSInstallationLocation" xml:space="preserve">
+    <value>Folder registered as the app's installation location.</value>
+  </data>
+  <data name="Message.Folders" xml:space="preserve">
+    <value>Folders</value>
+  </data>
+  <data name="Message.ForSafetyCommandChainsThroughCmdOrA" xml:space="preserve">
+    <value>For safety, command chains through cmd or a shell are blocked.</value>
+  </data>
+  <data name="Message.FreeSpace" xml:space="preserve">
+    <value>Free space</value>
+  </data>
+  <data name="Message.FullRepair" xml:space="preserve">
+    <value>Full Repair</value>
+  </data>
+  <data name="Message.FullRepairCanceled" xml:space="preserve">
+    <value>Full Repair canceled.</value>
+  </data>
+  <data name="Message.FullRepairCanceled2" xml:space="preserve">
+    <value>=== Full Repair canceled ===</value>
+  </data>
+  <data name="Message.FullRepairCompletedSuccessfullyDISMAndSFC" xml:space="preserve">
+    <value>Full Repair completed successfully (DISM and SFC).</value>
+  </data>
+  <data name="Message.FullRepairFailed0" xml:space="preserve">
+    <value>Full Repair failed: {0}</value>
+  </data>
+  <data name="Message.FullRepairFinished0HHMmSs" xml:space="preserve">
+    <value>=== Full Repair finished ({0:T}) ===</value>
+  </data>
+  <data name="Message.FullRepairStarted0HHMmSs" xml:space="preserve">
+    <value>=== Full Repair started ({0:T}) ===</value>
+  </data>
+  <data name="Message.GPUCoreClock" xml:space="preserve">
+    <value>GPU core clock</value>
+  </data>
+  <data name="Message.GPUModelUnavailable" xml:space="preserve">
+    <value>GPU model unavailable</value>
+  </data>
+  <data name="Message.GPUTemperature" xml:space="preserve">
+    <value>GPU temperature</value>
+  </data>
+  <data name="Message.GPUUtilization" xml:space="preserve">
+    <value>GPU utilization</value>
+  </data>
+  <data name="Message.GraphicsAdapter" xml:space="preserve">
+    <value>Graphics adapter</value>
+  </data>
+  <data name="Message.GraphicsCard" xml:space="preserve">
+    <value>Graphics card</value>
+  </data>
+  <data name="Message.HKCURunBackupLocationUnavailable" xml:space="preserve">
+    <value>HKCU Run: backup location unavailable.</value>
+  </data>
+  <data name="Message.HKCURunIncompleteScan" xml:space="preserve">
+    <value>HKCU Run: incomplete scan.</value>
+  </data>
+  <data name="Message.HKCURunWindowsStatusUnavailable" xml:space="preserve">
+    <value>HKCU Run: Windows status unavailable.</value>
+  </data>
+  <data name="Message.HealthReportedByWindows" xml:space="preserve">
+    <value>Health reported by Windows</value>
+  </data>
+  <data name="Message.Healthy" xml:space="preserve">
+    <value>Healthy</value>
+  </data>
+  <data name="Message.HelperComponentForAnotherAppSPerMachine" xml:space="preserve">
+    <value>Helper component for another app's per-machine installer.</value>
+  </data>
+  <data name="Message.HelperComponentForAnotherProductSInstaller" xml:space="preserve">
+    <value>Helper component for another product's installer.</value>
+  </data>
+  <data name="Message.High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="Message.High0Medium1Low2Protected3" xml:space="preserve">
+    <value>High: {0} · Medium: {1} · Low: {2} · Protected: {3} · ~{4} in eligible items</value>
+  </data>
+  <data name="Message.HighPerformance" xml:space="preserve">
+    <value>High performance</value>
+  </data>
+  <data name="Message.History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Message.HistoryClearedRecordsRemoved0" xml:space="preserve">
+    <value>History cleared. Records removed: {0}.</value>
+  </data>
+  <data name="Message.HistoryUnavailable" xml:space="preserve">
+    <value> History unavailable.</value>
+  </data>
+  <data name="Message.HistoryUnavailable2" xml:space="preserve">
+    <value>History unavailable.</value>
+  </data>
+  <data name="Message.ISCSILogicalDrive" xml:space="preserve">
+    <value>iSCSI logical drive</value>
+  </data>
+  <data name="Message.Identifier" xml:space="preserve">
+    <value>Identifier</value>
+  </data>
+  <data name="Message.Idle" xml:space="preserve">
+    <value>Idle</value>
+  </data>
+  <data name="Message.InsideAFolderMatchingTheAppPublisher" xml:space="preserve">
+    <value>Inside a folder matching the app publisher.</value>
+  </data>
+  <data name="Message.InsideTheInstallationFolderFor0AnApp" xml:space="preserve">
+    <value>Inside the installation folder for '{0}', an app that is still installed.</value>
+  </data>
+  <data name="Message.InstallShieldUninstallersMayNeedTheOriginalInstallationCache" xml:space="preserve">
+    <value>InstallShield uninstallers may need the original installation cache.</value>
+  </data>
+  <data name="Message.InstallationFilesFoundByWindowsDiskCleanup" xml:space="preserve">
+    <value>Installation files found by Windows Disk Cleanup.</value>
+  </data>
+  <data name="Message.InstallationFolderFound0FilesIn1Subfolders" xml:space="preserve">
+    <value>Installation folder found: {0} files in {1} subfolders, ~{2}.</value>
+  </data>
+  <data name="Message.Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Message.InstalledMemory" xml:space="preserve">
+    <value>Installed memory</value>
+  </data>
+  <data name="Message.InstalledPrograms" xml:space="preserve">
+    <value>Installed programs</value>
+  </data>
+  <data name="Message.InsufficientMetadataForAConclusiveClassification" xml:space="preserve">
+    <value>Insufficient metadata for a conclusive classification.</value>
+  </data>
+  <data name="Message.Integrated" xml:space="preserve">
+    <value>Integrated</value>
+  </data>
+  <data name="Message.IntegratedPCI" xml:space="preserve">
+    <value>Integrated PCI</value>
+  </data>
+  <data name="Message.InterfaceEnabled" xml:space="preserve">
+    <value>Interface enabled</value>
+  </data>
+  <data name="Message.InternalVisualStudioComponentIntelliSenseForWinRT" xml:space="preserve">
+    <value>Internal Visual Studio component (IntelliSense for WinRT).</value>
+  </data>
+  <data name="Message.InternalWindowsComponentRemovalIsBlockedInThis" xml:space="preserve">
+    <value>Internal Windows component. Removal is blocked in this module.</value>
+  </data>
+  <data name="Message.InvalidDriveSelectAnAvailableFixedNTFSDrive" xml:space="preserve">
+    <value>Invalid drive. Select an available fixed NTFS drive.</value>
+  </data>
+  <data name="Message.InvalidPackageIDSourceOrVersion" xml:space="preserve">
+    <value>Invalid package ID, source, or version.</value>
+  </data>
+  <data name="Message.InvalidRelativeOrAmbiguousPath" xml:space="preserve">
+    <value>Invalid, relative, or ambiguous path.</value>
+  </data>
+  <data name="Message.InvalidSettingOrValue" xml:space="preserve">
+    <value>Invalid setting or value.</value>
+  </data>
+  <data name="Message.InvalidSnapshot0YouCanManuallyImportThe" xml:space="preserve">
+    <value>Invalid snapshot: {0}. Registry backup at '{1}'.</value>
+  </data>
+  <data name="Message.ItemRestoredButTheManifestCouldNotBe" xml:space="preserve">
+    <value>Item restored, but the manifest could not be updated: {0}</value>
+  </data>
+  <data name="Message.ItemRestoredTheItemPreviouslyAtTheDestination" xml:space="preserve">
+    <value>Item restored. The item previously at the destination was quarantined.</value>
+  </data>
+  <data name="Message.ItemRestoredToItsOriginalLocation" xml:space="preserve">
+    <value>Item restored to its original location.</value>
+  </data>
+  <data name="Message.KeptBackupFailed" xml:space="preserve">
+    <value>kept (backup failed)</value>
+  </data>
+  <data name="Message.KeptBackupFailed2" xml:space="preserve">
+    <value>Kept (backup failed)</value>
+  </data>
+  <data name="Message.Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Message.LanguageApplied" xml:space="preserve">
+    <value>Language changed.</value>
+  </data>
+  <data name="Message.LanguageSaveFailed" xml:space="preserve">
+    <value>The language was applied, but the preference could not be saved.</value>
+  </data>
+  <data name="Message.LastUpdated" xml:space="preserve">
+    <value>Last updated —</value>
+  </data>
+  <data name="Message.LastUpdated0HHMmSs" xml:space="preserve">
+    <value>Last updated {0:T}</value>
+  </data>
+  <data name="Message.LastWinGetCheckFailed0HHMmSs" xml:space="preserve">
+    <value>Last WinGet check failed · {0:T}</value>
+  </data>
+  <data name="Message.LatestRestorePoint0G" xml:space="preserve">
+    <value>Latest restore point · {0:g}</value>
+  </data>
+  <data name="Message.LatestVerifiedDate0GSomeRestorePoints" xml:space="preserve">
+    <value>Latest verified date · {0:g}. Some restore points have no date.</value>
+  </data>
+  <data name="Message.LeftoverCleanup" xml:space="preserve">
+    <value>Leftover cleanup</value>
+  </data>
+  <data name="Message.LeftoverScanFailedFor01" xml:space="preserve">
+    <value>Leftover scan failed for '{0}': {1}</value>
+  </data>
+  <data name="Message.LetWindowsChoose" xml:space="preserve">
+    <value>Let Windows choose</value>
+  </data>
+  <data name="Message.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Message.Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="Message.LogicalProcessors" xml:space="preserve">
+    <value>Logical processors</value>
+  </data>
+  <data name="Message.Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="Message.Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="Message.MalformedRegistryKeyPath" xml:space="preserve">
+    <value>Malformed registry key path.</value>
+  </data>
+  <data name="Message.ManageWindowsFeaturesInTurnWindowsFeaturesOn" xml:space="preserve">
+    <value>Manage Windows features in 'Turn Windows features on or off'.</value>
+  </data>
+  <data name="Message.ManageWindowsUpdatesInWindowsUpdate" xml:space="preserve">
+    <value>Manage Windows updates in Windows Update.</value>
+  </data>
+  <data name="Message.ManagedByFileExplorerPolicy" xml:space="preserve">
+    <value>Managed by File Explorer policy.</value>
+  </data>
+  <data name="Message.ManagedByWindowsPolicy" xml:space="preserve">
+    <value>Managed by Windows policy.</value>
+  </data>
+  <data name="Message.Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+  <data name="Message.ManufacturerCode" xml:space="preserve">
+    <value>Manufacturer code</value>
+  </data>
+  <data name="Message.MarkedAsASystemComponentSystemComponentInThe" xml:space="preserve">
+    <value>Marked as a system component (SystemComponent) in the registry.</value>
+  </data>
+  <data name="Message.MayContainDocumentsAndOtherPersonalFiles" xml:space="preserve">
+    <value>May contain documents and other personal files.</value>
+  </data>
+  <data name="Message.MayContainFragmentsOfRecoveredData" xml:space="preserve">
+    <value>May contain fragments of recovered data.</value>
+  </data>
+  <data name="Message.MayReplaceCorruptedSystemFilesWindowsMayAsk" xml:space="preserve">
+    <value>May replace corrupted system files. Windows may ask you to restart afterward. WinCore Manager never restarts the PC automatically.</value>
+  </data>
+  <data name="Message.Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="Message.MemoryClock" xml:space="preserve">
+    <value>Memory clock</value>
+  </data>
+  <data name="Message.MemoryInstalledAmount" xml:space="preserve">
+    <value>{0} installed</value>
+  </data>
+  <data name="Message.MemoryModules" xml:space="preserve">
+    <value>Memory modules</value>
+  </data>
+  <data name="Message.MemoryRAM" xml:space="preserve">
+    <value>Memory (RAM)</value>
+  </data>
+  <data name="Message.MicrosoftRuntimeUsedAsASharedDependency" xml:space="preserve">
+    <value>Microsoft runtime used as a shared dependency.</value>
+  </data>
+  <data name="Message.MinutesToHoursDependingOnDriveSize" xml:space="preserve">
+    <value>Minutes to hours, depending on drive size</value>
+  </data>
+  <data name="Message.Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Message.ModelPartNumber" xml:space="preserve">
+    <value>Model (part number)</value>
+  </data>
+  <data name="Message.ModernNETRuntimeOrSDKUsedAsA" xml:space="preserve">
+    <value>Modern .NET runtime or SDK used as a shared dependency.</value>
+  </data>
+  <data name="Message.Module0" xml:space="preserve">
+    <value>Module {0}</value>
+  </data>
+  <data name="Message.Modules" xml:space="preserve">
+    <value>Modules</value>
+  </data>
+  <data name="Message.ModulesDetected" xml:space="preserve">
+    <value>Modules detected</value>
+  </data>
+  <data name="Message.MonitoringPaused" xml:space="preserve">
+    <value>Monitoring paused.</value>
+  </data>
+  <data name="Message.MonitoringPausedWhileTheWindowIsInactive" xml:space="preserve">
+    <value>Monitoring paused while the window is inactive.</value>
+  </data>
+  <data name="Message.MotherboardAndFirmware" xml:space="preserve">
+    <value>Motherboard and firmware</value>
+  </data>
+  <data name="Message.MotherboardModelUnavailable" xml:space="preserve">
+    <value>Motherboard model unavailable</value>
+  </data>
+  <data name="Message.MsiexecReturnedCode0" xml:space="preserve">
+    <value>msiexec returned code {0}.</value>
+  </data>
+  <data name="Message.MyComputer" xml:space="preserve">
+    <value>My Computer</value>
+  </data>
+  <data name="Message.NETFrameworkRuntimeBuiltIntoWindows" xml:space="preserve">
+    <value>.NET Framework runtime built into Windows.</value>
+  </data>
+  <data name="Message.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Message.NameContainsTheAppName" xml:space="preserve">
+    <value>Name contains the app name.</value>
+  </data>
+  <data name="Message.NameMatchesTheAppExactly" xml:space="preserve">
+    <value>Name matches the app exactly.</value>
+  </data>
+  <data name="Message.NameResemblesTheAppNameWeakMatch" xml:space="preserve">
+    <value>Name resembles the app name (weak match).</value>
+  </data>
+  <data name="Message.NativeCode00x1X" xml:space="preserve">
+    <value> (native code {0} / 0x{1:X})</value>
+  </data>
+  <data name="Message.Network" xml:space="preserve">
+    <value>Network</value>
+  </data>
+  <data name="Message.NetworkAdapter" xml:space="preserve">
+    <value>Network adapter</value>
+  </data>
+  <data name="Message.Never" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="Message.No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Message.NoCategorySelected" xml:space="preserve">
+    <value>No category selected</value>
+  </data>
+  <data name="Message.NoChangeNeeded" xml:space="preserve">
+    <value>No change needed.</value>
+  </data>
+  <data name="Message.NoChangeToUndo" xml:space="preserve">
+    <value>No change to undo.</value>
+  </data>
+  <data name="Message.NoEntriesChecked" xml:space="preserve">
+    <value>No entries checked</value>
+  </data>
+  <data name="Message.NoEntriesMatchTheSearch" xml:space="preserve">
+    <value>No entries match the search.</value>
+  </data>
+  <data name="Message.NoItemsProcessed" xml:space="preserve">
+    <value>No items processed.</value>
+  </data>
+  <data name="Message.NoItemsWereEligibleAfterValidationCleanupRemoved" xml:space="preserve">
+    <value>No items were eligible after validation. Cleanup removed nothing.</value>
+  </data>
+  <data name="Message.NoLikelyLeftoversWereFoundForThisApp" xml:space="preserve">
+    <value>No likely leftovers were found for this app.</value>
+  </data>
+  <data name="Message.NoMaintenanceOperationInProgress" xml:space="preserve">
+    <value>No maintenance operation in progress.</value>
+  </data>
+  <data name="Message.NoOperationInProgress" xml:space="preserve">
+    <value>No operation in progress.</value>
+  </data>
+  <data name="Message.NoReading" xml:space="preserve">
+    <value>No reading</value>
+  </data>
+  <data name="Message.NoReadingsAreAvailableInThisSession" xml:space="preserve">
+    <value>No readings are available in this session.</value>
+  </data>
+  <data name="Message.NoRegisteredCategoriesWereFound" xml:space="preserve">
+    <value>No registered categories were found.</value>
+  </data>
+  <data name="Message.NoRestorePointsFound0" xml:space="preserve">
+    <value>No restore points found. {0}</value>
+  </data>
+  <data name="Message.NoUpdatesFound0HHMmSs" xml:space="preserve">
+    <value>No updates found · {0:T}</value>
+  </data>
+  <data name="Message.NoUpdatesFoundLastChecked0HHMm" xml:space="preserve">
+    <value>No updates found · last checked {0:T}</value>
+  </data>
+  <data name="Message.NotActivated" xml:space="preserve">
+    <value>Not activated</value>
+  </data>
+  <data name="Message.NotDetected" xml:space="preserve">
+    <value>Not detected</value>
+  </data>
+  <data name="Message.NotReportedBySMBIOS" xml:space="preserve">
+    <value>Not reported by SMBIOS</value>
+  </data>
+  <data name="Message.NothingToRemoveValidationBlockedAllSelectedItems" xml:space="preserve">
+    <value>Nothing to remove. Validation blocked all selected items.</value>
+  </data>
+  <data name="Message.OK0UpdatedSuccessfully" xml:space="preserve">
+    <value>[OK] {0}: updated successfully.</value>
+  </data>
+  <data name="Message.Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Message.OfficialUninstallersRunOneAtATimeApps" xml:space="preserve">
+    <value>Official uninstallers run one at a time. Apps without a compatible uninstaller stay installed and are marked 'Unsupported'.</value>
+  </data>
+  <data name="Message.OfficialUninstallersWillRunOneAtATime" xml:space="preserve">
+    <value>Official uninstallers will run one at a time in list order. Follow the instructions in each window.</value>
+  </data>
+  <data name="Message.On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="Message.OnStartupTheAppWillRemoveRecordsOlder" xml:space="preserve">
+    <value>On startup, the app will remove records older than {0} days.</value>
+  </data>
+  <data name="Message.OnlyTheNameMatchesReviewTheItemManually" xml:space="preserve">
+    <value>Only the name matches. Review the item manually.</value>
+  </data>
+  <data name="Message.OnlyVerifiablePersonalShortcutsCanBeChanged" xml:space="preserve">
+    <value>Only verifiable personal shortcuts can be changed.</value>
+  </data>
+  <data name="Message.OpenWinCoreManagerWithoutAdministratorPrivilegesToUse" xml:space="preserve">
+    <value>Open WinCore Manager without administrator privileges to use WinGet.</value>
+  </data>
+  <data name="Message.OpeningCanceled" xml:space="preserve">
+    <value>Opening canceled.</value>
+  </data>
+  <data name="Message.OpeningTheWindowsToolWasCanceledOrPermission" xml:space="preserve">
+    <value>Opening the Windows tool was canceled or permission was denied.</value>
+  </data>
+  <data name="Message.OperatingSystem" xml:space="preserve">
+    <value>Operating system</value>
+  </data>
+  <data name="Message.OperationCanceledBeforeItStarted" xml:space="preserve">
+    <value>Operation canceled before it started.</value>
+  </data>
+  <data name="Message.OperationCanceledByTheUser" xml:space="preserve">
+    <value>Operation canceled by the user.</value>
+  </data>
+  <data name="Message.OperationCompletedSuccessfully" xml:space="preserve">
+    <value>Operation completed successfully.</value>
+  </data>
+  <data name="Message.OperationInProgress0" xml:space="preserve">
+    <value>Operation in progress: {0}</value>
+  </data>
+  <data name="Message.OriginalCommand" xml:space="preserve">
+    <value>Original command  </value>
+  </data>
+  <data name="Message.OriginalValueRestoredTheChangeTakesEffectAt" xml:space="preserve">
+    <value>Original value restored. The change takes effect at the next sign-in.</value>
+  </data>
+  <data name="Message.OutsideTheApprovedScopeUserProfile" xml:space="preserve">
+    <value>Outside the approved scope (user profile).</value>
+  </data>
+  <data name="Message.OutsideTheRemovalScopeApprovedInThisVersion" xml:space="preserve">
+    <value>Outside the removal scope approved in this version.</value>
+  </data>
+  <data name="Message.PARTIALREMOVAL0Of1KeysRemoved2" xml:space="preserve">
+    <value>PARTIAL REMOVAL: {0} of {1} keys removed. {2} Restore them from the backup.</value>
+  </data>
+  <data name="Message.PCIManufacturer" xml:space="preserve">
+    <value> · PCI manufacturer</value>
+  </data>
+  <data name="Message.PartialRestore" xml:space="preserve">
+    <value>Partial restore: </value>
+  </data>
+  <data name="Message.Partition0" xml:space="preserve">
+    <value>Partition {0}</value>
+  </data>
+  <data name="Message.PartitionCapacity" xml:space="preserve">
+    <value>Partition capacity</value>
+  </data>
+  <data name="Message.PartitionScheme" xml:space="preserve">
+    <value>Partition scheme</value>
+  </data>
+  <data name="Message.PartitionStyle" xml:space="preserve">
+    <value>Partition style</value>
+  </data>
+  <data name="Message.Path" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="Message.Pause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Message.PerformanceOptionsUnavailable" xml:space="preserve">
+    <value> Performance Options unavailable.</value>
+  </data>
+  <data name="Message.PeriodicReadingsAreLimitedTo16Drives" xml:space="preserve">
+    <value>Periodic readings are limited to 16 drives.</value>
+  </data>
+  <data name="Message.PermanentlyDeleteItemsFromTheRecycleBinOn" xml:space="preserve">
+    <value>Permanently delete items from the Recycle Bin on {0}?
+
+Estimated size: {1}. Check for files you want to restore.</value>
+  </data>
+  <data name="Message.PermanentlyRemoveAllHistoryRecords" xml:space="preserve">
+    <value>Permanently remove all history records?</value>
+  </data>
+  <data name="Message.PermissionDenied" xml:space="preserve">
+    <value>Permission denied</value>
+  </data>
+  <data name="Message.PermissionToChangeThisSettingIsUnavailable" xml:space="preserve">
+    <value>Permission to change this setting is unavailable.</value>
+  </data>
+  <data name="Message.PersonalStartupFolder" xml:space="preserve">
+    <value>Personal Startup folder</value>
+  </data>
+  <data name="Message.PhysicalCores" xml:space="preserve">
+    <value>Physical cores</value>
+  </data>
+  <data name="Message.PossibleLeftoversFound0ReviewTheClassificationBefore" xml:space="preserve">
+    <value>Possible leftovers found: {0}. Review the classification before selecting items.</value>
+  </data>
+  <data name="Message.PotentialSavings0SizesAvailableFor1Of" xml:space="preserve">
+    <value>Potential savings {0} · sizes available for {1} of {2} categories</value>
+  </data>
+  <data name="Message.Power" xml:space="preserve">
+    <value>Power</value>
+  </data>
+  <data name="Message.PowerOnHours" xml:space="preserve">
+    <value>Power-on hours</value>
+  </data>
+  <data name="Message.PowerPlan" xml:space="preserve">
+    <value>Power plan</value>
+  </data>
+  <data name="Message.PowerSaver" xml:space="preserve">
+    <value>Power saver</value>
+  </data>
+  <data name="Message.PreparingScan" xml:space="preserve">
+    <value>Preparing scan…</value>
+  </data>
+  <data name="Message.Presentation" xml:space="preserve">
+    <value>Presentation</value>
+  </data>
+  <data name="Message.PreviewOnlyThisStepRemovesNothing" xml:space="preserve">
+    <value>Preview only. This step removes nothing.</value>
+  </data>
+  <data name="Message.PreviousSettingRestoredAndVerified" xml:space="preserve">
+    <value>Previous setting restored and verified.</value>
+  </data>
+  <data name="Message.PreviousStateSaved" xml:space="preserve">
+    <value>Previous state saved</value>
+  </data>
+  <data name="Message.PreviousWindowsInstallations" xml:space="preserve">
+    <value>Previous Windows installations</value>
+  </data>
+  <data name="Message.Processor" xml:space="preserve">
+    <value>Processor</value>
+  </data>
+  <data name="Message.ProcessorAndMemory" xml:space="preserve">
+    <value>Processor and memory</value>
+  </data>
+  <data name="Message.ProcessorAndMotherboard" xml:space="preserve">
+    <value>Processor and motherboard</value>
+  </data>
+  <data name="Message.ProcessorArchitecture" xml:space="preserve">
+    <value>Processor architecture</value>
+  </data>
+  <data name="Message.ProcessorModelUnavailable" xml:space="preserve">
+    <value>Processor model unavailable</value>
+  </data>
+  <data name="Message.ProcessorSystemUtilization" xml:space="preserve">
+    <value>Processor · system utilization</value>
+  </data>
+  <data name="Message.Protected" xml:space="preserve">
+    <value>Protected</value>
+  </data>
+  <data name="Message.Protected2" xml:space="preserve">
+    <value>Protected</value>
+  </data>
+  <data name="Message.ProtectedItem0" xml:space="preserve">
+    <value>Protected item: {0}</value>
+  </data>
+  <data name="Message.ProtectedItemThatRequiresReviewUninstallItIndividually" xml:space="preserve">
+    <value>Protected item that requires review. Uninstall it individually.</value>
+  </data>
+  <data name="Message.ProtectedItemsExcludedFromTheBatch0" xml:space="preserve">
+    <value>· Protected items excluded from the batch: {0} </value>
+  </data>
+  <data name="Message.ProtectedRegistryKey0" xml:space="preserve">
+    <value>Protected registry key: {0}</value>
+  </data>
+  <data name="Message.Publisher" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="Message.PutComputerToSleepOnBattery" xml:space="preserve">
+    <value>Put computer to sleep · on battery</value>
+  </data>
+  <data name="Message.PutComputerToSleepPluggedIn" xml:space="preserve">
+    <value>Put computer to sleep · plugged in</value>
+  </data>
+  <data name="Message.QuarantineCrossVolume" xml:space="preserve">
+    <value>The item is on a different drive from quarantine. The app kept it in its original location.</value>
+  </data>
+  <data name="Message.QuarantineDidNotFinish0TheItemWas" xml:space="preserve">
+    <value>Quarantine did not finish ({0}). The item was kept.</value>
+  </data>
+  <data name="Message.QuarantineEntryNotFound" xml:space="preserve">
+    <value>Quarantine entry not found.</value>
+  </data>
+  <data name="Message.QuarantineIsOnAnotherVolumeTheMoveWas" xml:space="preserve">
+    <value>Quarantine is on another volume. The move was blocked and no changes were made.</value>
+  </data>
+  <data name="Message.Queued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="Message.QuickReadOnlyCheck" xml:space="preserve">
+    <value>Quick, read-only check.</value>
+  </data>
+  <data name="Message.QuicklyChecksWhetherTheWindowsComponentStoreHas" xml:space="preserve">
+    <value>Quickly checks whether the Windows component store has already been flagged as corrupted.</value>
+  </data>
+  <data name="Message.ReadOnly" xml:space="preserve">
+    <value>Read-only</value>
+  </data>
+  <data name="Message.ReadOnlyScanThisCanTakeAWhile" xml:space="preserve">
+    <value>Read-only scan. This can take a while.</value>
+  </data>
+  <data name="Message.ReadOnlyTheFullReportIsInWINDIR" xml:space="preserve">
+    <value>Read-only. The full report is in %WINDIR%\Logs\CBS\CBS.log.</value>
+  </data>
+  <data name="Message.ReadingError" xml:space="preserve">
+    <value>Reading error</value>
+  </data>
+  <data name="Message.ReadingWindowsAndHardwareInformation" xml:space="preserve">
+    <value>Reading Windows and hardware information…</value>
+  </data>
+  <data name="Message.ReadingWindowsSettings" xml:space="preserve">
+    <value>Reading Windows settings…</value>
+  </data>
+  <data name="Message.RecognizedAppChatOrCollaboration" xml:space="preserve">
+    <value>Recognized app (chat or collaboration).</value>
+  </data>
+  <data name="Message.RecognizedAppCuratedList" xml:space="preserve">
+    <value>Recognized app (curated list).</value>
+  </data>
+  <data name="Message.RecognizedAppGamingOrStorefront" xml:space="preserve">
+    <value>Recognized app (gaming or storefront).</value>
+  </data>
+  <data name="Message.RecognizedAppOfficeSuite" xml:space="preserve">
+    <value>Recognized app (Office suite).</value>
+  </data>
+  <data name="Message.RecognizedBrowserCuratedListOfApps" xml:space="preserve">
+    <value>Recognized browser (curated list of apps).</value>
+  </data>
+  <data name="Message.RecognizedDevelopmentTool" xml:space="preserve">
+    <value>Recognized development tool.</value>
+  </data>
+  <data name="Message.RecognizedSyncAppThatRunsInTheBackground" xml:space="preserve">
+    <value>Recognized sync app that runs in the background.</value>
+  </data>
+  <data name="Message.RecognizedUtilityThatRunsInTheBackground" xml:space="preserve">
+    <value>Recognized utility that runs in the background.</value>
+  </data>
+  <data name="Message.RecordsDisplayed0" xml:space="preserve">
+    <value>Records displayed: {0}.</value>
+  </data>
+  <data name="Message.RecycleBin" xml:space="preserve">
+    <value>Recycle Bin</value>
+  </data>
+  <data name="Message.RedistributablePackageVisualCOrSimilarRequiredBy" xml:space="preserve">
+    <value>Redistributable package (Visual C++ or similar) required by other apps.</value>
+  </data>
+  <data name="Message.RefreshRate" xml:space="preserve">
+    <value>Refresh rate</value>
+  </data>
+  <data name="Message.RegisteredCheckInWindows" xml:space="preserve">
+    <value>Registered · check in Windows</value>
+  </data>
+  <data name="Message.Registry" xml:space="preserve">
+    <value>Registry</value>
+  </data>
+  <data name="Message.Registry32Bit" xml:space="preserve">
+    <value>Registry (32-bit)</value>
+  </data>
+  <data name="Message.Registry64Bit" xml:space="preserve">
+    <value>Registry (64-bit)</value>
+  </data>
+  <data name="Message.RegistryAccessIsUnavailable" xml:space="preserve">
+    <value>Registry access is unavailable.</value>
+  </data>
+  <data name="Message.RegistryEntriesAreReadOnly" xml:space="preserve">
+    <value>Registry entries are read-only.</value>
+  </data>
+  <data name="Message.RegistryKey" xml:space="preserve">
+    <value>Registry key</value>
+  </data>
+  <data name="Message.RegistryKeyRecreatedFromTheSnapshotReviewPermissions" xml:space="preserve">
+    <value>Registry key recreated from the snapshot. Review permissions (ACL), ownership, and modification date separately.</value>
+  </data>
+  <data name="Message.RegistryKeyRemovedRegBackupAndSnapshotAvailable" xml:space="preserve">
+    <value>Registry key removed (.reg backup and snapshot available).</value>
+  </data>
+  <data name="Message.Remote" xml:space="preserve">
+    <value>Remote</value>
+  </data>
+  <data name="Message.RemovedAfterBackup" xml:space="preserve">
+    <value>removed after backup</value>
+  </data>
+  <data name="Message.RemovesSupersededVersionsOfComponentsReviewTheAvailable" xml:space="preserve">
+    <value>Removes superseded versions of components. Review the available recovery options.</value>
+  </data>
+  <data name="Message.RemovingTheseFilesCanLimitRollbackToOlder" xml:space="preserve">
+    <value>Removing these files can limit rollback to older drivers.</value>
+  </data>
+  <data name="Message.RemovingTheseFilesCanPreventAReturnTo" xml:space="preserve">
+    <value>Removing these files can prevent a return to the previous installation.</value>
+  </data>
+  <data name="Message.RemovingTheseFilesMayDiscardVersionsYouNeed" xml:space="preserve">
+    <value>Removing these files may discard versions you need for recovery.</value>
+  </data>
+  <data name="Message.RepairsTheWindowsComponentStoreDownloadingHealthyComponents" xml:space="preserve">
+    <value>Repairs the Windows component store, downloading healthy components from Windows Update when needed.</value>
+  </data>
+  <data name="Message.ReparsePointSymlinkOrJunctionTheOperationCould" xml:space="preserve">
+    <value>Reparse point (symlink or junction). The operation could leave the approved scope.</value>
+  </data>
+  <data name="Message.ReplacesWindowsImageComponentsItMayConnectTo" xml:space="preserve">
+    <value>Replaces Windows image components. It may connect to Windows Update and take a while.</value>
+  </data>
+  <data name="Message.Reported" xml:space="preserve">
+    <value>Reported</value>
+  </data>
+  <data name="Message.ReportedBaseClock" xml:space="preserve">
+    <value>Reported base clock</value>
+  </data>
+  <data name="Message.ReportedCurrentClock" xml:space="preserve">
+    <value>Reported current clock</value>
+  </data>
+  <data name="Message.ReportedDrives01" xml:space="preserve">
+    <value>Reported drives: {0} · {1}</value>
+  </data>
+  <data name="Message.ReportedHealth" xml:space="preserve">
+    <value>Reported health</value>
+  </data>
+  <data name="Message.ReportedInstallationDate" xml:space="preserve">
+    <value>Reported installation date</value>
+  </data>
+  <data name="Message.ReportedPower" xml:space="preserve">
+    <value>Reported power</value>
+  </data>
+  <data name="Message.ReportedStatus" xml:space="preserve">
+    <value>Reported status</value>
+  </data>
+  <data name="Message.ReportedTypes" xml:space="preserve">
+    <value>Reported types</value>
+  </data>
+  <data name="Message.ReportedVRAMUsage" xml:space="preserve">
+    <value>Reported VRAM usage</value>
+  </data>
+  <data name="Message.ReportedWear" xml:space="preserve">
+    <value>Reported wear</value>
+  </data>
+  <data name="Message.ResetLogFiles" xml:space="preserve">
+    <value>Reset log files</value>
+  </data>
+  <data name="Message.Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Message.Restore2" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Message.RestoreDidNotComplete0" xml:space="preserve">
+    <value>Restore did not complete: {0}</value>
+  </data>
+  <data name="Message.RestoreFailed0" xml:space="preserve">
+    <value>Restore failed: {0}</value>
+  </data>
+  <data name="Message.RestoreFailed01" xml:space="preserve">
+    <value>Restore failed: {0}{1}</value>
+  </data>
+  <data name="Message.RestoreFromQuarantine" xml:space="preserve">
+    <value>Restore from quarantine</value>
+  </data>
+  <data name="Message.RestoreStartupEntry" xml:space="preserve">
+    <value>Restore startup entry</value>
+  </data>
+  <data name="Message.RestoreSupervised" xml:space="preserve">
+    <value>Restore (supervised)</value>
+  </data>
+  <data name="Message.RestoreWasNotConfirmed0" xml:space="preserve">
+    <value>Restore was not confirmed: {0}</value>
+  </data>
+  <data name="Message.RestrictedAccess" xml:space="preserve">
+    <value>Restricted access</value>
+  </data>
+  <data name="Message.Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Message.ReviewRequired" xml:space="preserve">
+    <value>Review required</value>
+  </data>
+  <data name="Message.ReviewRequiredSharedDependencyOrUnrecognizedApp" xml:space="preserve">
+    <value>Review required (shared dependency or unrecognized app). Remove it only if you are sure no program depends on it.</value>
+  </data>
+  <data name="Message.ReviewTheFilesBeforeConfirmingInWindows" xml:space="preserve">
+    <value>Review the files before confirming in Windows.</value>
+  </data>
+  <data name="Message.RowsSkippedDueToIncompleteData0" xml:space="preserve">
+    <value> · rows skipped due to incomplete data: {0}</value>
+  </data>
+  <data name="Message.Running0" xml:space="preserve">
+    <value>Running {0}…</value>
+  </data>
+  <data name="Message.RunningFullRepairDISMRestoreHealthSFCScannow" xml:space="preserve">
+    <value>Running Full Repair (DISM RestoreHealth → SFC Scannow)…</value>
+  </data>
+  <data name="Message.RunsDISMRestoreHealthToRepairTheWindowsImage" xml:space="preserve">
+    <value>Runs DISM RestoreHealth to repair the Windows image. If it succeeds, SFC Scannow checks and repairs system files.</value>
+  </data>
+  <data name="Message.SFCFailedSeeTheLogForDetails" xml:space="preserve">
+    <value>SFC failed. See the log for details.</value>
+  </data>
+  <data name="Message.SafeMode" xml:space="preserve">
+    <value>Safe mode</value>
+  </data>
+  <data name="Message.ScanCanceled" xml:space="preserve">
+    <value>Scan canceled.</value>
+  </data>
+  <data name="Message.ScanCanceled2" xml:space="preserve">
+    <value>Scan canceled.</value>
+  </data>
+  <data name="Message.ScanFailed0" xml:space="preserve">
+    <value>Scan failed: {0}</value>
+  </data>
+  <data name="Message.ScanForLeftovers" xml:space="preserve">
+    <value>Scan for leftovers</value>
+  </data>
+  <data name="Message.ScanResults" xml:space="preserve">
+    <value>Scan results</value>
+  </data>
+  <data name="Message.ScanUnavailable" xml:space="preserve">
+    <value>Scan unavailable</value>
+  </data>
+  <data name="Message.Scanning" xml:space="preserve">
+    <value>Scanning…</value>
+  </data>
+  <data name="Message.ScanningForLeftoversReadOnly" xml:space="preserve">
+    <value>Scanning for leftovers (read-only)…</value>
+  </data>
+  <data name="Message.ScanningInstalledApps" xml:space="preserve">
+    <value>Scanning installed apps…</value>
+  </data>
+  <data name="Message.ScanningStartupEntries" xml:space="preserve">
+    <value>Scanning startup entries…</value>
+  </data>
+  <data name="Message.ScansTheWindowsImageForCorruption" xml:space="preserve">
+    <value>Scans the Windows image for corruption.</value>
+  </data>
+  <data name="Message.ScheduledTask" xml:space="preserve">
+    <value>Scheduled task</value>
+  </data>
+  <data name="Message.ScheduledTasksAreReadOnly" xml:space="preserve">
+    <value>Scheduled tasks are read-only.</value>
+  </data>
+  <data name="Message.Seconds" xml:space="preserve">
+    <value>Seconds</value>
+  </data>
+  <data name="Message.SeeTheDescriptionInWindowsDiskCleanup" xml:space="preserve">
+    <value>See the description in Windows Disk Cleanup.</value>
+  </data>
+  <data name="Message.SelectADrive" xml:space="preserve">
+    <value>Select a drive</value>
+  </data>
+  <data name="Message.SelectTheDriveToScan" xml:space="preserve">
+    <value>Select the drive to scan.</value>
+  </data>
+  <data name="Message.SerialNumber" xml:space="preserve">
+    <value>Serial number</value>
+  </data>
+  <data name="Message.SettingUnavailable" xml:space="preserve">
+    <value>Setting unavailable</value>
+  </data>
+  <data name="Message.Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Message.SetupLogFiles" xml:space="preserve">
+    <value>Setup log files</value>
+  </data>
+  <data name="Message.SharedBrowserComponentWebView2OrEdgeUpdate" xml:space="preserve">
+    <value>Shared browser component (WebView2 or Edge Update).</value>
+  </data>
+  <data name="Message.SharedDependency" xml:space="preserve">
+    <value>Shared dependency</value>
+  </data>
+  <data name="Message.SharedDependencyOrUnclassifiedReviewAndUninstallThese" xml:space="preserve">
+    <value>(shared dependency or unclassified). Review and uninstall these items individually.</value>
+  </data>
+  <data name="Message.SharedDependencyReviewItAndUninstallIndividuallyBatch" xml:space="preserve">
+    <value>Shared dependency. Review it and uninstall individually. Batch uninstall is blocked.</value>
+  </data>
+  <data name="Message.SharedStartupFolder" xml:space="preserve">
+    <value>Shared Startup folder</value>
+  </data>
+  <data name="Message.Shortcut" xml:space="preserve">
+    <value>Shortcut</value>
+  </data>
+  <data name="Message.ShortcutDisabledAndSavedTheChangeTakesEffect" xml:space="preserve">
+    <value>Shortcut disabled and saved. The change takes effect at the next sign-in.</value>
+  </data>
+  <data name="Message.ShortcutRestoredTheChangeTakesEffectAtThe" xml:space="preserve">
+    <value>Shortcut restored. The change takes effect at the next sign-in.</value>
+  </data>
+  <data name="Message.ShowFileExtensions" xml:space="preserve">
+    <value>Show file extensions</value>
+  </data>
+  <data name="Message.ShowHiddenFilesFoldersAndDrives" xml:space="preserve">
+    <value>Show hidden files, folders, and drives</value>
+  </data>
+  <data name="Message.ShowShadowUnderTheMousePointer" xml:space="preserve">
+    <value>Show shadow under the mouse pointer</value>
+  </data>
+  <data name="Message.ShowThumbnailsInsteadOfIcons" xml:space="preserve">
+    <value>Show thumbnails instead of icons</value>
+  </data>
+  <data name="Message.ShowWindowContentsWhileDragging" xml:space="preserve">
+    <value>Show window contents while dragging</value>
+  </data>
+  <data name="Message.SimulatedUninstallNoProcessWasStarted" xml:space="preserve">
+    <value>Simulated uninstall. No process was started.</value>
+  </data>
+  <data name="Message.SizeUnavailable" xml:space="preserve">
+    <value>Size unavailable</value>
+  </data>
+  <data name="Message.Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="Message.SkippedBecauseTheUserCanceled" xml:space="preserve">
+    <value>Skipped because the user canceled.</value>
+  </data>
+  <data name="Message.SkippedBecauseTheUserCanceledTheRemainingOperations" xml:space="preserve">
+    <value>Skipped because the user canceled the remaining operations.</value>
+  </data>
+  <data name="Message.SkippedCanceled" xml:space="preserve">
+    <value>skipped (canceled)</value>
+  </data>
+  <data name="Message.SmoothEdgesOfScreenFonts" xml:space="preserve">
+    <value>Smooth edges of screen fonts</value>
+  </data>
+  <data name="Message.SomeContentCouldNotBeVerifiedOrContains" xml:space="preserve">
+    <value>Some content could not be verified or contains links. Review the item manually.</value>
+  </data>
+  <data name="Message.SomeContentCouldNotBeVerifiedOrContains2" xml:space="preserve">
+    <value>Some content could not be verified or contains links. The item was kept.</value>
+  </data>
+  <data name="Message.Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Message.SpaceEstimateUnavailable" xml:space="preserve">
+    <value>Space estimate unavailable</value>
+  </data>
+  <data name="Message.Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="Message.StandardDiskDrives" xml:space="preserve">
+    <value>(Standard disk drives)</value>
+  </data>
+  <data name="Message.Startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="Message.StartupBackupsAFileNeedsReview" xml:space="preserve">
+    <value>Startup backups: a file needs review.</value>
+  </data>
+  <data name="Message.StartupBackupsCouldNotReadAllEntries" xml:space="preserve">
+    <value>Startup backups: could not read all entries.</value>
+  </data>
+  <data name="Message.StartupBackupsCouldNotVerifyTheLocation" xml:space="preserve">
+    <value>Startup backups: could not verify the location.</value>
+  </data>
+  <data name="Message.StartupEntriesForAllUsersAreReadOnly" xml:space="preserve">
+    <value>Startup entries for all users are read-only.</value>
+  </data>
+  <data name="Message.StartupFolderForAllUsers" xml:space="preserve">
+    <value>Startup folder for all users</value>
+  </data>
+  <data name="Message.StartupFolders" xml:space="preserve">
+    <value>Startup folders</value>
+  </data>
+  <data name="Message.StartupIsDisabledInWindowsOrItsStatus" xml:space="preserve">
+    <value>Startup is disabled in Windows or its status could not be verified. Use Startup Apps in Windows.</value>
+  </data>
+  <data name="Message.StatusUnknown" xml:space="preserve">
+    <value>Status unknown</value>
+  </data>
+  <data name="Message.StopAfterCurrent" xml:space="preserve">
+    <value>Stop after current</value>
+  </data>
+  <data name="Message.Storage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Message.StorageModeChangedItTakesEffectTheNext" xml:space="preserve">
+    <value>Storage mode changed. It takes effect the next time you start the app. Each mode has its own history.</value>
+  </data>
+  <data name="Message.Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Message.SuccessRestartPending" xml:space="preserve">
+    <value>Success (restart pending)</value>
+  </data>
+  <data name="Message.SuccessRestartRecommended" xml:space="preserve">
+    <value>Success (restart recommended)</value>
+  </data>
+  <data name="Message.SystemArchitecture" xml:space="preserve">
+    <value>System architecture</value>
+  </data>
+  <data name="Message.SystemErrorMemoryDumpFiles" xml:space="preserve">
+    <value>System error memory dump files</value>
+  </data>
+  <data name="Message.SystemErrorMinidumpFiles" xml:space="preserve">
+    <value>System error minidump files</value>
+  </data>
+  <data name="Message.SystemProtectionUnavailable" xml:space="preserve">
+    <value> System Protection unavailable.</value>
+  </data>
+  <data name="Message.SystemRestoreIsDisabledByPolicy" xml:space="preserve">
+    <value>System Restore is disabled by policy.</value>
+  </data>
+  <data name="Message.TaskScheduler" xml:space="preserve">
+    <value>Task Scheduler</value>
+  </data>
+  <data name="Message.TaskSchedulerCouldNotReadSomeTasksOr" xml:space="preserve">
+    <value>Task Scheduler: could not read some tasks or folders.</value>
+  </data>
+  <data name="Message.TechnicalComponentsInAdvancedView01" xml:space="preserve">
+    <value>Technical components in advanced view: {0} · {1}.</value>
+  </data>
+  <data name="Message.TechnicalInventory0Entries" xml:space="preserve">
+    <value>technical inventory: {0} entries</value>
+  </data>
+  <data name="Message.Technology" xml:space="preserve">
+    <value>Technology</value>
+  </data>
+  <data name="Message.Temperature" xml:space="preserve">
+    <value>Temperature</value>
+  </data>
+  <data name="Message.TemperatureSensor0" xml:space="preserve">
+    <value>Temperature · sensor {0}</value>
+  </data>
+  <data name="Message.TemperaturesVoltagesPowerAndMotherboardFanSpeedsRequire" xml:space="preserve">
+    <value>Temperatures, voltages, power, and motherboard fan speeds require a validated hardware provider.</value>
+  </data>
+  <data name="Message.TemporaryCacheOfInternetContent" xml:space="preserve">
+    <value>Temporary cache of Internet content.</value>
+  </data>
+  <data name="Message.TemporaryFiles" xml:space="preserve">
+    <value>Temporary files</value>
+  </data>
+  <data name="Message.TemporaryFilesWindowsConsidersEligibleForCleanup" xml:space="preserve">
+    <value>Temporary files Windows considers eligible for cleanup.</value>
+  </data>
+  <data name="Message.TemporaryInstallationFiles" xml:space="preserve">
+    <value>Temporary installation files</value>
+  </data>
+  <data name="Message.TemporaryInternetFiles" xml:space="preserve">
+    <value>Temporary Internet Files</value>
+  </data>
+  <data name="Message.Terminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="Message.TheAppIsStillListedAsInstalledUninstall" xml:space="preserve">
+    <value>The app is still listed as installed. Uninstall it before cleanup.</value>
+  </data>
+  <data name="Message.TheAppSOfficialUninstallerWillOpenFollow" xml:space="preserve">
+    <value>The app's official uninstaller will open. Follow the instructions in its window.</value>
+  </data>
+  <data name="Message.TheAppSUninstallKeyRemainsInThe" xml:space="preserve">
+    <value>The app's uninstall key remains in the registry.</value>
+  </data>
+  <data name="Message.TheApplicationSSignatureCouldNotBeVerified" xml:space="preserve">
+    <value>The application's signature could not be verified.</value>
+  </data>
+  <data name="Message.TheAssociatedFileHasNoDirectExecutable" xml:space="preserve">
+    <value>The associated file has no direct executable.</value>
+  </data>
+  <data name="Message.TheBackupConflictsWithAnotherShortcutOrBackup" xml:space="preserve">
+    <value>The backup conflicts with another shortcut or backup.</value>
+  </data>
+  <data name="Message.TheBackupDoesNotSupportTheTypeOf" xml:space="preserve">
+    <value>The backup does not support the type of value '{0}'.</value>
+  </data>
+  <data name="Message.TheBackupOrWindowsStateChangedAfterStartup" xml:space="preserve">
+    <value>The backup or Windows state changed after startup was disabled.</value>
+  </data>
+  <data name="Message.TheChangeWasCanceledBeforeWriting" xml:space="preserve">
+    <value>The change was canceled before writing.</value>
+  </data>
+  <data name="Message.TheClassificationChangedTo0SinceThePreview" xml:space="preserve">
+    <value>The classification changed to '{0}' since the preview. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheCommandContainsAmbiguousQuotationMarks" xml:space="preserve">
+    <value>The command contains ambiguous quotation marks.</value>
+  </data>
+  <data name="Message.TheCommandIsEmpty" xml:space="preserve">
+    <value>The command is empty.</value>
+  </data>
+  <data name="Message.TheCommandLaunchesAnIntermediaryTheFinalApplication" xml:space="preserve">
+    <value>The command launches an intermediary. The final application could not be identified.</value>
+  </data>
+  <data name="Message.TheDestinationCrossesALinkJunctionOrMount" xml:space="preserve">
+    <value>The destination crosses a link, junction, or mount point.</value>
+  </data>
+  <data name="Message.TheDestinationIsProtected0" xml:space="preserve">
+    <value>The destination is protected: {0}</value>
+  </data>
+  <data name="Message.TheDestinationRegistryKeyIsProtected0" xml:space="preserve">
+    <value>The destination registry key is protected: {0}</value>
+  </data>
+  <data name="Message.TheDeviceDidNotReturnATemperature" xml:space="preserve">
+    <value>The device did not return a temperature.</value>
+  </data>
+  <data name="Message.TheDiskCleanupCatalogIsUnavailable" xml:space="preserve">
+    <value>The Disk Cleanup catalog is unavailable.</value>
+  </data>
+  <data name="Message.TheDriverDidNotExposeCompatibleReadings" xml:space="preserve">
+    <value>The driver did not expose compatible readings.</value>
+  </data>
+  <data name="Message.TheDriverDidNotProvideAccessToThis" xml:space="preserve">
+    <value>The driver did not provide access to this adapter.</value>
+  </data>
+  <data name="Message.TheEntireHiveCannotBeRemoved" xml:space="preserve">
+    <value>The entire hive cannot be removed.</value>
+  </data>
+  <data name="Message.TheEntryChangedIsInUseOrIs" xml:space="preserve">
+    <value>The entry changed, is in use, or is no longer available. Refresh the list.</value>
+  </data>
+  <data name="Message.TheEntryIsAssociatedWithSecurityAuthenticationOr" xml:space="preserve">
+    <value>The entry is associated with security, authentication, or essential components.</value>
+  </data>
+  <data name="Message.TheExecutable0WasNotFoundOnThis" xml:space="preserve">
+    <value>The executable {0} was not found on this system.</value>
+  </data>
+  <data name="Message.TheFileHasHardLinksAndMayBe" xml:space="preserve">
+    <value>The file has hard links and may be shared.</value>
+  </data>
+  <data name="Message.TheFileIsNotAValidWindowsShortcut" xml:space="preserve">
+    <value>The file is not a valid Windows shortcut.</value>
+  </data>
+  <data name="Message.TheFileIsUnavailableOrItsPathCould" xml:space="preserve">
+    <value>The file is unavailable or its path could not be verified.</value>
+  </data>
+  <data name="Message.TheFileUsesAnIndirectPath" xml:space="preserve">
+    <value>The file uses an indirect path.</value>
+  </data>
+  <data name="Message.TheFolderIsNotOnALocalFixed" xml:space="preserve">
+    <value>The folder is not on a local fixed drive.</value>
+  </data>
+  <data name="Message.TheFolderNameDoesNotMatchTheApp" xml:space="preserve">
+    <value>The folder name does not match the app. Several apps may share it.</value>
+  </data>
+  <data name="Message.TheInstallationFolderStillExists" xml:space="preserve">
+    <value>The installation folder still exists.</value>
+  </data>
+  <data name="Message.TheInventoryScanWasInterrupted" xml:space="preserve">
+    <value>The inventory scan was interrupted.</value>
+  </data>
+  <data name="Message.TheItemChangedAfterTheScanTheOperation" xml:space="preserve">
+    <value>The item changed after the scan. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheItemChangedOrDisappearedSinceThePreview" xml:space="preserve">
+    <value>The item changed or disappeared since the preview. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheItemIsALinkJunctionOrReparse" xml:space="preserve">
+    <value>The item is a link, junction, or reparse point.</value>
+  </data>
+  <data name="Message.TheItemNoLongerExistsAndCannotBe" xml:space="preserve">
+    <value>The item no longer exists and cannot be quarantined.</value>
+  </data>
+  <data name="Message.TheItemSContentsOrIdentityChangedSince" xml:space="preserve">
+    <value>The item's contents or identity changed since the preview. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheItemSIdentityCouldNotBeVerified" xml:space="preserve">
+    <value>The item's identity could not be verified. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheItemTypeChangedAfterTheScan" xml:space="preserve">
+    <value>The item type changed after the scan.</value>
+  </data>
+  <data name="Message.TheItemWasMovedTo0ButIts" xml:space="preserve">
+    <value>The item was moved to '{0}', but its manifest could not be completed. It can still be restored.</value>
+  </data>
+  <data name="Message.TheKeyHasAValueThatPointsDirectly" xml:space="preserve">
+    <value>The key has a value that points directly to the app's installation folder.</value>
+  </data>
+  <data name="Message.TheKeyHasTooManyValuesToBack" xml:space="preserve">
+    <value>The key has too many values to back up fully. Removal was blocked.</value>
+  </data>
+  <data name="Message.TheKeyIsTooLargeToBackUp" xml:space="preserve">
+    <value>The key is too large to back up fully. Removal was blocked.</value>
+  </data>
+  <data name="Message.TheKeyMatches0AnAppThatIs" xml:space="preserve">
+    <value>The key matches '{0}', an app that is still installed.</value>
+  </data>
+  <data name="Message.TheLocationWasEnteredManuallyFolderOwnershipIs" xml:space="preserve">
+    <value>The location was entered manually. Folder ownership is unverified.</value>
+  </data>
+  <data name="Message.TheLockFileUsesAnIndirectPath" xml:space="preserve">
+    <value>The lock file uses an indirect path.</value>
+  </data>
+  <data name="Message.TheManifestIsEmpty" xml:space="preserve">
+    <value>The manifest is empty.</value>
+  </data>
+  <data name="Message.TheManifestPointsOutsideQuarantineRestoreWasBlocked" xml:space="preserve">
+    <value>The manifest points outside quarantine. Restore was blocked.</value>
+  </data>
+  <data name="Message.TheManifestWriteFailedAndTheItemWas" xml:space="preserve">
+    <value>The manifest write failed and the item was returned to its original location: {0}</value>
+  </data>
+  <data name="Message.TheNVIDIADriverDidNotOpenAnNVML" xml:space="preserve">
+    <value>The NVIDIA driver did not open an NVML session.</value>
+  </data>
+  <data name="Message.TheNVIDIADriverNVMLLibraryCouldNotBe" xml:space="preserve">
+    <value>The NVIDIA driver NVML library could not be found.</value>
+  </data>
+  <data name="Message.TheNVMLProviderSupportsNVIDIAAdaptersOnly" xml:space="preserve">
+    <value>The NVML provider supports NVIDIA adapters only.</value>
+  </data>
+  <data name="Message.TheNVMLSessionDidNotListAnyAdapters" xml:space="preserve">
+    <value>The NVML session did not list any adapters.</value>
+  </data>
+  <data name="Message.TheNameAloneCannotEstablishExclusiveOwnershipReview" xml:space="preserve">
+    <value>The name alone cannot establish exclusive ownership. Review the item manually.</value>
+  </data>
+  <data name="Message.TheNameMatches0AnAppThatIs" xml:space="preserve">
+    <value>The name matches '{0}', an app that is still installed.</value>
+  </data>
+  <data name="Message.TheNameMatchesThePublisherOfAnotherInstalled" xml:space="preserve">
+    <value>The name matches the publisher of another installed app.</value>
+  </data>
+  <data name="Message.TheOperationFailedOrCouldNotBeVerified" xml:space="preserve">
+    <value>The operation failed or could not be verified. Check the current setting and recovery record.</value>
+  </data>
+  <data name="Message.TheOriginalRegistryKeyPathIsInvalid" xml:space="preserve">
+    <value>The original registry key path is invalid.</value>
+  </data>
+  <data name="Message.TheOriginalSettingWillBeRestoredIfIt" xml:space="preserve">
+    <value>The original setting will be restored if it is available.</value>
+  </data>
+  <data name="Message.TheParentRegistryKeyIsMissingOrCould" xml:space="preserve">
+    <value>The parent registry key is missing or could not be opened for writing. Check permissions.</value>
+  </data>
+  <data name="Message.ThePathCrossesALinkJunctionMountPoint" xml:space="preserve">
+    <value>The path crosses a link, junction, mount point, or short name.</value>
+  </data>
+  <data name="Message.TheProcessCouldNotBeStarted" xml:space="preserve">
+    <value>The process could not be started.</value>
+  </data>
+  <data name="Message.TheProcessDidNotStart" xml:space="preserve">
+    <value>The process did not start.</value>
+  </data>
+  <data name="Message.TheProviderReturnedNoReadings" xml:space="preserve">
+    <value>The provider returned no readings.</value>
+  </data>
+  <data name="Message.ThePublisherMarkedTheEntryNoRemove" xml:space="preserve">
+    <value>The publisher marked the entry NoRemove.</value>
+  </data>
+  <data name="Message.ThePublisherMarkedThisEntryNoRemoveUninstallMay" xml:space="preserve">
+    <value>The publisher marked this entry 'NoRemove'. Uninstall may fail or be blocked.</value>
+  </data>
+  <data name="Message.ThePublisherSUninstallerMayRemoveTheApp" xml:space="preserve">
+    <value>The publisher's uninstaller may remove the app and its data from this computer.</value>
+  </data>
+  <data name="Message.TheQuarantineFolderCannotBeMovedIntoQuarantine" xml:space="preserve">
+    <value>The quarantine folder cannot be moved into quarantine.</value>
+  </data>
+  <data name="Message.TheQuarantineLocationCrossesALinkJunctionOr" xml:space="preserve">
+    <value>The quarantine location crosses a link, junction, or mount point.</value>
+  </data>
+  <data name="Message.TheQuarantineLocationIsInvalidOrIsNot" xml:space="preserve">
+    <value>The quarantine location is invalid or is not local.</value>
+  </data>
+  <data name="Message.TheQuarantineManifestIsCorrupt0NoChanges" xml:space="preserve">
+    <value>The quarantine manifest is corrupt ({0}). No changes will be made. A copy was saved at '{1}'.</value>
+  </data>
+  <data name="Message.TheQuarantinedContentChangedOrIsIncompleteRestore" xml:space="preserve">
+    <value>The quarantined content changed or is incomplete. Restore was blocked.</value>
+  </data>
+  <data name="Message.TheQuarantinedItemNoLongerExists" xml:space="preserve">
+    <value>The quarantined item no longer exists.</value>
+  </data>
+  <data name="Message.TheRecordedOriginalPathIsInvalid" xml:space="preserve">
+    <value>The recorded original path is invalid.</value>
+  </data>
+  <data name="Message.TheRecoveryRecordIsUnavailableChangesThatRequire" xml:space="preserve">
+    <value>The recovery record is unavailable. Changes that require a backup are blocked.</value>
+  </data>
+  <data name="Message.TheRecycleBinChangedRefreshTheListAnd" xml:space="preserve">
+    <value>The Recycle Bin changed. Refresh the list and review the selection.</value>
+  </data>
+  <data name="Message.TheRecycleBinOn0WasEmptiedAnd" xml:space="preserve">
+    <value>The Recycle Bin on {0} was emptied and verified.</value>
+  </data>
+  <data name="Message.TheRegistryHasNoMSIProductCodeGUID" xml:space="preserve">
+    <value>The registry has no MSI product code (GUID). Using the command supplied by the publisher.</value>
+  </data>
+  <data name="Message.TheRegistryKeyAlreadyExistsAndWasLeft" xml:space="preserve">
+    <value>The registry key already exists and was left intact. Registry backup at '{0}'.</value>
+  </data>
+  <data name="Message.RegistryBackupSavedAt0" xml:space="preserve">
+    <value>Registry backup at '{0}'.</value>
+  </data>
+  <data name="Message.TheRegistryKeyChangedAfterBackup" xml:space="preserve">
+    <value>The registry key changed after backup.</value>
+  </data>
+  <data name="Message.TheRegistryKeyChangedAfterTheScanThe" xml:space="preserve">
+    <value>The registry key changed after the scan. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheRegistryKeyIsMissingOrCouldNot" xml:space="preserve">
+    <value>The registry key is missing or could not be opened for writing. Check permissions.</value>
+  </data>
+  <data name="Message.TheRegistryKeyNoLongerExistsAndCannot" xml:space="preserve">
+    <value>The registry key no longer exists and cannot be exported.</value>
+  </data>
+  <data name="Message.TheRegistryKeyNoLongerExistsThereIs" xml:space="preserve">
+    <value>The registry key no longer exists. There is nothing to remove.</value>
+  </data>
+  <data name="Message.TheRegistryKeyPathIsInconsistent" xml:space="preserve">
+    <value>The registry key path is inconsistent.</value>
+  </data>
+  <data name="Message.TheRegistryKeyPathIsInvalidTheOperation" xml:space="preserve">
+    <value>The registry key path is invalid. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheRegistryKeySIdentityCouldNotBe" xml:space="preserve">
+    <value>The registry key's identity could not be verified. The operation was blocked.</value>
+  </data>
+  <data name="Message.TheRegistrySnapshotNoLongerExists" xml:space="preserve">
+    <value>The registry snapshot no longer exists.</value>
+  </data>
+  <data name="Message.TheRequestedSettingIsAlreadyApplied" xml:space="preserve">
+    <value>The requested setting is already applied.</value>
+  </data>
+  <data name="Message.TheRequiredBackupFailed0TheRegistryKey" xml:space="preserve">
+    <value>The required backup failed ({0}). The registry key was kept.</value>
+  </data>
+  <data name="Message.TheSOFTWAREKeyItselfCannotBeRemoved" xml:space="preserve">
+    <value>The SOFTWARE key itself cannot be removed.</value>
+  </data>
+  <data name="Message.TheScanFailed" xml:space="preserve">
+    <value>The scan failed.</value>
+  </data>
+  <data name="Message.TheScanOnlyChecksKeysUnderSOFTWARE" xml:space="preserve">
+    <value>The scan only checks keys under SOFTWARE.</value>
+  </data>
+  <data name="Message.TheSelectedCategoryIsAvailableInWindowsDisk" xml:space="preserve">
+    <value>The selected category is available in Windows Disk Cleanup.</value>
+  </data>
+  <data name="Message.TheSettingChangedSinceTheLastScanRefresh" xml:space="preserve">
+    <value>The setting changed since the last scan. Refresh the page.</value>
+  </data>
+  <data name="Message.TheSettingIsUnavailableInThisVersionOf" xml:space="preserve">
+    <value>The setting is unavailable in this version of Windows or for this user.</value>
+  </data>
+  <data name="Message.TheSettingOrOptionChangedSinceTheLast" xml:space="preserve">
+    <value>The setting or option changed since the last scan. Refresh the page.</value>
+  </data>
+  <data name="Message.TheSettingWillBeSavedSoYouCan" xml:space="preserve">
+    <value>The setting will be saved so you can restore it.</value>
+  </data>
+  <data name="Message.TheShortcutIsEmptyOrExceedsTheAllowed" xml:space="preserve">
+    <value>The shortcut is empty or exceeds the allowed size.</value>
+  </data>
+  <data name="Message.TheShortcutIsUnavailableOrItsPathCould" xml:space="preserve">
+    <value>The shortcut is unavailable or its path could not be verified.</value>
+  </data>
+  <data name="Message.TheShortcutPointsToADifferentOrIndirect" xml:space="preserve">
+    <value>The shortcut points to a different or indirect target.</value>
+  </data>
+  <data name="Message.TheShortcutWasMovedButItsFinalState" xml:space="preserve">
+    <value>The shortcut was moved, but its final state could not be verified. Refresh the list and check the backup.</value>
+  </data>
+  <data name="Message.TheSnapshotChangedAfterBackupRestoreWasBlocked" xml:space="preserve">
+    <value>The snapshot changed after backup. Restore was blocked.</value>
+  </data>
+  <data name="Message.TheSnapshotIsEmpty" xml:space="preserve">
+    <value>The snapshot is empty.</value>
+  </data>
+  <data name="Message.TheSpecifiedInstallationFolderNoLongerExists" xml:space="preserve">
+    <value>The specified installation folder no longer exists.</value>
+  </data>
+  <data name="Message.TheStartupOrBackupFolderUsesAnIndirect" xml:space="preserve">
+    <value>The startup or backup folder uses an indirect path.</value>
+  </data>
+  <data name="Message.TheSystemRootFolderCannotBeRemoved" xml:space="preserve">
+    <value>The system root folder cannot be removed.</value>
+  </data>
+  <data name="Message.TheTargetAlreadyExistsNothingWasOverwritten" xml:space="preserve">
+    <value>The target already exists. Nothing was overwritten.</value>
+  </data>
+  <data name="Message.TheTargetIsIndirectOrTheExecutablePath" xml:space="preserve">
+    <value>The target is indirect or the executable path could not be identified.</value>
+  </data>
+  <data name="Message.TheTargetIsIndirectUnavailableOrProtected" xml:space="preserve">
+    <value>The target is indirect, unavailable, or protected.</value>
+  </data>
+  <data name="Message.TheTargetIsNotAFileOnDisk" xml:space="preserve">
+    <value>The target is not a file on disk.</value>
+  </data>
+  <data name="Message.TheTaskHasAnIndirectActionOrMultiple" xml:space="preserve">
+    <value>The task has an indirect action or multiple actions.</value>
+  </data>
+  <data name="Message.TheThemeWasAppliedButThePreferenceCould" xml:space="preserve">
+    <value>The theme was applied, but the preference could not be saved.</value>
+  </data>
+  <data name="Message.TheToolIsNotInTheMaintenanceCatalog" xml:space="preserve">
+    <value>The tool is not in the maintenance catalog.</value>
+  </data>
+  <data name="Message.TheToolIsUnavailableOnThisPage" xml:space="preserve">
+    <value>The tool is unavailable on this page.</value>
+  </data>
+  <data name="Message.TheToolReturnedCode00x1X" xml:space="preserve">
+    <value>The tool returned code {0} (0x{1:X}). See the log for details.</value>
+  </data>
+  <data name="Message.TheUnderlyingShortcutTargetCouldNotBeVerified" xml:space="preserve">
+    <value>The underlying shortcut target could not be verified.</value>
+  </data>
+  <data name="Message.TheUninstallCommandIsEmpty" xml:space="preserve">
+    <value>The uninstall command is empty.</value>
+  </data>
+  <data name="Message.TheUninstallKeyIsMissingFromTheRegistry" xml:space="preserve">
+    <value>The uninstall key is missing from the registry.</value>
+  </data>
+  <data name="Message.TheUninstallKeyIsStillInTheRegistry" xml:space="preserve">
+    <value>The uninstall key is still in the registry.</value>
+  </data>
+  <data name="Message.TheUninstallKeyRemainsInTheRegistry" xml:space="preserve">
+    <value>The uninstall key remains in the registry.</value>
+  </data>
+  <data name="Message.TheUninstallerExecutableIsStillPresent" xml:space="preserve">
+    <value>The uninstaller executable is still present.</value>
+  </data>
+  <data name="Message.TheUninstallerExecutableWasNotFoundAtThe" xml:space="preserve">
+    <value>The uninstaller executable was not found at the registry path.</value>
+  </data>
+  <data name="Message.TheUninstallerReturnedCode0" xml:space="preserve">
+    <value>The uninstaller returned code {0}.</value>
+  </data>
+  <data name="Message.TheUnquotedCommandContainsAnAmbiguousPath" xml:space="preserve">
+    <value>The unquoted command contains an ambiguous path.</value>
+  </data>
+  <data name="Message.TheUserCanceledBeforeCompletion" xml:space="preserve">
+    <value>The user canceled before completion.</value>
+  </data>
+  <data name="Message.TheUserCanceledCleanupBeforeConfirming" xml:space="preserve">
+    <value>The user canceled cleanup before confirming.</value>
+  </data>
+  <data name="Message.TheUserCanceledTheUninstallInTheInstaller" xml:space="preserve">
+    <value>The user canceled the uninstall in the installer.</value>
+  </data>
+  <data name="Message.TheUserCanceledUninstallBeforeConfirming" xml:space="preserve">
+    <value>The user canceled uninstall before confirming.</value>
+  </data>
+  <data name="Message.TheValueNameCannotBeRepresentedInA" xml:space="preserve">
+    <value>The value name cannot be represented in a .reg file.</value>
+  </data>
+  <data name="Message.TheValueTargetOrWindowsStateChangedRefresh" xml:space="preserve">
+    <value>The value, target, or Windows state changed. Refresh the inventory.</value>
+  </data>
+  <data name="Message.TheValueTypeOrDataIsUnsupported" xml:space="preserve">
+    <value>The value type or data is unsupported.</value>
+  </data>
+  <data name="Message.TheValueWasWrittenButItsFinalState" xml:space="preserve">
+    <value>The value was written, but its final state could not be verified. The backup was preserved.</value>
+  </data>
+  <data name="Message.TheWindowsShortcutUsesAnIndirectLaunchMode" xml:space="preserve">
+    <value>The Windows shortcut uses an indirect launch mode.</value>
+  </data>
+  <data name="Message.TheWindowsToolIsUnavailable" xml:space="preserve">
+    <value>The Windows tool is unavailable.</value>
+  </data>
+  <data name="Message.TheWindowsVolumeChangedOrIsUnavailableRefresh" xml:space="preserve">
+    <value>The Windows volume changed or is unavailable. Refresh the scan.</value>
+  </data>
+  <data name="Message.TheWindowsVolumeCouldNotBeIdentified" xml:space="preserve">
+    <value>The Windows volume could not be identified.</value>
+  </data>
+  <data name="Message.ThemeChangedTo0" xml:space="preserve">
+    <value>Theme changed to {0}.</value>
+  </data>
+  <data name="Message.TheseFilesCanHelpDiagnoseProblems" xml:space="preserve">
+    <value>These files can help diagnose problems.</value>
+  </data>
+  <data name="Message.TheseFilesMayBeNeededToDiagnoseSystem" xml:space="preserve">
+    <value>These files may be needed to diagnose system failures.</value>
+  </data>
+  <data name="Message.TheseFilesMayBeRequiredByWindowsRecovery" xml:space="preserve">
+    <value>These files may be required by Windows recovery options.</value>
+  </data>
+  <data name="Message.TheseLogsCanHelpDiagnoseUpdateProblems" xml:space="preserve">
+    <value>These logs can help diagnose update problems.</value>
+  </data>
+  <data name="Message.TheseLogsCanHelpInvestigateAWindowsReset" xml:space="preserve">
+    <value>These logs can help investigate a Windows reset.</value>
+  </data>
+  <data name="Message.TheseLogsMayBeNeededToInvestigateSetup" xml:space="preserve">
+    <value>These logs may be needed to investigate setup problems.</value>
+  </data>
+  <data name="Message.ThisCanOccurIfTheAppIsRunning" xml:space="preserve">
+    <value> This can occur if the app is running as an administrator or if policy blocks the App Installer alias.</value>
+  </data>
+  <data name="Message.ThisCategoryDoesNotSupportFileMoves" xml:space="preserve">
+    <value>This category does not support file moves.</value>
+  </data>
+  <data name="Message.ThisComputerHasNoAvailableBattery" xml:space="preserve">
+    <value>This computer has no available battery.</value>
+  </data>
+  <data name="Message.ThisEntryCannotBeChanged" xml:space="preserve">
+    <value>This entry cannot be changed.</value>
+  </data>
+  <data name="Message.ThisEntryHasNoInstallationFolder" xml:space="preserve">
+    <value>This entry has no installation folder.</value>
+  </data>
+  <data name="Message.ThisEntryHasNoUninstallerInTheRegistry" xml:space="preserve">
+    <value>This entry has no uninstaller in the registry.</value>
+  </data>
+  <data name="Message.ThisEntryIsASystemUpdateOrHotfix" xml:space="preserve">
+    <value>This entry is a system update or hotfix.</value>
+  </data>
+  <data name="Message.ThisEntryIsMarkedAsASystemComponent" xml:space="preserve">
+    <value>This entry is marked as a system component. Removing it may affect Windows.</value>
+  </data>
+  <data name="Message.ThisEntryIsProtectedAgainstChanges" xml:space="preserve">
+    <value>This entry is protected against changes.</value>
+  </data>
+  <data name="Message.ThisRegistryEntryIsProtected" xml:space="preserve">
+    <value>This registry entry is protected.</value>
+  </data>
+  <data name="Message.ThisShortcutAlreadyHasABackup" xml:space="preserve">
+    <value>This shortcut already has a backup.</value>
+  </data>
+  <data name="Message.ThisValueHasAConflictingOrInvalidBackup" xml:space="preserve">
+    <value>This value has a conflicting or invalid backup.</value>
+  </data>
+  <data name="Message.ThisVersionBlocksUninstallThroughPowerShellScripts" xml:space="preserve">
+    <value>This version blocks uninstall through PowerShell scripts.</value>
+  </data>
+  <data name="Message.ThisVersionBlocksUninstallThroughSdbInst" xml:space="preserve">
+    <value>This version blocks uninstall through SdbInst.</value>
+  </data>
+  <data name="Message.ThisVersionCannotSafelyUninstallAnyOfThe" xml:space="preserve">
+    <value>This version cannot safely uninstall any of the selected apps.</value>
+  </data>
+  <data name="Message.Thumbnails" xml:space="preserve">
+    <value>Thumbnails</value>
+  </data>
+  <data name="Message.ToUninstallMicrosoftStoreAppsUseWindowsStart" xml:space="preserve">
+    <value>To uninstall Microsoft Store apps, use Windows Start or Settings.</value>
+  </data>
+  <data name="Message.Toggle" xml:space="preserve">
+    <value>Toggle</value>
+  </data>
+  <data name="Message.TotalInstalled" xml:space="preserve">
+    <value>Total installed</value>
+  </data>
+  <data name="Message.TotalMemoryReportedByNVIDIA" xml:space="preserve">
+    <value>Total memory reported by NVIDIA</value>
+  </data>
+  <data name="Message.TotalUsable" xml:space="preserve">
+    <value>Total usable</value>
+  </data>
+  <data name="Message.TotalUtilization" xml:space="preserve">
+    <value>Total utilization</value>
+  </data>
+  <data name="Message.TransactionalWritesToHKCURunAreUnavailableThis" xml:space="preserve">
+    <value>Transactional writes to HKCU Run are unavailable. This entry is read-only.</value>
+  </data>
+  <data name="Message.TurnOffDisplayOnBattery" xml:space="preserve">
+    <value>Turn off display · on battery</value>
+  </data>
+  <data name="Message.TurnOffDisplayPluggedIn" xml:space="preserve">
+    <value>Turn off display · plugged in</value>
+  </data>
+  <data name="Message.Tweaks" xml:space="preserve">
+    <value>Tweaks</value>
+  </data>
+  <data name="Message.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Message.UNCAndDevicePathsAreUnsupported" xml:space="preserve">
+    <value>UNC and device paths are unsupported.</value>
+  </data>
+  <data name="Message.Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="Message.Unclassified" xml:space="preserve">
+    <value>Unclassified</value>
+  </data>
+  <data name="Message.UnclosedOpeningQuotationMark" xml:space="preserve">
+    <value>Unclosed opening quotation mark: </value>
+  </data>
+  <data name="Message.UncorrectedReadErrors" xml:space="preserve">
+    <value>Uncorrected read errors</value>
+  </data>
+  <data name="Message.UncorrectedWriteErrors" xml:space="preserve">
+    <value>Uncorrected write errors</value>
+  </data>
+  <data name="Message.UndoChange" xml:space="preserve">
+    <value>Undo change</value>
+  </data>
+  <data name="Message.UnexpectedCleanupError0" xml:space="preserve">
+    <value>=== Unexpected cleanup error: {0} ===</value>
+  </data>
+  <data name="Message.UnexpectedError" xml:space="preserve">
+    <value>An unexpected error occurred:
+
+{0}</value>
+  </data>
+  <data name="Message.UnexpectedUninstallError0" xml:space="preserve">
+    <value>=== Unexpected uninstall error: {0} ===</value>
+  </data>
+  <data name="Message.Unhealthy" xml:space="preserve">
+    <value>Unhealthy</value>
+  </data>
+  <data name="Message.Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="Message.Uninstall0" xml:space="preserve">
+    <value>Uninstall '{0}'?</value>
+  </data>
+  <data name="Message.Uninstall0Apps" xml:space="preserve">
+    <value>Uninstall {0} apps?</value>
+  </data>
+  <data name="Message.UninstallBlockedByProtectionPolicy" xml:space="preserve">
+    <value>Uninstall blocked by protection policy </value>
+  </data>
+  <data name="Message.UninstallIsUnsupportedForThisEntry" xml:space="preserve">
+    <value>Uninstall is unsupported for this entry.</value>
+  </data>
+  <data name="Message.UninstallStartedApps0" xml:space="preserve">
+    <value>=== Uninstall started. Apps: {0} ===</value>
+  </data>
+  <data name="Message.UninstallThroughTheSteamClientWhichTheRegistry" xml:space="preserve">
+    <value>Uninstall through the Steam client, which the registry command requires.</value>
+  </data>
+  <data name="Message.UninstallThroughWindowsInstallerMsiexecWithAutomaticRestart" xml:space="preserve">
+    <value>Uninstall through Windows Installer (msiexec), with automatic restart suppressed.</value>
+  </data>
+  <data name="Message.Uninstaller" xml:space="preserve">
+    <value>Uninstaller</value>
+  </data>
+  <data name="Message.Uninstalling" xml:space="preserve">
+    <value>Uninstalling…</value>
+  </data>
+  <data name="Message.Uninstalling0" xml:space="preserve">
+    <value>Uninstalling '{0}'…</value>
+  </data>
+  <data name="Message.Uninstalls" xml:space="preserve">
+    <value>Uninstalls</value>
+  </data>
+  <data name="Message.UniversalCRuntimeRequiredByOtherApps" xml:space="preserve">
+    <value>Universal C Runtime required by other apps.</value>
+  </data>
+  <data name="Message.Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Message.Unknown2" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Message.Unknown3" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Message.UnknownSource" xml:space="preserve">
+    <value>Unknown source</value>
+  </data>
+  <data name="Message.Unsupported" xml:space="preserve">
+    <value>Unsupported</value>
+  </data>
+  <data name="Message.UnsupportedRegistryHive" xml:space="preserve">
+    <value>Unsupported registry hive.</value>
+  </data>
+  <data name="Message.Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Message.UpdateOrHotfixEntryParentKeyNameReleaseTypeKB" xml:space="preserve">
+    <value>Update or hotfix entry (ParentKeyName/ReleaseType/KB).</value>
+  </data>
+  <data name="Message.UpdateStartedSelectedApps0" xml:space="preserve">
+    <value>=== Update started. Selected apps: {0} ===</value>
+  </data>
+  <data name="Message.Updated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="Message.UpdatedSuccessfully" xml:space="preserve">
+    <value>Updated successfully.</value>
+  </data>
+  <data name="Message.Updater.Available" xml:space="preserve">
+    <value>A new version of WinCore Manager is available.</value>
+  </data>
+  <data name="Message.Updater.Canceled" xml:space="preserve">
+    <value>Update canceled.</value>
+  </data>
+  <data name="Message.Updater.CannotWrite" xml:space="preserve">
+    <value>The package could not be saved in the app directory with the current permissions.</value>
+  </data>
+  <data name="Message.Updater.Checking" xml:space="preserve">
+    <value>Checking for a stable release…</value>
+  </data>
+  <data name="Message.Updater.Confirm" xml:space="preserve">
+    <value>Download and install version {1} ({2:N1} MiB)?
+
+Installed version: {0}. WinCore Manager will close to apply the update after verifying the package.</value>
+  </data>
+  <data name="Message.Updater.Current" xml:space="preserve">
+    <value>WinCore Manager is already up to date.</value>
+  </data>
+  <data name="Message.Updater.Downloading" xml:space="preserve">
+    <value>Downloading and verifying the package…</value>
+  </data>
+  <data name="Message.Updater.Failed" xml:space="preserve">
+    <value>Could not prepare the update. Finish other operations and try again.</value>
+  </data>
+  <data name="Message.Updater.Idle" xml:space="preserve">
+    <value>Check whether a new version is available.</value>
+  </data>
+  <data name="Message.Updater.IncompatiblePackage" xml:space="preserve">
+    <value>A compatible Windows x64 portable package could not be found.</value>
+  </data>
+  <data name="Message.Updater.InsufficientSpace" xml:space="preserve">
+    <value>There is not enough space to download, extract, and back up the package.</value>
+  </data>
+  <data name="Message.Updater.InvalidResponse" xml:space="preserve">
+    <value>GitHub returned invalid or incomplete data.</value>
+  </data>
+  <data name="Message.Updater.Network" xml:space="preserve">
+    <value>Could not connect to GitHub. Check your connection and try again.</value>
+  </data>
+  <data name="Message.Updater.NotConfigured" xml:space="preserve">
+    <value>Online updates are not configured for this version yet.</value>
+  </data>
+  <data name="Message.Updater.RateLimited" xml:space="preserve">
+    <value>GitHub has rate-limited update checks. Try again later.</value>
+  </data>
+  <data name="Message.Updater.Ready" xml:space="preserve">
+    <value>Package verified. Closing the app to update…</value>
+  </data>
+  <data name="Message.Updater.ReleaseUnavailable" xml:space="preserve">
+    <value>No stable release is available in the repository.</value>
+  </data>
+  <data name="Message.Updater.RepositoryUnavailable" xml:space="preserve">
+    <value>The official repository is unavailable.</value>
+  </data>
+  <data name="Message.Updater.Timeout" xml:space="preserve">
+    <value>The check or download timed out. Try again.</value>
+  </data>
+  <data name="Message.Updater.VerificationFailed" xml:space="preserve">
+    <value>The package source or integrity could not be verified.</value>
+  </data>
+  <data name="Message.Updates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="Message.Updating" xml:space="preserve">
+    <value>Updating…</value>
+  </data>
+  <data name="Message.Updating01Of2" xml:space="preserve">
+    <value>Updating {0} ({1} of {2})…</value>
+  </data>
+  <data name="Message.Uptime" xml:space="preserve">
+    <value>Uptime</value>
+  </data>
+  <data name="Message.Usage" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="Message.UserFileVersions" xml:space="preserve">
+    <value>User file versions</value>
+  </data>
+  <data name="Message.UserRegistry" xml:space="preserve">
+    <value>User registry</value>
+  </data>
+  <data name="Message.UserStartupFolder" xml:space="preserve">
+    <value>User Startup folder</value>
+  </data>
+  <data name="Message.Utilization" xml:space="preserve">
+    <value>Utilization</value>
+  </data>
+  <data name="Message.ValidatingItemsAgain" xml:space="preserve">
+    <value>Validating items again…</value>
+  </data>
+  <data name="Message.VerifyingTheChange" xml:space="preserve">
+    <value>Verifying the change…</value>
+  </data>
+  <data name="Message.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Message.Virtual" xml:space="preserve">
+    <value>Virtual</value>
+  </data>
+  <data name="Message.VirtualOrPooledDrive" xml:space="preserve">
+    <value>Virtual or pooled drive</value>
+  </data>
+  <data name="Message.VisualStudioHelperComponent" xml:space="preserve">
+    <value>Visual Studio helper component.</value>
+  </data>
+  <data name="Message.VolumeCapacity" xml:space="preserve">
+    <value>Volume capacity</value>
+  </data>
+  <data name="Message.VolumeWithoutADriveLetter" xml:space="preserve">
+    <value>Volume without a drive letter</value>
+  </data>
+  <data name="Message.WaitForTheOperationBeforeClosing" xml:space="preserve">
+    <value>Wait for the current operation to finish before closing the app.</value>
+  </data>
+  <data name="Message.Waiting" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="Message.WaitingForAReading" xml:space="preserve">
+    <value>Waiting for a reading…</value>
+  </data>
+  <data name="Message.WaitingForScan" xml:space="preserve">
+    <value>Waiting for scan.</value>
+  </data>
+  <data name="Message.WaitingForTheCurrentInstallerToFinish" xml:space="preserve">
+    <value>Waiting for the current installer to finish…</value>
+  </data>
+  <data name="Message.WaitingForTheFirstReading" xml:space="preserve">
+    <value>Waiting for the first reading.</value>
+  </data>
+  <data name="Message.Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Message.WeakAssociationShownForReference" xml:space="preserve">
+    <value>Weak association. Shown for reference.</value>
+  </data>
+  <data name="Message.WinCoreManagerIsRunningAsAnAdministratorQuarantine" xml:space="preserve">
+    <value>WinCore Manager is running as an administrator. Quarantine is in a user-writable location, so cleanup and restore are blocked in this mode. Open the app without administrator privileges.</value>
+  </data>
+  <data name="Message.WinGetDetected0" xml:space="preserve">
+    <value>WinGet detected ({0})</value>
+  </data>
+  <data name="Message.WinGetDidNotRespondToTheVersionCheck" xml:space="preserve">
+    <value>WinGet did not respond to the version check.</value>
+  </data>
+  <data name="Message.WinGetIsUnavailable" xml:space="preserve">
+    <value>WinGet is unavailable.</value>
+  </data>
+  <data name="Message.WinGetIsUnavailableInThisSession" xml:space="preserve">
+    <value>WinGet is unavailable in this session.</value>
+  </data>
+  <data name="Message.WinGetNotDetected" xml:space="preserve">
+    <value>WinGet not detected.</value>
+  </data>
+  <data name="Message.WinGetReturnedCode0" xml:space="preserve">
+    <value>WinGet returned code {0}.</value>
+  </data>
+  <data name="Message.WinGetWasFoundAt0ButCouldNot" xml:space="preserve">
+    <value>WinGet was found at "{0}", but could not start{1}: {2}.{3}</value>
+  </data>
+  <data name="Message.WinGetWasNotFoundOnThisComputerInstall" xml:space="preserve">
+    <value>WinGet was not found on this computer. Install App Installer from the Microsoft Store and try again.</value>
+  </data>
+  <data name="Message.WindowsApplicationCompatibilityDatabase" xml:space="preserve">
+    <value>Windows application compatibility database.</value>
+  </data>
+  <data name="Message.WindowsBuildAndUBR" xml:space="preserve">
+    <value>Windows · build and UBR</value>
+  </data>
+  <data name="Message.WindowsCanRebuildShadersAsNeeded" xml:space="preserve">
+    <value>Windows can rebuild shaders as needed.</value>
+  </data>
+  <data name="Message.WindowsCompletedTheOperation" xml:space="preserve">
+    <value>Windows completed the operation.</value>
+  </data>
+  <data name="Message.WindowsCompletedTheOperationButTheRecycleBin" xml:space="preserve">
+    <value>Windows completed the operation, but the Recycle Bin could not be confirmed empty.</value>
+  </data>
+  <data name="Message.WindowsComponent" xml:space="preserve">
+    <value>Windows component</value>
+  </data>
+  <data name="Message.WindowsDidNotConfirmThatTheToolOpened" xml:space="preserve">
+    <value>Windows did not confirm that the tool opened.</value>
+  </data>
+  <data name="Message.WindowsDidNotConfirmTheLimitsForThis" xml:space="preserve">
+    <value>Windows did not confirm the limits for this setting.</value>
+  </data>
+  <data name="Message.WindowsDidNotIdentifyAValidFixedDrive" xml:space="preserve">
+    <value>Windows did not identify a valid fixed drive.</value>
+  </data>
+  <data name="Message.WindowsDidNotProvideAccessToDriveCounters" xml:space="preserve">
+    <value>Windows did not provide access to drive counters.</value>
+  </data>
+  <data name="Message.WindowsDidNotReportVolumeUsage" xml:space="preserve">
+    <value>Windows did not report volume usage.</value>
+  </data>
+  <data name="Message.WindowsDidNotReturnMemoryCounters" xml:space="preserve">
+    <value>Windows did not return memory counters.</value>
+  </data>
+  <data name="Message.WindowsDidNotReturnReliabilityCounters" xml:space="preserve">
+    <value>Windows did not return reliability counters.</value>
+  </data>
+  <data name="Message.WindowsDiskCleanupIsUnavailable" xml:space="preserve">
+    <value> Windows Disk Cleanup is unavailable.</value>
+  </data>
+  <data name="Message.WindowsESDInstallationFiles" xml:space="preserve">
+    <value>Windows ESD installation files</value>
+  </data>
+  <data name="Message.WindowsEnumDisplaySettingsWDesktopMode" xml:space="preserve">
+    <value>Windows EnumDisplaySettingsW · desktop mode</value>
+  </data>
+  <data name="Message.WindowsErrorReports" xml:space="preserve">
+    <value>Windows error reports</value>
+  </data>
+  <data name="Message.WindowsFeature" xml:space="preserve">
+    <value>Windows feature</value>
+  </data>
+  <data name="Message.WindowsFeatureManagedByTheOperatingSystem" xml:space="preserve">
+    <value>Windows feature managed by the operating system.</value>
+  </data>
+  <data name="Message.WindowsFolderOrSystemComponent" xml:space="preserve">
+    <value>Windows folder or system component.</value>
+  </data>
+  <data name="Message.WindowsInstallerCouldNotFindTheRegisteredProduct" xml:space="preserve">
+    <value>Windows Installer could not find the registered product.</value>
+  </data>
+  <data name="Message.WindowsInstallerManagesMSIRegistryEntriesDirectRemoval" xml:space="preserve">
+    <value>Windows Installer manages MSI registry entries. Direct removal is blocked.</value>
+  </data>
+  <data name="Message.WindowsInstallerProductKeyDerivedFromTheApp" xml:space="preserve">
+    <value>Windows Installer product key derived from the app's product code.</value>
+  </data>
+  <data name="Message.WindowsInterfaceType" xml:space="preserve">
+    <value>Windows · interface type</value>
+  </data>
+  <data name="Message.WindowsManagesThisSettingOutsideTheApp" xml:space="preserve">
+    <value>Windows manages this setting outside the app.</value>
+  </data>
+  <data name="Message.WindowsPolicyManagesThisSetting" xml:space="preserve">
+    <value>Windows policy manages this setting.</value>
+  </data>
+  <data name="Message.WindowsReportsMemoryUsageAndAvailabilityModuleTemperature" xml:space="preserve">
+    <value>Windows reports memory usage and availability. Module temperature requires access to a module sensor.</value>
+  </data>
+  <data name="Message.WindowsReturnedRestorePointsWithAnInvalidDate" xml:space="preserve">
+    <value>Windows returned restore points with an invalid date.</value>
+  </data>
+  <data name="Message.WindowsSDKComponentOrPackage" xml:space="preserve">
+    <value>Windows SDK component or package.</value>
+  </data>
+  <data name="Message.WindowsSecurityUpdateOrFix" xml:space="preserve">
+    <value>Windows security update or fix.</value>
+  </data>
+  <data name="Message.WindowsStateChangedAfterStartupWasDisabledCheck" xml:space="preserve">
+    <value>Windows state changed after startup was disabled. Check Startup Apps in Windows.</value>
+  </data>
+  <data name="Message.WindowsTimeSinceStartup" xml:space="preserve">
+    <value>Windows · time since startup</value>
+  </data>
+  <data name="Message.WindowsToolOpened" xml:space="preserve">
+    <value>Windows tool opened.</value>
+  </data>
+  <data name="Message.WindowsToolRequestsAdministratorApproval" xml:space="preserve">
+    <value>Windows tool requests administrator approval</value>
+  </data>
+  <data name="Message.WindowsUpdate" xml:space="preserve">
+    <value>Windows update</value>
+  </data>
+  <data name="Message.WindowsUpdateCleanup" xml:space="preserve">
+    <value>Windows Update Cleanup</value>
+  </data>
+  <data name="Message.WindowsUpdateLogFiles" xml:space="preserve">
+    <value>Windows update log files</value>
+  </data>
+  <data name="Message.WindowsUpdateManagedByWindowsUpdate" xml:space="preserve">
+    <value>Windows update managed by Windows Update.</value>
+  </data>
+  <data name="Message.WindowsVolume" xml:space="preserve">
+    <value>Windows volume</value>
+  </data>
+  <data name="Message.WindowsVolume0" xml:space="preserve">
+    <value>Windows volume · {0}</value>
+  </data>
+  <data name="Message.WindowsVolumeUnavailable" xml:space="preserve">
+    <value>Windows volume unavailable</value>
+  </data>
+  <data name="Message.Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Message.YouDoNotHavePermissionToChangeHKCU" xml:space="preserve">
+    <value>You do not have permission to change HKCU Run.</value>
+  </data>
+  <data name="Message.YouDoNotHavePermissionToChangeThis" xml:space="preserve">
+    <value>You do not have permission to change this setting.</value>
+  </data>
+  <data name="Message.YouDoNotHavePermissionToChangeThis2" xml:space="preserve">
+    <value>You do not have permission to change this entry.</value>
+  </data>
+  <data name="Message.YouDoNotHavePermissionToCheckRestore" xml:space="preserve">
+    <value>You do not have permission to check restore points.</value>
+  </data>
+  <data name="Message.YouDoNotHavePermissionToEmptyThe" xml:space="preserve">
+    <value>You do not have permission to empty the Recycle Bin.</value>
+  </data>
+  <data name="Residue.CleanSelected" xml:space="preserve">
+    <value>Clean selected ({0})</value>
+  </data>
+  <data name="Residue.CleanupEffects" xml:space="preserve">
+    <value>Cleanup processes one item at a time. Files and folders are moved to quarantine and can be recovered from this window. Registry keys are exported to a .reg file and a snapshot before removal. Registry recovery is supervised. Cleanup takes a backup before removing each item.</value>
+  </data>
+  <data name="Residue.Quarantine" xml:space="preserve">
+    <value>Quarantine and recovery ({0})</value>
+  </data>
+  <data name="Settings.AppVersion" xml:space="preserve">
+    <value>WinCore Manager — version {0}</value>
+  </data>
+  <data name="Settings.DataDirectory" xml:space="preserve">
+    <value>Current data folder: {0}</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings.LanguageDescription" xml:space="preserve">
+    <value>Changes the app language immediately.</value>
+  </data>
+  <data name="Settings.WinGet" xml:space="preserve">
+    <value>WinGet: {0}</value>
+  </data>
+  <data name="UI.AdjustTheseEffectsIndividuallyReducingAnimationsMayMake" xml:space="preserve">
+    <value>Adjust these effects individually. Reducing animations may make Windows feel more responsive. Frame rates may stay the same.</value>
+  </data>
+  <data name="UI.AdministratorApprovalRequired" xml:space="preserve">
+    <value>Administrator approval required</value>
+  </data>
+  <data name="UI.AdvancedLeftoverCleanup" xml:space="preserve">
+    <value>Advanced leftover cleanup</value>
+  </data>
+  <data name="UI.AllApps" xml:space="preserve">
+    <value>All apps</value>
+  </data>
+  <data name="UI.App" xml:space="preserve">
+    <value>App: </value>
+  </data>
+  <data name="UI.App2" xml:space="preserve">
+    <value>App</value>
+  </data>
+  <data name="UI.AppAlreadyUninstalled" xml:space="preserve">
+    <value>App already uninstalled…</value>
+  </data>
+  <data name="UI.AppName" xml:space="preserve">
+    <value>App name</value>
+  </data>
+  <data name="UI.AppNameRequired" xml:space="preserve">
+    <value>App name (required)</value>
+  </data>
+  <data name="UI.AppPreferencesAppearanceAndDataStorage" xml:space="preserve">
+    <value>App preferences, appearance, and data storage.</value>
+  </data>
+  <data name="UI.AppPublisher" xml:space="preserve">
+    <value>App publisher</value>
+  </data>
+  <data name="UI.AppTheme" xml:space="preserve">
+    <value>App theme</value>
+  </data>
+  <data name="UI.Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="UI.AppliesImmediatelyToWinCoreManagerYourWindowsTheme" xml:space="preserve">
+    <value>Applies immediately to WinCore Manager. Your Windows theme stays the same.</value>
+  </data>
+  <data name="UI.Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="UI.Apps" xml:space="preserve">
+    <value>Apps</value>
+  </data>
+  <data name="UI.Arguments" xml:space="preserve">
+    <value>Arguments  </value>
+  </data>
+  <data name="UI.AutomaticallyRemoveRecordsOlderThan" xml:space="preserve">
+    <value>Automatically remove records older than</value>
+  </data>
+  <data name="UI.Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="UI.AvailableUpdatesList" xml:space="preserve">
+    <value>Available updates list</value>
+  </data>
+  <data name="UI.Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="UI.BuiltWithCAndWPFOnNET10" xml:space="preserve">
+    <value>Built with C# and WPF on .NET 10, with local history stored in SQLite.</value>
+  </data>
+  <data name="UI.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="UI.CancelScan" xml:space="preserve">
+    <value>Cancel scan</value>
+  </data>
+  <data name="UI.Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="UI.CategoryFilter" xml:space="preserve">
+    <value>Category filter</value>
+  </data>
+  <data name="UI.Cleanup" xml:space="preserve">
+    <value>Cleanup</value>
+  </data>
+  <data name="UI.CleanupProgress" xml:space="preserve">
+    <value>Cleanup progress</value>
+  </data>
+  <data name="UI.ClearHistory" xml:space="preserve">
+    <value>Clear history</value>
+  </data>
+  <data name="UI.ClearHistoryNow" xml:space="preserve">
+    <value>Clear history now</value>
+  </data>
+  <data name="UI.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="UI.Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="UI.CommandToRun" xml:space="preserve">
+    <value>Command to run</value>
+  </data>
+  <data name="UI.Confidence" xml:space="preserve">
+    <value>Confidence</value>
+  </data>
+  <data name="UI.ConfirmCleanup" xml:space="preserve">
+    <value>Confirm cleanup</value>
+  </data>
+  <data name="UI.ConfirmLeftoverCleanup" xml:space="preserve">
+    <value>Confirm leftover cleanup</value>
+  </data>
+  <data name="UI.ConfirmOperation" xml:space="preserve">
+    <value>Confirm operation</value>
+  </data>
+  <data name="UI.ConfirmUninstall" xml:space="preserve">
+    <value>Confirm uninstall</value>
+  </data>
+  <data name="UI.Control" xml:space="preserve">
+    <value>Control</value>
+  </data>
+  <data name="UI.CreatedBy" xml:space="preserve">
+    <value>Created by</value>
+  </data>
+  <data name="UI.CustomizeTheAppearanceOfWinCoreManager" xml:space="preserve">
+    <value>Customize the appearance of WinCore Manager.</value>
+  </data>
+  <data name="UI.DateAndTime" xml:space="preserve">
+    <value>Date and time</value>
+  </data>
+  <data name="UI.Days" xml:space="preserve">
+    <value>days</value>
+  </data>
+  <data name="UI.Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="UI.DetectAgain" xml:space="preserve">
+    <value>Detect again</value>
+  </data>
+  <data name="UI.DevelopmentTools" xml:space="preserve">
+    <value>Development tools</value>
+  </data>
+  <data name="UI.DiskCleanupCategories" xml:space="preserve">
+    <value>Disk Cleanup categories</value>
+  </data>
+  <data name="UI.DriveToScan" xml:space="preserve">
+    <value>Drive to scan</value>
+  </data>
+  <data name="UI.Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="UI.EmptySelectedRecycleBin" xml:space="preserve">
+    <value>Empty selected Recycle Bin</value>
+  </data>
+  <data name="UI.EmptyingTheRecycleBinPermanentlyDeletesItsFiles" xml:space="preserve">
+    <value>Emptying the Recycle Bin permanently deletes its files. Check for files you want to restore before confirming.</value>
+  </data>
+  <data name="UI.Enter0ToKeepAllRecordsDatabaseLocation" xml:space="preserve">
+    <value>Enter 0 to keep all records. Database location:</value>
+  </data>
+  <data name="UI.EnterTheInformationYouHaveAboutTheApp" xml:space="preserve">
+    <value>Enter the information you have about the app</value>
+  </data>
+  <data name="UI.EstimateHowMuchSpaceYouCanReclaimAnd" xml:space="preserve">
+    <value>Estimate how much space you can reclaim and open Windows Disk Cleanup.</value>
+  </data>
+  <data name="UI.Features" xml:space="preserve">
+    <value>Features</value>
+  </data>
+  <data name="UI.File" xml:space="preserve">
+    <value>File  </value>
+  </data>
+  <data name="UI.FileExplorerPreferencesForTheCurrentUserWindows" xml:space="preserve">
+    <value>File Explorer preferences for the current user. Windows has a separate setting for protected system files.</value>
+  </data>
+  <data name="UI.FilePath" xml:space="preserve">
+    <value>File path</value>
+  </data>
+  <data name="UI.FilterByCategory" xml:space="preserve">
+    <value>Filter by category</value>
+  </data>
+  <data name="UI.FilterByConfidence" xml:space="preserve">
+    <value>Filter by confidence</value>
+  </data>
+  <data name="UI.FilterByNameIDOrSource" xml:space="preserve">
+    <value>Filter by name, ID, or source…</value>
+  </data>
+  <data name="UI.FilterByNamePublisherOrVersion" xml:space="preserve">
+    <value>Filter by name, publisher, or version</value>
+  </data>
+  <data name="UI.FilterBySource" xml:space="preserve">
+    <value>Filter by source</value>
+  </data>
+  <data name="UI.FilterByStatus" xml:space="preserve">
+    <value>Filter by status</value>
+  </data>
+  <data name="UI.FilterByType" xml:space="preserve">
+    <value>Filter by type</value>
+  </data>
+  <data name="UI.FilterPrograms" xml:space="preserve">
+    <value>Filter programs</value>
+  </data>
+  <data name="UI.FilterUpdates" xml:space="preserve">
+    <value>Filter updates</value>
+  </data>
+  <data name="UI.FindAndInstallAppUpdatesThroughWinGet" xml:space="preserve">
+    <value>Find and install app updates through WinGet.</value>
+  </data>
+  <data name="UI.FolderOptions" xml:space="preserve">
+    <value>Folder Options</value>
+  </data>
+  <data name="UI.FullRepair" xml:space="preserve">
+    <value>Full Repair</value>
+  </data>
+  <data name="UI.History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="UI.HistoryRetentionInDays" xml:space="preserve">
+    <value>History retention in days</value>
+  </data>
+  <data name="UI.HowLongToKeepOperationHistory" xml:space="preserve">
+    <value>How long to keep operation history.</value>
+  </data>
+  <data name="UI.ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="UI.IncludesCodeAdaptedFromBulkCrapUninstallerBy" xml:space="preserve">
+    <value>Includes code adapted from Bulk Crap Uninstaller by Marcin Szeniak (Klocman) under the Apache 2.0 License. See the notices for the libraries included with this distribution.</value>
+  </data>
+  <data name="UI.InstallationDate" xml:space="preserve">
+    <value>Installation Date</value>
+  </data>
+  <data name="UI.InstallationFolder" xml:space="preserve">
+    <value>Installation folder</value>
+  </data>
+  <data name="UI.InstalledProgramsList" xml:space="preserve">
+    <value>Installed programs list</value>
+  </data>
+  <data name="UI.InstalledVersion" xml:space="preserve">
+    <value>Installed version</value>
+  </data>
+  <data name="UI.ItemsToProcessInOrder" xml:space="preserve">
+    <value>Items to process, in order</value>
+  </data>
+  <data name="UI.KeepALocalRecordOfOperationsAndTheir" xml:space="preserve">
+    <value>Keep a local record of operations and their results.</value>
+  </data>
+  <data name="UI.KnownInstallationFolderOptional" xml:space="preserve">
+    <value>Known installation folder (optional)</value>
+  </data>
+  <data name="UI.LeftoversFound" xml:space="preserve">
+    <value>Leftovers found</value>
+  </data>
+  <data name="UI.LicensesAndCredits" xml:space="preserve">
+    <value>Licenses and credits</value>
+  </data>
+  <data name="UI.Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="UI.Log" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="UI.Maintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="UI.MaintenanceProgress" xml:space="preserve">
+    <value>Maintenance progress</value>
+  </data>
+  <data name="UI.MyComputer" xml:space="preserve">
+    <value>My Computer</value>
+  </data>
+  <data name="UI.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="UI.NoActivityRecordedYetUpdatesAndMaintenanceOperations" xml:space="preserve">
+    <value>No activity recorded yet. Updates and maintenance operations will appear here.</value>
+  </data>
+  <data name="UI.NoRecordsFound" xml:space="preserve">
+    <value>No records found</value>
+  </data>
+  <data name="UI.OnePlaceToMaintainYourWindowsPCKeep" xml:space="preserve">
+    <value>One place to maintain your Windows PC. Keep apps up to date, remove software you no longer use, free up storage, and see what hardware is in your computer.</value>
+  </data>
+  <data name="UI.OpenFileLocation" xml:space="preserve">
+    <value>Open file location</value>
+  </data>
+  <data name="UI.OpenHistory" xml:space="preserve">
+    <value>Open History</value>
+  </data>
+  <data name="UI.OpenMaintenance" xml:space="preserve">
+    <value>Open Maintenance</value>
+  </data>
+  <data name="UI.OpenSystemProtection" xml:space="preserve">
+    <value>Open System Protection</value>
+  </data>
+  <data name="UI.OpenTheAuthorSGitHubProfile" xml:space="preserve">
+    <value>Open the author's GitHub profile</value>
+  </data>
+  <data name="UI.OpenUpdates" xml:space="preserve">
+    <value>Open Updates</value>
+  </data>
+  <data name="UI.OpenWindowsDiskCleanup" xml:space="preserve">
+    <value>Open Windows Disk Cleanup</value>
+  </data>
+  <data name="UI.OpenWindowsPerformanceOptions" xml:space="preserve">
+    <value>Open Windows Performance Options</value>
+  </data>
+  <data name="UI.OpenWindowsPerformanceOptionsToViewTheActive" xml:space="preserve">
+    <value>Open Windows Performance Options to view the active profile, window shadows, processor scheduling, virtual memory, and Data Execution Prevention (DEP).</value>
+  </data>
+  <data name="UI.OperationHistory" xml:space="preserve">
+    <value>Operation history</value>
+  </data>
+  <data name="UI.Performance" xml:space="preserve">
+    <value>Performance</value>
+  </data>
+  <data name="UI.PortableModeSaveDataNextToTheExecutable" xml:space="preserve">
+    <value>Portable mode (save data next to the executable)</value>
+  </data>
+  <data name="UI.PossibleEffects" xml:space="preserve">
+    <value>Possible effects</value>
+  </data>
+  <data name="UI.Power" xml:space="preserve">
+    <value>Power</value>
+  </data>
+  <data name="UI.ProfilesAdditionalEffectsAndAdvancedOptions" xml:space="preserve">
+    <value>Profiles, additional effects, and advanced options</value>
+  </data>
+  <data name="UI.Publisher" xml:space="preserve">
+    <value>Publisher</value>
+  </data>
+  <data name="UI.PublisherOptional" xml:space="preserve">
+    <value>Publisher (optional)</value>
+  </data>
+  <data name="UI.Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="UI.RecentActivity" xml:space="preserve">
+    <value>Recent activity</value>
+  </data>
+  <data name="UI.Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="UI.RefreshInventory" xml:space="preserve">
+    <value>Refresh inventory</value>
+  </data>
+  <data name="UI.RefreshList" xml:space="preserve">
+    <value>Refresh list</value>
+  </data>
+  <data name="UI.RequiresAdministratorApprovalUAC" xml:space="preserve">
+    <value>Requires administrator approval (UAC)</value>
+  </data>
+  <data name="UI.ReviewAndAdjustWindowsSettingsEachSettingShows" xml:space="preserve">
+    <value>Review and adjust Windows settings. Each setting shows its current value. Select Apply to make a change.</value>
+  </data>
+  <data name="UI.Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="UI.RunWindowsRepairToolsSuchAsSFCAnd" xml:space="preserve">
+    <value>Run Windows repair tools such as SFC and DISM with clear warnings.</value>
+  </data>
+  <data name="UI.RunsDISMRestoreHealthThenSFCScannowIfDISM" xml:space="preserve">
+    <value>Runs DISM RestoreHealth, then SFC Scannow if DISM succeeds.</value>
+  </data>
+  <data name="UI.SafetyWarnings" xml:space="preserve">
+    <value>Safety warnings</value>
+  </data>
+  <data name="UI.Scan" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="UI.ScanForLeftovers" xml:space="preserve">
+    <value>Scan for leftovers</value>
+  </data>
+  <data name="UI.ScanForLeftoversFromAnUninstalledApp" xml:space="preserve">
+    <value>Scan for leftovers from an uninstalled app</value>
+  </data>
+  <data name="UI.Search" xml:space="preserve">
+    <value>Search…</value>
+  </data>
+  <data name="UI.SearchApps" xml:space="preserve">
+    <value>Search apps…</value>
+  </data>
+  <data name="UI.SearchByNamePublisherOrPath" xml:space="preserve">
+    <value>Search by name, publisher, or path</value>
+  </data>
+  <data name="UI.SearchHistory" xml:space="preserve">
+    <value>Search history</value>
+  </data>
+  <data name="UI.SearchHistory2" xml:space="preserve">
+    <value>Search history…</value>
+  </data>
+  <data name="UI.SeeHowMuchSpaceYouCanReclaimOn" xml:space="preserve">
+    <value>See how much space you can reclaim on the Windows volume.</value>
+  </data>
+  <data name="UI.SeeNOTICEBCUninstallerMdLICENSEBCUninstallerTxtAnd" xml:space="preserve">
+    <value>MIT license text: Licencas/WinCoreManager-LICENSE.txt, next to the portable executable. Third-party notices: the Licencas folder, NOTICE-BCUninstaller.md, and LICENSE-BCUninstaller.txt.</value>
+  </data>
+  <data name="UI.SeeWhatRunsAtStartupAndEnableOr" xml:space="preserve">
+    <value>See what runs at startup and enable or disable eligible entries.</value>
+  </data>
+  <data name="UI.SeeWhatStartsWithWindowsAndManageEligible" xml:space="preserve">
+    <value>See what starts with Windows and manage eligible personal entries.</value>
+  </data>
+  <data name="UI.SelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="UI.SelectEligibleItems" xml:space="preserve">
+    <value>Select eligible items</value>
+  </data>
+  <data name="UI.SelectLeftoverForCleanup" xml:space="preserve">
+    <value>Select leftover for cleanup</value>
+  </data>
+  <data name="UI.SelectProgram" xml:space="preserve">
+    <value>Select program</value>
+  </data>
+  <data name="UI.SelectUpdate" xml:space="preserve">
+    <value>Select update</value>
+  </data>
+  <data name="UI.Sensors" xml:space="preserve">
+    <value>Sensors</value>
+  </data>
+  <data name="UI.SensorsWinCoreManager" xml:space="preserve">
+    <value>Sensors · WinCore Manager</value>
+  </data>
+  <data name="UI.Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="UI.Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="UI.Source2" xml:space="preserve">
+    <value>Source  </value>
+  </data>
+  <data name="UI.StartFullRepair" xml:space="preserve">
+    <value>Start Full Repair</value>
+  </data>
+  <data name="UI.Startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="UI.StartupEntries" xml:space="preserve">
+    <value>Startup entries</value>
+  </data>
+  <data name="UI.Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="UI.Storage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="UI.SystemAndWinGetStatusAtAGlance" xml:space="preserve">
+    <value>System and WinGet status at a glance.</value>
+  </data>
+  <data name="UI.SystemRestore" xml:space="preserve">
+    <value>System Restore</value>
+  </data>
+  <data name="UI.Target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="UI.TechnicalComponentsAdvanced" xml:space="preserve">
+    <value>Technical components (advanced)</value>
+  </data>
+  <data name="UI.TheChangeTakesEffectTheNextTimeYou" xml:space="preserve">
+    <value>The change takes effect the next time you start the app. In portable mode, history and settings stay alongside the executable.</value>
+  </data>
+  <data name="UI.TheScanDoesNotRemoveAnyFilesReview" xml:space="preserve">
+    <value>The scan does not remove any files. Review and confirm the results before deleting anything.</value>
+  </data>
+  <data name="UI.TheScanUsesTheAppNamePublisherAnd" xml:space="preserve">
+    <value>The scan uses the app name, publisher, and installation folder as evidence. With less information, confidence is lower and more results appear for reference only.</value>
+  </data>
+  <data name="UI.Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="UI.TheseTimeoutsApplyToTheActivePlanSwitch" xml:space="preserve">
+    <value>These timeouts apply to the active plan. Switch plans to view another plan's settings.</value>
+  </data>
+  <data name="UI.ThisAppRunsOnlyApprovedCommandsSfcDism" xml:space="preserve">
+    <value>This app runs only approved commands (sfc, dism, chkdsk, ipconfig, winget) with fixed arguments. It never restarts Windows automatically or runs commands entered in the interface.</value>
+  </data>
+  <data name="UI.MitLicenseAndCopyright" xml:space="preserve">
+    <value>License: MIT License. Copyright (c) 2026 Lucas Sehnem.</value>
+  </data>
+  <data name="UI.TryFixMyPC" xml:space="preserve">
+    <value>Try FixMyPC</value>
+  </data>
+  <data name="UI.Tweaks" xml:space="preserve">
+    <value>Tweaks</value>
+  </data>
+  <data name="UI.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="UI.TypicalDuration" xml:space="preserve">
+    <value>Typical duration: </value>
+  </data>
+  <data name="UI.UndoLastChange" xml:space="preserve">
+    <value>Undo last change</value>
+  </data>
+  <data name="UI.UninstallAppsAndReviewLeftoverFilesAndSettings" xml:space="preserve">
+    <value>Uninstall apps and review leftover files and settings before removal.</value>
+  </data>
+  <data name="UI.UninstallProgress" xml:space="preserve">
+    <value>Uninstall progress</value>
+  </data>
+  <data name="UI.UninstallSelected" xml:space="preserve">
+    <value>Uninstall selected</value>
+  </data>
+  <data name="UI.Uninstaller" xml:space="preserve">
+    <value>Uninstaller</value>
+  </data>
+  <data name="UI.UninstallerToRun" xml:space="preserve">
+    <value>Uninstaller to run</value>
+  </data>
+  <data name="UI.UpdateProgress" xml:space="preserve">
+    <value>Update progress</value>
+  </data>
+  <data name="UI.UpdateSelected" xml:space="preserve">
+    <value>Update selected</value>
+  </data>
+  <data name="UI.Updates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="UI.UpdatesAndMaintenanceOperationsWillAppearHereAdjust" xml:space="preserve">
+    <value>Updates and maintenance operations will appear here. Adjust the filters to find other records.</value>
+  </data>
+  <data name="UI.UseWindowsDiskCleanupToSelectOtherCategories" xml:space="preserve">
+    <value>Use Windows Disk Cleanup to select other categories or choose Clean up system files.</value>
+  </data>
+  <data name="UI.UsedSpaceOnTheVolume" xml:space="preserve">
+    <value>Used space on the volume</value>
+  </data>
+  <data name="UI.Version" xml:space="preserve">
+    <value>Version </value>
+  </data>
+  <data name="UI.Version2" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="UI.ViewAndAdjustPowerPerformanceAndFolderSettings" xml:space="preserve">
+    <value>View and adjust power, performance, and folder settings.</value>
+  </data>
+  <data name="UI.ViewInformationAboutYourProcessorGraphicsMemoryDrives" xml:space="preserve">
+    <value>View information about your processor, graphics, memory, drives, and sensors.</value>
+  </data>
+  <data name="UI.WhatWillHappen" xml:space="preserve">
+    <value>What will happen</value>
+  </data>
+  <data name="UI.WhatWinCoreManagerDoesAndWhoCreatedIt" xml:space="preserve">
+    <value>What WinCore Manager does and who created it.</value>
+  </data>
+  <data name="UI.WhereHistoryAndSettingsAreStored" xml:space="preserve">
+    <value>Where history and settings are stored.</value>
+  </data>
+  <data name="UI.WinCoreManagerBringsWindowsToolsTogetherInOne" xml:space="preserve">
+    <value>WinCore Manager brings Windows tools together in one app. It previews the changes it will make and waits for your confirmation before applying them.</value>
+  </data>
+  <data name="UI.WinCoreManagerRunsOnlyApprovedCommandsWithFixed" xml:space="preserve">
+    <value>WinCore Manager runs only approved commands with fixed arguments. It never restarts Windows automatically. Operation history stays on this computer. The app does not collect or send personal data.</value>
+  </data>
+  <data name="UI.WinGetAndSecurity" xml:space="preserve">
+    <value>WinGet and security</value>
+  </data>
+  <data name="UI.WindowsMayHideRegisteredCategoriesDependingOnThe" xml:space="preserve">
+    <value>Windows may hide registered categories depending on the drive, your permissions, or the files it finds.</value>
+  </data>
+  <data name="UI.WindowsUpdatesAndMaintenance" xml:space="preserve">
+    <value>Windows updates and maintenance</value>
+  </data>
+  <data name="Uninstaller.Ascending" xml:space="preserve">
+    <value>Ascending order</value>
+  </data>
+  <data name="Uninstaller.Descending" xml:space="preserve">
+    <value>Descending order</value>
+  </data>
+  <data name="Uninstaller.InstallDateHelp" xml:space="preserve">
+    <value>Date reported by the registry. For MSI apps, it may reflect the last maintenance operation.</value>
+  </data>
+  <data name="Updater.AvailableVersion" xml:space="preserve">
+    <value>Available version: {0}</value>
+  </data>
+  <data name="Updater.Check" xml:space="preserve">
+    <value>Check for Updates</value>
+  </data>
+  <data name="Updater.DownloadProgress" xml:space="preserve">
+    <value>Download progress</value>
+  </data>
+  <data name="Updater.HelperFailure" xml:space="preserve">
+    <value>WinCore Manager could not complete the update.</value>
+  </data>
+  <data name="Updater.HelperRecovery" xml:space="preserve">
+    <value>Close the app, then run the recovery helper at {0}.</value>
+  </data>
+  <data name="Updater.Install" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Updater.InstalledVersion" xml:space="preserve">
+    <value>Installed version: {0}</value>
+  </data>
+  <data name="Updater.OpenRelease" xml:space="preserve">
+    <value>Open official release page</value>
+  </data>
+  <data name="Updater.PackageBusy" xml:space="preserve">
+    <value>The package is in use or needs recovery. Close other instances or run the recovery helper in the .wincore-update folder.</value>
+  </data>
+  <data name="Updater.PackageSize" xml:space="preserve">
+    <value>Package size: {0} MiB</value>
+  </data>
+  <data name="Updater.ReleaseNotes" xml:space="preserve">
+    <value>Release notes</value>
+  </data>
+  <data name="Updater.Title" xml:space="preserve">
+    <value>WinCore Manager Updates</value>
+  </data>
+  <data name="Message.Safety.RegistryMutationUnavailable" xml:space="preserve">
+    <value>Registry key cleanup and restore are blocked until transactional recovery is verified.</value>
+  </data>
+  <data name="Message.Safety.PrivilegedUninstallUnavailable" xml:space="preserve">
+    <value>This uninstaller requires privileges that WinCore Manager does not request. Execution was blocked.</value>
+  </data>
+  <data name="Message.Safety.PrivilegedResidueUnavailable" xml:space="preserve">
+    <value>Leftovers in machine installation or data directories are read-only in this version.</value>
+  </data>
+  <data name="Message.CHKDSKReviewCleanupOutput" xml:space="preserve">
+    <value>CHKDSK returned informational code 2. Check the log for the cleanup result.</value>
+  </data>
+  <data name="Message.Safety.SourceVolumeQuarantine0" xml:space="preserve">
+    <value>Files from another volume will stay on this computer in the local quarantine at '{0}'.</value>
+  </data>
+  <data name="Message.ProcessOutputDrainTimeout" xml:space="preserve">
+    <value>The process exited, but a child kept its output channel open. The log may be incomplete.</value>
+  </data>
+  <data name="Message.HistoryDatabaseDamaged" xml:space="preserve"><value>The history database is damaged. The database path is {0}.</value></data>
+  <data name="Message.HistoryDatabaseUnsupported" xml:space="preserve"><value>The history database format is unsupported. The database path is {0}.</value></data>
+  <data name="Message.SettingsReadProblem" xml:space="preserve"><value>Preferences could not be read. The original file was preserved at {0}.</value></data>
+  <data name="Updater.RecoveryBlocked" xml:space="preserve"><value>An update was interrupted. Close the app and open Recovery\WinCoreManager.Recover.exe from the portable folder. Keep the transaction directory.</value></data>
+  <data name="Message.WinGetExitSuccess" xml:space="preserve"><value>0 (success)</value></data>
+  <data name="Message.PciDevice" xml:space="preserve"><value>PCI device</value></data>
+  <data name="Message.CpuArchitecture" xml:space="preserve"><value>Architecture</value></data>
+  <data name="Message.CpuidSignature" xml:space="preserve"><value>CPUID signature</value></data>
+  <data name="Message.StorageDriveLetter" xml:space="preserve"><value>Drive letter</value></data>
+  <data name="Message.NvidiaAdapter" xml:space="preserve"><value>NVIDIA adapter</value></data>
+  <data name="Message.NvidiaAdapterNumber" xml:space="preserve"><value>NVIDIA adapter {0}</value></data>
+  <data name="Message.WindowsActivated" xml:space="preserve"><value>Activated</value></data>
+  <data name="Message.DisplacedItemInQuarantine" xml:space="preserve"><value> The item previously at the destination remains in quarantine at {0}.</value></data>
+  <data name="Message.ResidueHistoryDetails" xml:space="preserve"><value>Operation {0} · {1} item(s) · backups: {2}</value></data>
+  <data name="Message.ResidueHistoryNoBackups" xml:space="preserve"><value>none</value></data>
+  <data name="Message.ResidueHistoryPartial" xml:space="preserve"><value>PARTIAL</value></data>
+  <data name="Message.MaintenanceCommandLine" xml:space="preserve"><value>Command: {0} {1}</value></data>
+  <data name="Message.MaintenanceCommandForDrive" xml:space="preserve"><value>{0} (drive {1})</value></data>
+  <data name="Message.CompleteRepairFailed" xml:space="preserve"><value>Complete Repair failed: {0}</value></data>
+  <data name="Message.ResidueOutcomeFailed" xml:space="preserve"><value>failed: {0}</value></data>
+  <data name="Message.ResidueOutcomeBlocked" xml:space="preserve"><value>blocked: {0}</value></data>
+  <data name="Message.Essentials" xml:space="preserve"><value>Essentials</value></data>
+  <data name="Essentials.Title" xml:space="preserve"><value>Essential Apps Center</value></data>
+  <data name="Essentials.Subtitle" xml:space="preserve"><value>Discover useful components, drivers, and tools to set up your Windows PC.</value></data>
+  <data name="Essentials.Intro" xml:space="preserve"><value>Choose what fits your computer and apps. Links open in your default browser.</value></data>
+  <data name="Essentials.Search" xml:space="preserve"><value>Search apps</value></data>
+  <data name="Essentials.Placeholder" xml:space="preserve"><value>Name, description, or category</value></data>
+  <data name="Essentials.Filter" xml:space="preserve"><value>Filter by category</value></data>
+  <data name="Essentials.Open" xml:space="preserve"><value>Open page</value></data>
+  <data name="Essentials.OpenNamed" xml:space="preserve"><value>Open the {0} page in your browser</value></data>
+  <data name="Essentials.OpenFailed" xml:space="preserve"><value>Could not open the page in your default browser.</value></data>
+  <data name="Essentials.Empty" xml:space="preserve"><value>No apps found. Try another search or category.</value></data>
+  <data name="Essentials.Category.All" xml:space="preserve"><value>All</value></data>
+  <data name="Essentials.Category.System" xml:space="preserve"><value>System &amp; Runtimes</value></data>
+  <data name="Essentials.Category.Drivers" xml:space="preserve"><value>Drivers</value></data>
+  <data name="Essentials.Category.Media" xml:space="preserve"><value>Media</value></data>
+  <data name="Essentials.Category.Productivity" xml:space="preserve"><value>Productivity</value></data>
+  <data name="Essentials.Category.Development" xml:space="preserve"><value>Development</value></data>
+  <data name="Essentials.Category.Ide" xml:space="preserve"><value>IDEs &amp; AI</value></data>
+  <data name="Essentials.Origin.Microsoft" xml:space="preserve"><value>Microsoft</value></data>
+  <data name="Essentials.Origin.Vendor" xml:space="preserve"><value>Vendor</value></data>
+  <data name="Essentials.Origin.GitHub" xml:space="preserve"><value>GitHub</value></data>
+  <data name="Essentials.Note.Optional" xml:space="preserve"><value>Optional</value></data>
+  <data name="Essentials.Note.Compatibility" xml:space="preserve"><value>Compatibility</value></data>
+  <data name="Essentials.Note.ThirdParty" xml:space="preserve"><value>Third-party alternative</value></data>
+  <data name="Essentials.Note.Unsupported" xml:space="preserve"><value>Legacy · out of support</value></data>
+  <data name="Essentials.Note.Experimental" xml:space="preserve"><value>Experimental · optional</value></data>
+  <data name="Essentials.DriverName.Nvidia" xml:space="preserve"><value>NVIDIA Drivers</value></data>
+  <data name="Essentials.DriverName.Amd" xml:space="preserve"><value>AMD Drivers</value></data>
+  <data name="WindowsCard.Title" xml:space="preserve"><value>Windows &amp; Activation</value></data>
+  <data name="WindowsCard.Edition" xml:space="preserve"><value>Installed edition</value></data>
+  <data name="WindowsCard.Version" xml:space="preserve"><value>Display version</value></data>
+  <data name="WindowsCard.Build" xml:space="preserve"><value>Build</value></data>
+  <data name="WindowsCard.Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="WindowsCard.Status" xml:space="preserve"><value>Activation status</value></data>
+  <data name="WindowsCard.Checking" xml:space="preserve"><value>Checking activation…</value></data>
+  <data name="WindowsCard.Activated" xml:space="preserve"><value>Windows is activated</value></data>
+  <data name="WindowsCard.NotActivated" xml:space="preserve"><value>Windows is not activated</value></data>
+  <data name="WindowsCard.Grace" xml:space="preserve"><value>Evaluation or grace period</value></data>
+  <data name="WindowsCard.Unknown" xml:space="preserve"><value>Could not verify</value></data>
+  <data name="WindowsCard.Refresh" xml:space="preserve"><value>Refresh status</value></data>
+  <data name="WindowsCard.Activate" xml:space="preserve"><value>Activate Windows</value></data>
+  <data name="WindowsCard.Settings" xml:space="preserve"><value>Activation settings</value></data>
+  <data name="WindowsCard.View" xml:space="preserve"><value>View activation</value></data>
+  <data name="WindowsCard.Check" xml:space="preserve"><value>Check in Windows</value></data>
+  <data name="WindowsCard.OpenFailed" xml:space="preserve"><value>Could not open Windows Activation settings.</value></data>
+  <data name="WindowsCard.OpenRepository" xml:space="preserve"><value>Open on GitHub</value></data>
+  <data name="WindowsCard.RepositoryOpenFailed" xml:space="preserve"><value>Could not open the MAS repository in your browser.</value></data>
+  <data name="WindowsCard.Confirm" xml:space="preserve"><value>Open the GitHub repository for Microsoft Activation Scripts (MAS), a third-party project, in your browser?</value></data>
+  <data name="Essentials.App.vc-redist" xml:space="preserve"><value>Libraries required by various Windows apps and games.</value></data>
+  <data name="Essentials.App.vc-aio" xml:space="preserve"><value>A bundle of multiple redistributables assembled by TechPowerUp.</value></data>
+  <data name="Essentials.App.directx" xml:space="preserve"><value>Legacy DirectX components used by some games.</value></data>
+  <data name="Essentials.App.framework35" xml:space="preserve"><value>Runtime for older apps. On Windows 11 through 25H2 it is an optional feature. From 26H1 onward, see Microsoft’s installer for your version.</value></data>
+  <data name="Essentials.App.desktop8" xml:space="preserve"><value>Runs desktop apps that require runtime 8. Use only if the app explicitly requires this version.</value></data>
+  <data name="Essentials.App.desktop10" xml:space="preserve"><value>Runtime for running compatible .NET 10 desktop apps.</value></data>
+  <data name="Essentials.App.desktop11" xml:space="preserve"><value>Runtime for running compatible .NET 11 desktop apps.</value></data>
+  <data name="Essentials.App.nvidia" xml:space="preserve"><value>Drivers for NVIDIA hardware. Check your model and Windows version on the vendor’s site.</value></data>
+  <data name="Essentials.App.amd" xml:space="preserve"><value>Drivers for AMD hardware. Check your model and Windows version on the vendor’s site.</value></data>
+  <data name="Essentials.App.klite" xml:space="preserve"><value>A bundle of codecs and media playback tools.</value></data>
+  <data name="Essentials.App.java" xml:space="preserve"><value>Runtime for Java apps. Some apps require a specific version or distribution.</value></data>
+  <data name="Essentials.App.winrar" xml:space="preserve"><value>Compresses and extracts archives, including RAR and ZIP.</value></data>
+  <data name="Essentials.App.stirling" xml:space="preserve"><value>Tools for editing, organizing, and converting PDF files.</value></data>
+  <data name="Essentials.App.artcraft" xml:space="preserve"><value>Creative tool for composing scenes and generating images and video with AI.</value></data>
+  <data name="Essentials.App.windirstat" xml:space="preserve"><value>Visual map of the files and folders that use disk space.</value></data>
+  <data name="Essentials.App.recordly" xml:space="preserve"><value>Records your screen and helps edit demos.</value></data>
+  <data name="Essentials.App.nextgenup" xml:space="preserve"><value>AI tools for enhancing images and video.</value></data>
+  <data name="Essentials.App.tracedraw" xml:space="preserve"><value>Open-source vector editor in early development.</value></data>
+  <data name="Essentials.App.arroxy" xml:space="preserve"><value>Manages downloads of videos and other content from supported sources.</value></data>
+  <data name="Essentials.App.misterdownload" xml:space="preserve"><value>Organizes file downloads.</value></data>
+  <data name="Essentials.App.python" xml:space="preserve"><value>A language for learning to code, automating tasks, and building apps.</value></data>
+  <data name="Essentials.App.nodejs" xml:space="preserve"><value>Runs JavaScript outside the browser and supports web development tools.</value></data>
+  <data name="Essentials.App.git" xml:space="preserve"><value>Tracks file changes and helps teams collaborate on code.</value></data>
+  <data name="Essentials.App.kiro" xml:space="preserve"><value>Development environment with an AI agent and a specification-driven workflow.</value></data>
+  <data name="Essentials.App.orca" xml:space="preserve"><value>Workspace for using coding agents in parallel.</value></data>
+  <data name="Essentials.App.opencode" xml:space="preserve"><value>Coding agent available in the terminal, on desktop, and in editors.</value></data>
+  <data name="Essentials.App.freebuff" xml:space="preserve"><value>AI coding agent for the terminal.</value></data>
+  <data name="Essentials.App.commandcode" xml:space="preserve"><value>Coding agent that works with your project from the terminal.</value></data>
+  <data name="Essentials.App.qoder" xml:space="preserve"><value>Development environment with AI agents for coding tasks.</value></data>
+  <data name="Essentials.App.vscode" xml:space="preserve"><value>Extensible code editor for many languages.</value></data>
+  <data name="UpdateOperation.QueuePosition" xml:space="preserve">
+    <value>{0} · {1} of {2}</value>
+  </data>
+  <data name="UpdateOperation.Elapsed" xml:space="preserve">
+    <value>Elapsed {0}</value>
+  </data>
+  <data name="UpdateOperation.Waiting" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="UpdateOperation.Downloading" xml:space="preserve">
+    <value>Downloading</value>
+  </data>
+  <data name="UpdateOperation.Installing" xml:space="preserve">
+    <value>Installing</value>
+  </data>
+  <data name="UpdateOperation.Interaction" xml:space="preserve">
+    <value>Waiting for interaction</value>
+  </data>
+  <data name="UpdateOperation.Cancelling" xml:space="preserve">
+    <value>Cancelling</value>
+  </data>
+  <data name="UpdateOperation.Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="UpdateOperation.Interrupted" xml:space="preserve">
+    <value>Interrupted — status uncertain</value>
+  </data>
+  <data name="UpdateOperation.Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="UpdateOperation.Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="UpdateOperation.Verifying" xml:space="preserve">
+    <value>Checking the installed version</value>
+  </data>
+  <data name="UpdateOperation.CancelCurrent" xml:space="preserve">
+    <value>Cancel update</value>
+  </data>
+  <data name="UpdateOperation.CancelQueue" xml:space="preserve">
+    <value>Cancel queue</value>
+  </data>
+  <data name="UpdateOperation.Force" xml:space="preserve">
+    <value>Force termination</value>
+  </data>
+  <data name="UpdateOperation.ForceWarning" xml:space="preserve">
+    <value>The update may be installing files right now. Forcing it to stop may leave the application partially updated. Do you want to continue?</value>
+  </data>
+  <data name="UpdateOperation.StallWarning" xml:space="preserve">
+    <value>WinGet has stopped sending messages. Check whether an installer window is awaiting a response, or request cancellation.</value>
+  </data>
+  <data name="UpdateOperation.NoGracefulClose" xml:space="preserve">
+    <value>The controlled process does not offer a graceful close. Check the installer or choose force termination.</value>
+  </data>
+  <data name="UpdateOperation.ExternalMayContinue" xml:space="preserve">
+    <value>An installer outside WinCore Manager’s control may still be running.</value>
+  </data>
+  <data name="UpdateOperation.OwnershipUnconfirmed" xml:space="preserve">
+    <value>Termination was refused because the process could not be linked to this operation.</value>
+  </data>
+  <data name="UpdateOperation.ControlError" xml:space="preserve">
+    <value>The controlled process could not be stopped. {0}</value>
+  </data>
+  <data name="UpdateOperation.JobUnavailable" xml:space="preserve">
+    <value>WinGet could not join the job object. Native code {0}. Only the directly launched process can be stopped.</value>
+  </data>
+  <data name="UpdateOperation.ScanTimeout" xml:space="preserve">
+    <value>The WinGet scan timed out or left its output stream open.</value>
+  </data>
+  <data name="UpdateOperation.VerifiedVersion" xml:space="preserve">
+    <value>Installed version confirmed by inventory. {0}</value>
+  </data>
+  <data name="UpdateOperation.VersionUnconfirmed" xml:space="preserve">
+    <value>Expected version {0}. Detected version {1}.</value>
+  </data>
+  <data name="UpdateOperation.InventoryError" xml:space="preserve">
+    <value>The installed version could not be checked. {0}</value>
+  </data>
+  <data name="UpdateOperation.InstalledVersion" xml:space="preserve">
+    <value>Inventory version for {0}. {1}</value>
+  </data>
+  <data name="UpdateOperation.ReceiptError" xml:space="preserve">
+    <value>The update record could not be accessed or completed. {0}</value>
+  </data>
+  <data name="UpdateOperation.RecoveryNotice" xml:space="preserve">
+    <value>An update may still be running in another window or WinCore Manager session. Check that the installer has finished before allowing new installations or uninstalls.</value>
+  </data>
+  <data name="UpdateOperation.Recheck" xml:space="preserve">
+    <value>Recheck status</value>
+  </data>
+  <data name="UpdateOperation.RecheckWarning" xml:space="preserve">
+    <value>Confirm that WinGet and the update installer have finished, including in other windows. WinCore Manager will check the inventory and unlock new operations. Do you want to continue?</value>
+  </data>
+  <data name="UpdateOperation.KeepWaiting" xml:space="preserve">
+    <value>Keep waiting</value>
+  </data>
+  <data name="UpdateOperation.CloseWarning" xml:space="preserve">
+    <value>An update is running. You can keep using the other tabs while you wait.</value>
+  </data>
+  <data name="UpdateOperation.CloseWithoutWaiting" xml:space="preserve">
+    <value>Close the interface</value>
+  </data>
+  <data name="UpdateOperation.CloseWithoutWaitingWarning" xml:space="preserve">
+    <value>The installer or WinGet may continue running. The state will be recorded for review when you reopen WinCore Manager. Do you want to close the interface?</value>
+  </data>
+  <data name="UpdateOperation.InactivitySetting" xml:space="preserve">
+    <value>WinGet inactivity warning</value>
+  </data>
+  <data name="UpdateOperation.InactivityDescription" xml:space="preserve">
+    <value>Seconds without new output before a warning appears.</value>
+  </data>
+  <data name="UpdateOperation.InactivitySaved" xml:space="preserve">
+    <value>WinGet warning interval saved.</value>
+  </data>
+  <data name="UpdateOperation.OriginalProcessPending" xml:space="preserve">
+    <value>The original process is still running, or its exit could not be confirmed. Wait and check again.</value>
+  </data>
+  <data name="UpdateOperation.RecoveryReview" xml:space="preserve"><value>A package change is awaiting verification. Recheck its status to see what is needed.</value></data>
+  <data name="UpdateOperation.RecoveryIdentity" xml:space="preserve"><value>The operation status remains inconclusive and the receipt is unavailable. Check whether another instance is still open and recheck the status.</value></data>
+  <data name="UpdateOperation.RecoveryInventory" xml:space="preserve"><value>The inventory check required for {0} failed. Check App Installer and the WinGet source, then recheck.</value></data>
+  <data name="UpdateOperation.RecoveryRestart" xml:space="preserve"><value>Check installer windows and records. Restart Windows from Start and recheck to assess the residual risk.</value></data>
+  <data name="UpdateOperation.RecoveryVersion" xml:space="preserve"><value>Inventory for {0} shows {1}. The expected version is {2}. Check that the app opens at the observed version, then record a manual review.</value></data>
+  <data name="UpdateOperation.RecoveryBootUnavailable" xml:space="preserve"><value>The Windows boot session could not be verified. Check WMI availability and recheck.</value></data>
+  <data name="UpdateOperation.RecoveryVerified" xml:space="preserve"><value>Restart and installed version verified for {0} ({1}). The block was released.</value></data>
+  <data name="UpdateOperation.PackageConflict" xml:space="preserve"><value>Another package operation is active or awaiting review in Updates.</value></data>
+  <data name="UpdateOperation.UntrustedAppInstaller" xml:space="preserve"><value>Could not validate WinGet from Microsoft App Installer for this user.</value></data>
+  <data name="UpdateOperation.UntrustedSource" xml:space="preserve"><value>The WinGet source configuration could not be validated. Allowed sources: official winget and msstore.</value></data>
+  <data name="Message.ExternalProcessObservationEnded" xml:space="preserve"><value>The observation period ended. The external process may continue. Check its state in Windows before retrying.</value></data>
+  <data name="UpdateOperation.BatchTotals" xml:space="preserve"><value>{0} succeeded, {1} failed, {2} canceled, {3} inconclusive, {4} not started.</value></data>
+  <data name="UpdateOperation.ReviewVersion" xml:space="preserve"><value>Review interrupted operation</value></data>
+  <data name="UpdateOperation.ReviewVersionConfirm" xml:space="preserve"><value>Confirm that you checked the result in the app or installer records, that every installer you observed has stopped, and that you accept releasing the block with the possibility of unobserved delegated work. Inventory checked: {0}.</value></data>
+  <data name="UpdateOperation.RecoveryManualRecord" xml:space="preserve"><value>Manual review of {0} after a verified restart. Observed version: {1}.</value></data>
+  <data name="UpdateOperation.ExternalRestartVerified" xml:space="preserve"><value>Restart verified after the external operation. Review History for the recorded result.</value></data>
+  <data name="Message.CloseAfterObservation" xml:space="preserve"><value>End observation and close</value></data>
+  <data name="Message.CloseAfterObservationWarning" xml:space="preserve"><value>The queue will stop. WinCore Manager closes after recording the result or the end of the observation period. The external process may continue.</value></data>
+  <data name="UpdateOperation.AttemptOnly" xml:space="preserve"><value>The command reported success. The package change is awaiting evidence of completion.</value></data>
+  <data name="UpdateOperation.PendingEvidence" xml:space="preserve"><value>The change is awaiting reconciliation. Open Updates to review the operation receipt.</value></data>
+  <data name="UpdateOperation.RiskReviewAvailable" xml:space="preserve"><value>Operation {0}. {1}. Check the installer result and use the review to decide whether to accept the residual risk.</value></data>
+  <data name="UpdateOperation.RiskReviewRecord" xml:space="preserve"><value>The app verified Windows boot {0}, the available process identities, and the inventory check ({1}). The operator confirmed checking the installers and outcome and accepted the residual risk. Technical completion remained inconclusive.</value></data>
+  <data name="UpdateOperation.RiskReviewReleased" xml:space="preserve"><value>Block released by a residual risk review recorded in History.</value></data>
+  <data name="UpdateOperation.ResolvePending" xml:space="preserve"><value>Resolve pending update</value></data>
+  <data name="UpdateOperation.AcceptResidualRisk" xml:space="preserve"><value>Accept residual risk</value></data>
+  <data name="UpdateOperation.RecoveryReceiptTimestamp" xml:space="preserve"><value>{0} (receipt timestamp)</value></data>
+  <data name="UpdateOperation.RecoveryDetails" xml:space="preserve"><value>View details</value></data>
+  <data name="UpdateOperation.RecoveryTarget" xml:space="preserve"><value>Pending operation: {0} ({1})</value></data>
+  <data name="UpdateOperation.RecoveryUnknownTarget" xml:space="preserve"><value>Pending operation with no identified app</value></data>
+  <data name="UpdateOperation.RecoveryLeaseBusy" xml:space="preserve"><value>Another window or session is using the receipt. Wait for the operation to finish or use that window’s cancellation option and recheck.</value></data>
+  <data name="UpdateOperation.RecoveryReceiptUnavailable" xml:space="preserve"><value>The receipt is inaccessible. Check that the app’s storage is available and recheck the status.</value></data>
+  <data name="UpdateOperation.RecoveryReceiptChanged" xml:space="preserve"><value>The receipt changed during review. Recheck the status and confirm the review again.</value></data>
+  <data name="UpdateOperation.RecoveryHistoryUnavailable" xml:space="preserve"><value>The risk acceptance could not be saved to History. The block remains. Check History storage and recheck.</value></data>
+  <data name="UpdateOperation.RecoveryNotStarted" xml:space="preserve"><value>The receipt confirms that the update did not launch. The block was released.</value></data>
+  <data name="UpdateOperation.RecoveryAlreadyResolved" xml:space="preserve"><value>Another session resolved the pending operation.</value></data>
+  <data name="UpdateOperation.RecoveryDiagnostic" xml:space="preserve"><value>Date and time: {0}&#10;Last known state: {1}&#10;Main process: {2}&#10;Known delegated processes: {3}&#10;Inventory: {4}&#10;Subsequent restart: {5}&#10;Operation exit: {6}</value></data>
+  <data name="UpdateOperation.RecoveryProcessUnknown" xml:space="preserve"><value>No evidence available</value></data>
+  <data name="UpdateOperation.RecoveryDelegatesUnknown" xml:space="preserve"><value>No delegates identified</value></data>
+  <data name="UpdateOperation.RecoveryProcessActive" xml:space="preserve"><value>Activity confirmed</value></data>
+  <data name="UpdateOperation.RecoveryProcessExited" xml:space="preserve"><value>Exit confirmed</value></data>
+  <data name="UpdateOperation.RecoveryProcessUnverified" xml:space="preserve"><value>Activity could not be ruled out</value></data>
+  <data name="UpdateOperation.RecoveryBootConfirmed" xml:space="preserve"><value>Confirmed</value></data>
+  <data name="UpdateOperation.RecoveryBootMissing" xml:space="preserve"><value>Pending confirmation</value></data>
+  <data name="UpdateOperation.RecoveryNotChecked" xml:space="preserve"><value>Waiting for the process check</value></data>
+  <data name="UpdateOperation.RecoveryInventoryUnavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="UpdateOperation.RecoveryInventoryVersion" xml:space="preserve"><value>Observed version: {0}</value></data>
+  <data name="UpdateOperation.RecoveryInventoryUnknownVersion" xml:space="preserve"><value>App found. The installed version is unknown.</value></data>
+  <data name="UpdateOperation.RecoveryInventoryPartial" xml:space="preserve"><value>Partial inventory available, with no matching receipt identity.</value></data>
+  <data name="UpdateOperation.RecoveryInventoryUncorrelated" xml:space="preserve"><value>Available, with no matching receipt identity</value></data>
+  <data name="UpdateOperation.RecoveryInventoryNotApplicable" xml:space="preserve"><value>Does not apply to the recorded operation</value></data>
+  <data name="UpdateOperation.RecoveryStageUnknown" xml:space="preserve"><value>Intent recorded. Launch or outcome remains inconclusive.</value></data>
+  <data name="UpdateOperation.RecoveryStagePrepared" xml:space="preserve"><value>Prepared before launch</value></data>
+  <data name="UpdateOperation.RecoveryStageLaunchPending" xml:space="preserve"><value>Launch authorized. Start remains inconclusive.</value></data>
+  <data name="UpdateOperation.RecoveryStageRootStarted" xml:space="preserve"><value>Main process started</value></data>
+  <data name="UpdateOperation.RecoveryStageNotStarted" xml:space="preserve"><value>Rejected before launch</value></data>
+  <data name="UpdateOperation.RecoveryStageObserved" xml:space="preserve"><value>The monitor recorded the attempt outcome</value></data>
+  <data name="UpdateOperation.RecoveryStageUnreadable" xml:space="preserve"><value>The receipt is unreadable or incomplete. Operation correlation may be missing.</value></data>
+  <data name="UpdateOperation.InstallLocationRequired" xml:space="preserve"><value>This package requires an install folder. Select the app’s folder to try again.</value></data>
+  <data name="UpdateOperation.StartRejected" xml:space="preserve"><value>The attempt ended before the update process launched.</value></data>
+  <data name="UpdateOperation.InstallLocationInvalid" xml:space="preserve"><value>Select an existing local directory. For Battle.net, select the folder that contains the launcher executable.</value></data>
+  <data name="UpdateOperation.BattleNetUnknownTitle" xml:space="preserve"><value>Installed version could not be identified</value></data>
+  <data name="UpdateOperation.BattleNetUnknownMessage" xml:space="preserve"><value>WinGet recognized the installed Battle.net app but could not identify its current version.&#xA;&#xA;The launcher reports version {0}, and the catalog offers installer package {1}. These numbers refer to different things and cannot tell you which is newer.&#xA;&#xA;This attempt may run the Battle.net installer again. Confirm the launcher folder before continuing.&#xA;&#xA;Suggested folder&#xA;{2}</value></data>
+  <data name="UpdateOperation.BattleNetChooseFolder" xml:space="preserve"><value>Continue and choose folder</value></data>
+  <data name="UpdateOperation.BattleNetApprovalDeclined" xml:space="preserve"><value>The Battle.net attempt was declined before launch.</value></data>
+  <data name="UpdateOperation.BattleNetInstallationUnverified" xml:space="preserve"><value>Could not confirm a single Battle.net installation with a verified launcher and an unknown version in the official source.</value></data>
+  <data name="UpdateOperation.BattleNetFolderInvalid" xml:space="preserve"><value>Choose a valid local folder containing the verified launcher from the registered Battle.net installation.</value></data>
+  <data name="UpdateOperation.SelectBattleNetFolder" xml:space="preserve"><value>Select the Battle.net launcher folder (not the games folder)</value></data>
+  <data name="UpdateOperation.SelectInstallFolder" xml:space="preserve"><value>Select the install folder for {0}</value></data>
+  <data name="UpdateOperation.InstallerMetadataUnavailable" xml:space="preserve"><value>The installer manifest for this version could not be verified. Refresh updates and try again.</value></data>
+  <data name="UpdateOperation.UnknownInstalledVersion" xml:space="preserve"><value>WinGet could not identify the installed version. Check the app’s version, use the publisher’s update feature, or refresh inventory.</value></data>
+  <data name="UpdatesList.Hide" xml:space="preserve"><value>Hide from this list</value></data>
+  <data name="UpdatesList.ManageHidden" xml:space="preserve"><value>Manage hidden updates</value></data>
+  <data name="UpdatesList.Back" xml:space="preserve"><value>Back to updates</value></data>
+  <data name="UpdatesList.Show" xml:space="preserve"><value>Show again</value></data>
+  <data name="UpdatesList.HiddenList" xml:space="preserve"><value>Hidden apps</value></data>
+  <data name="UpdatesList.HiddenEmpty" xml:space="preserve"><value>No hidden apps.</value></data>
+  <data name="Message.UpdatesList.Empty" xml:space="preserve"><value>No updates found.</value></data>
+  <data name="Message.UpdatesList.AllHidden" xml:space="preserve"><value>All detected updates are hidden.</value></data>
+  <data name="Message.UpdatesList.NoMatches" xml:space="preserve"><value>No updates match your search.</value></data>
+  <data name="Message.UpdatesList.Summary" xml:space="preserve"><value>Available: {0} · Hidden: {1}</value></data>
+  <data name="Message.UpdatesList.SummaryOneHidden" xml:space="preserve"><value>Available: {0} · 1 hidden</value></data>
+  <data name="Message.UpdatesList.CheckedAt" xml:space="preserve"><value>Last checked at {0:HH:mm}.</value></data>
+  <data name="Message.UpdatesList.ScanDetected" xml:space="preserve"><value>Scan complete. Updates detected: {0}.</value></data>
+  <data name="Message.UpdatesList.HideBlocked" xml:space="preserve"><value>Wait for the current update to finish before hiding apps.</value></data>
+  <data name="Message.UpdatesList.HideMissingIdentity" xml:space="preserve"><value>An app needs a known ID and source before it can be hidden.</value></data>
+  <data name="Message.UpdatesList.HiddenSaveFailed" xml:space="preserve"><value>Could not save the list of hidden apps.</value></data>
+  <data name="Message.UpdatesList.RatioSaveFailed" xml:space="preserve"><value>The list was resized for this session. Its size could not be saved.</value></data>
+  <data name="UpdatesList.Resize" xml:space="preserve"><value>Resize updates list</value></data>
+  <data name="UpdatesList.ResizeHelp" xml:space="preserve"><value>Drag the divider or use the Up and Down arrow keys.</value></data>
+  <data name="UpdatesList.Details" xml:space="preserve"><value>Update progress and recovery</value></data>
+</root>

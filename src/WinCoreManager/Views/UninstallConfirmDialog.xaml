@@ -1,0 +1,118 @@
+<Window Icon="pack://application:,,,/WinCoreManager;component/Assets/app.ico" x:Class="WinCoreManager.Views.UninstallConfirmDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:WinCoreManager.Localization"
+        xmlns:helpers="clr-namespace:WinCoreManager.Helpers"
+        Language="{Binding Language, Source={x:Static loc:LocalizationService.Current}}"
+        Title="{loc:Loc UI.ConfirmUninstall}"
+        Width="600"
+        SizeToContent="Height"
+        MaxWidth="660"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        UseLayoutRounding="True"
+        Background="{DynamicResource WindowBgBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        FontFamily="{StaticResource FontUi}"
+        FontSize="14">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <helpers:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Ações -->
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource SidebarBgBrush}"
+                BorderBrush="{DynamicResource GridLineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="28,16">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="{loc:Loc UI.Cancel}"
+                        IsCancel="True"
+                        IsDefault="True"
+                        MinWidth="110"
+                        Margin="0,0,8,0" />
+                <Button x:Name="ConfirmButton"
+                        Content="{loc:Localized ConfirmButtonText}"
+                        Style="{StaticResource PrimaryButton}"
+                        MinWidth="110"
+                        Click="OnConfirmClick" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="28,28,28,24">
+                <!-- Título -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Border Style="{StaticResource IconTile}" Background="{DynamicResource WarningSubtleBrush}" Margin="0,0,14,0">
+                        <TextBlock Text="&#xE74D;"
+                                   Style="{StaticResource IconText}"
+                                   FontSize="18"
+                                   Foreground="{DynamicResource WarningBrush}"
+                                   HorizontalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="{loc:Localized Title}"
+                               FontFamily="{StaticResource FontDisplay}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Descrição -->
+                <TextBlock Text="{loc:Localized Description}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,20" />
+
+                <!-- Comando (apenas 1 programa) -->
+                <StackPanel Margin="0,0,0,20"
+                            Visibility="{Binding CommandText, Converter={StaticResource NullToCollapsedConverter}}">
+                    <TextBlock Text="{loc:Loc UI.UninstallerToRun}" Style="{StaticResource LabelText}" Margin="0,0,0,8" />
+                    <Border Background="{DynamicResource InsetBgBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource RadiusSm}"
+                            Padding="14,10">
+                        <TextBlock Text="{Binding CommandText}"
+                                   FontFamily="{StaticResource FontMono}"
+                                   FontSize="12.5"
+                                   Foreground="{DynamicResource AccentTextBrush}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+
+                <!-- Avisos -->
+                <StackPanel Margin="0,0,0,20"
+                            Visibility="{Binding HasWarnings, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{loc:Loc UI.SafetyWarnings}" Style="{StaticResource LabelText}" Margin="0,0,0,6" />
+                    <ItemsControl ItemsSource="{Binding Warnings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                    <TextBlock Text="&#xE7BA;"
+                                               Style="{StaticResource IconText}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource WarningBrush}"
+                                               Margin="0,2,8,0" />
+                                    <TextBlock Text="{loc:Localized .}"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Efeitos -->
+                <TextBlock Text="{loc:Loc UI.WhatWillHappen}" Style="{StaticResource LabelText}" Margin="0,0,0,6" />
+                <TextBlock Text="{loc:Localized Effects}"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>
