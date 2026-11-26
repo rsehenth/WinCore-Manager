@@ -69,7 +69,7 @@ public sealed class WinGetCompletion12MTests
         {
             await lab.RunAsync();
             lab.AssertGuard(HistoryStatus.Interrupted);
-            using var child = Process.GetProcessById(int.Parse(File.ReadAllText(lab.Marker)));
+            using var child = Process.GetProcessById(int.Parse(WinGetCancellationTests.ReadFixtureFile(lab.Marker)));
             Assert.False(child.HasExited);
             Assert.Equal(DelegatedProcessState.KnownActive, lab.RunResult!.Observation.Delegation);
         }
@@ -84,7 +84,7 @@ public sealed class WinGetCompletion12MTests
         try
         {
             await lab.RunAsync();
-            using var child = Process.GetProcessById(int.Parse(File.ReadAllText(lab.Marker)));
+            using var child = Process.GetProcessById(int.Parse(WinGetCancellationTests.ReadFixtureFile(lab.Marker)));
             Assert.False(child.HasExited);
             Assert.Equal(DelegatedProcessState.KnownActive, lab.RunResult!.Observation.Delegation);
             lab.AssertGuard(HistoryStatus.Interrupted);
@@ -258,16 +258,7 @@ public sealed class WinGetCompletion12MTests
             return RunResult;
         }
 
-        private Process WaitForFixture()
-        {
-            var deadline = Stopwatch.StartNew();
-            while (deadline.Elapsed < TimeSpan.FromSeconds(5))
-            {
-                if (File.Exists(Marker) && int.TryParse(File.ReadAllText(Marker), out var pid)) return Process.GetProcessById(pid);
-                Thread.Sleep(20);
-            }
-            throw new IOException("Fixture did not publish its PID.");
-        }
+        private Process WaitForFixture() => Process.GetProcessById(int.Parse(WinGetCancellationTests.ReadFixtureFile(Marker)));
 
         private sealed class OnDispose(Action action) : IDisposable
         {

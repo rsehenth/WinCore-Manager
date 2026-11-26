@@ -254,6 +254,41 @@ public class WinGetCancellationTests
         Assert.True(condition());
     }
 
+    // A fixture process may still hold the file it is writing: a sharing violation means "not ready yet".
+    internal static string ReadFixtureFile(string path)
+    {
+        var deadline = Stopwatch.StartNew();
+        while (true)
+        {
+            var expired = deadline.Elapsed > TimeSpan.FromSeconds(5);
+            try
+            {
+                if (File.ReadAllText(path) is { Length: > 0 } text) return text;
+                if (expired) throw new IOException($"Fixture file stayed empty: {path}");
+            }
+            catch (IOException) when (!expired) { }
+            Thread.Sleep(20);
+        }
+    }
+
+    [Fact]
+    public async Task Fixture_file_read_waits_for_its_writer_to_close()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"wincore-fixture-{Guid.NewGuid():N}");
+        try
+        {
+            // Same sharing mode as File.WriteAllText while it is still writing.
+            var writer = new StreamWriter(new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read));
+            var read = Task.Run(() => ReadFixtureFile(path));
+            await Task.Delay(200);
+            Assert.False(read.IsCompleted);
+            writer.Write("4242");
+            writer.Dispose();
+            Assert.Equal("4242", await read);
+        }
+        finally { File.Delete(path); }
+    }
+
     private static void AssertControlledForce(ProcessRunResult result)
     {
         Assert.True(result.HasExitCode, result.FullOutput + result.StartError);

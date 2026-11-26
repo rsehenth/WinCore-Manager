@@ -253,7 +253,7 @@ public sealed class PackageCoordination12KTests
             using var child = ReadChild(Path.Combine(root, "child"));
             var beforeDeparture = File.ReadAllBytes(path);
             Assert.Equal(Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(WinGetService).Assembly.Location))),
-                File.ReadAllText(ready));
+                WinGetCancellationTests.ReadFixtureFile(ready));
             await AssertContenderBlockedAsync(root);
             File.WriteAllText(Path.Combine(root, "depart"), "1");
             await owner.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(6));
@@ -295,7 +295,7 @@ public sealed class PackageCoordination12KTests
     }
 
     private static Process ReadChild(string marker) =>
-        Process.GetProcessById(int.Parse(File.ReadAllText(marker), CultureInfo.InvariantCulture));
+        Process.GetProcessById(int.Parse(WinGetCancellationTests.ReadFixtureFile(marker), CultureInfo.InvariantCulture));
 
     private static async Task WaitForFileAsync(string path)
     {
