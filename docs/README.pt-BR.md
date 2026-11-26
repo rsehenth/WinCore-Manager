@@ -65,7 +65,7 @@ A atualização automática do próprio WinCore Manager existe no código, mas *
 
 ## Como executar o pacote portátil
 
-Ainda não há release pública. Quando houver, o ZIP oficial será anexado à página **Releases** deste repositório. Extraia em uma pasta local com permissão de gravação e execute `WinCoreManager.exe`.
+Baixe `WinCoreManager-0.1.0-win-x64-portable.zip` na página de [Releases](https://github.com/rsehenth/WinCore-Manager/releases), extraia em uma pasta local com permissão de gravação e execute `WinCoreManager.exe`. Os binários não têm assinatura de código, então o SmartScreen do Windows pode exibir um aviso. Compare o SHA-256 do arquivo com o publicado na release.
 
 ## Como compilar
 
@@ -134,7 +134,7 @@ Como parte dos dados fica no perfil do usuário, apagar a pasta portátil não r
 
 ## Estado do projeto
 
-**WinCore Manager 0.1.0** é a versão local oficial para uso pessoal supervisionado. Ainda não é uma release estável pública. A homologação completa de instaladores externos e do comportamento de DPI nativo entre monitores ainda tem limitações documentadas.
+**WinCore Manager 0.1.0** está publicado como pré-lançamento para uso pessoal supervisionado. Ainda não é uma release estável. A homologação completa de instaladores externos e do comportamento de DPI nativo entre monitores ainda tem limitações documentadas.
 
 ## Contribuição e segurança
 

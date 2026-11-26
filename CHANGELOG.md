@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.0 (not yet publicly released)
+## 0.1.0 - 2026-11-26 (pre-release)
 
-First version prepared for publication.
+First public version.
 
 - Dashboard, Updates, Maintenance, Uninstaller, Startup, Cleanup, Tweaks, My Computer, Essentials, History, Settings and About.
 - Application updates through WinGet with supervision, hidden updates and supervised recovery of interrupted operations.

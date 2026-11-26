@@ -65,7 +65,7 @@ In-app self-update of WinCore Manager itself is present in the code but **not en
 
 ## Running the portable package
 
-No public release has been published yet. Once a release exists, the official ZIP will be attached to this repository's **Releases** page. Extract it to a local folder you can write to and run `WinCoreManager.exe`.
+Download `WinCoreManager-0.1.0-win-x64-portable.zip` from the [Releases](https://github.com/rsehenth/WinCore-Manager/releases) page, extract it to a local folder you can write to and run `WinCoreManager.exe`. The binaries are not code-signed, so Windows SmartScreen may warn you. Compare the file's SHA-256 hash with the one published with the release.
 
 ## Building from source
 
@@ -134,7 +134,7 @@ Because some data stays in the user profile, deleting a portable folder does not
 
 ## Project status
 
-**WinCore Manager 0.1.0** is an official local version for supervised personal use. It is not yet a public stable release. Full validation of third-party installers and of native DPI behavior across multiple monitors still has documented limitations.
+**WinCore Manager 0.1.0** is published as a pre-release for supervised personal use. It is not yet a stable release. Full validation of third-party installers and of native DPI behavior across multiple monitors still has documented limitations.
 
 ## Contributing and security
 
