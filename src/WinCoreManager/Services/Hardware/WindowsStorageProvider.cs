@@ -83,6 +83,13 @@ internal sealed class WindowsStorageProvider(IHardwareWmi wmi) : IStorageProvide
         return bySerial is [var matched] ? matched : null;
     }
 
+    internal static string? UniqueSerial(WmiRow? disk, IReadOnlyList<WmiRow> disks)
+    {
+        var serial = disk?.Text("SerialNumber");
+        return serial is not null && disks.Count(row => string.Equals(row.Text("SerialNumber"), serial, StringComparison.OrdinalIgnoreCase)) == 1
+            ? serial : null;
+    }
+
     private Dictionary<uint, List<HardwareDevice>> ReadPartitions(CancellationToken token)
     {
         const string partitionSource = "Windows Storage · MSFT_Partition";
@@ -154,7 +161,7 @@ internal sealed class WindowsStorageProvider(IHardwareWmi wmi) : IStorageProvide
         .Where(group => group.Count() == 1).ToDictionary(group => group.Key, group => group.Single());
 
     private static string? Manufacturer(string? value) => value is "(Standard disk drives)" or "(Unidades de disco padrão)" ? null : value;
-    private static string? Letter(object? value)
+    internal static string? Letter(object? value)
     {
         var text = value?.ToString();
         return text is { Length: 1 or 2 } && char.IsAsciiLetter(text[0]) && (text.Length == 1 || text[1] == ':')

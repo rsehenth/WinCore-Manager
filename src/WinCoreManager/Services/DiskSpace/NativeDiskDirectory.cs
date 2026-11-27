@@ -11,6 +11,8 @@ internal static unsafe class NativeDiskDirectory
     public const int BufferSize = 16 * 1024;
     private const uint ListDirectory = 1;
     private const uint ReadAttributes = 0x80;
+    private const uint ReadData = 1;
+    private const int BasicInfo = 0;
     private const uint Synchronize = 0x00100000;
     private const uint OpenReparsePoint = 0x00200000;
     private const uint BackupSemantics = 0x02000000;
@@ -44,7 +46,7 @@ internal static unsafe class NativeDiskDirectory
         RequireOrdinary(CreateFile(extendedPath, (guard ? 0 : ListDirectory) | ReadAttributes,
             guard ? ShareRead : ShareAll, 0, OpenExisting, BackupSemantics | OpenReparsePoint, 0), directory: true);
 
-    public static SafeFileHandle OpenChild(SafeFileHandle parent, ReadOnlySpan<char> name, bool directory, bool guard = false)
+    public static SafeFileHandle OpenChild(SafeFileHandle parent, ReadOnlySpan<char> name, bool directory, bool guard = false, bool readData = false)
     {
         if (name.IsEmpty || name is "." or ".." || name.IndexOfAny('\\', '/', ':') >= 0 || name.Contains('\0'))
             throw new IOException("Invalid directory entry name.");
@@ -60,7 +62,7 @@ internal static unsafe class NativeDiskDirectory
                 ObjectName = &unicode,
                 Attributes = DontReparse,
             };
-            var status = NtCreateFile(out var handle, Synchronize | ReadAttributes | (directory && !guard ? ListDirectory : 0),
+            var status = NtCreateFile(out var handle, Synchronize | ReadAttributes | (directory && !guard ? ListDirectory : 0) | (readData ? ReadData : 0),
                 &attributes, out _, 0, 0, guard ? ShareRead : ShareAll, FileOpen,
                 OpenReparsePoint | SynchronousIoNonAlert | (directory ? DirectoryFile : NonDirectoryFile), 0, 0);
             GC.KeepAlive(parent);
@@ -69,6 +71,19 @@ internal static unsafe class NativeDiskDirectory
 
             return RequireOrdinary(new SafeFileHandle(handle, ownsHandle: true), directory);
         }
+    }
+
+    internal static bool MatchesFile(SafeFileHandle handle, DiskFile file)
+    {
+        byte* basic = stackalloc byte[40];
+        if (!GetFileInformation(handle, BasicInfo, basic, 40))
+            return false;
+        var attributes = BinaryPrimitives.ReadUInt32LittleEndian(new ReadOnlySpan<byte>(basic + 32, 4));
+        if ((attributes & (0x1000 | 0x40000 | 0x400000)) != 0) // Offline or cloud recall.
+            return false;
+        var written = BinaryPrimitives.ReadInt64LittleEndian(new ReadOnlySpan<byte>(basic + 16, 8));
+        return written == file.ModifiedFileTime && RandomAccess.GetLength(handle) == file.LogicalBytes
+            && (file.Identity == 0 || ReadIdentity(handle) == file.Identity);
     }
 
     private static SafeFileHandle RequireOrdinary(SafeFileHandle handle, bool directory)
@@ -153,11 +168,16 @@ internal static unsafe class NativeDiskDirectory
         try
         {
             using var file = OpenChild(parent, name, directory: false);
-            byte* info = stackalloc byte[24]; // Volume serial number, followed by FILE_ID_128.
-            return GetFileInformation(file, IdInfo, info, 24)
-                ? BinaryPrimitives.ReadUInt128LittleEndian(new ReadOnlySpan<byte>(info + 8, 16)) : UInt128.Zero;
+            return ReadIdentity(file);
         }
         catch (IOException) { return UInt128.Zero; }
+    }
+
+    internal static UInt128 ReadIdentity(SafeFileHandle file)
+    {
+        byte* info = stackalloc byte[24]; // Volume serial number, followed by FILE_ID_128.
+        return GetFileInformation(file, IdInfo, info, 24)
+            ? BinaryPrimitives.ReadUInt128LittleEndian(new ReadOnlySpan<byte>(info + 8, 16)) : UInt128.Zero;
     }
 
     public static long? ReadSpecialAllocation(SafeFileHandle parent, ReadOnlySpan<char> name)

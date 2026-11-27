@@ -12,7 +12,7 @@
     <AssemblyName>WinCoreManager</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version Condition="'$(Version)' == ''">0.2.0-rc.3</Version>
+    <Version Condition="'$(Version)' == ''">0.2.0-rc.4</Version>
     <WinCoreBuildChannel Condition="'$(WinCoreBuildChannel)' == ''">Candidate</WinCoreBuildChannel>
     <Product>WinCore Manager</Product>
     <Description>Gerenciador de atualizações (WinGet) e ferramentas de manutenção do Windows</Description>
@@ -33,10 +33,13 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageReference Include="System.Management" Version="10.0.14" />
     <PackageReference Include="YamlDotNet" Version="18.1.0" />
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\Nebula\*.png" />
     <None Update="ThirdParty\YamlDotNet.LICENSE.txt" TargetPath="Licencas\YamlDotNet.LICENSE.txt" CopyToPublishDirectory="PreserveNewest" />
     <!-- Licenças no pacote publicado. Na raiz o verificador de pacote só aceita os arquivos do BCUninstaller; o restante vai em Licencas\. -->
     <None Include="..\..\LICENSE" TargetPath="Licencas\WinCoreManager-LICENSE.txt" CopyToPublishDirectory="PreserveNewest" />

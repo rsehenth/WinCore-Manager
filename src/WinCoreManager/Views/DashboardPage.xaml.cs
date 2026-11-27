@@ -12,7 +12,10 @@ public partial class DashboardPage : UserControl
         InitializeComponent();
         Loaded += (_, _) =>
         {
-            if (DataContext is DashboardViewModel dashboard) dashboard.Activation.RefreshIfIdle();
+            if (DataContext is not DashboardViewModel dashboard) return;
+            dashboard.Activation.RefreshIfIdle();
+            dashboard.Refresh();
+            dashboard.EnsureInventory();
         };
     }
 

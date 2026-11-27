@@ -72,11 +72,57 @@
         </Grid.RowDefinitions>
 
         <!-- Cabeçalho -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-            <TextBlock Text="{loc:Localized StatusText}"
-                       Style="{StaticResource PageSubtitleText}"
-                       Margin="0,4,0,0" />
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Trash}" Margin="0">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+                        <TextBlock Text="{loc:Localized StatusText}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </HeaderedContentControl>
+            <h:TileGrid x:Name="SummaryCards" MinItemWidth="200" Margin="0,14,-12,-12">
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Box}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource CyanBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Uninstaller.CardApps}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding AppCount}" Style="{StaticResource ValueText}" FontSize="20" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Chart}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource PurpleBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Uninstaller.CardListed}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Catalog.Count}" Style="{StaticResource ValueText}" FontSize="20" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Check}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource SuccessBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Uninstaller.CardSelected}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding SelectedCount}" Style="{StaticResource ValueText}" FontSize="20" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Shield}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource WarningBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Uninstaller.CardTechnical}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding TechnicalCount}" Style="{StaticResource ValueText}" FontSize="20" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </h:TileGrid>
             <Border x:Name="UninstallRecoveryNotice" Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,8,0,0"
                     Visibility="{Binding PendingRecoveryNotice, Converter={StaticResource NullToCollapsed}}">
                 <StackPanel>

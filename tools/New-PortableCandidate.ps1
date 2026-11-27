@@ -160,7 +160,7 @@ try {
             '-p:DebugType=None', '-p:DebugSymbols=false')
         $appProject = 'src/WinCoreManager/WinCoreManager.csproj'
         $helperProject = 'src/WinCoreManager.Update/WinCoreManager.Update.csproj'
-        $helperArguments = @('-p:PublishSingleFile=true', '-p:IncludeNativeLibrariesForSelfExtract=true')
+        $helperArguments = @('-p:PublishSingleFile=true', '-p:IncludeNativeLibrariesForSelfExtract=true', '-p:PublishTrimmed=true')
         Invoke-Sdk 'publish-app' (@('publish', $appProject, '--artifacts-path', '.artifacts/publish-app', '-o', $draft) + $publish)
         $helperOutput = Join-Path $scratch 'helper'
         Invoke-Sdk 'publish-helper' (@('publish', $helperProject, '--artifacts-path', '.artifacts/publish-helper', '-o', $helperOutput) + $publish + $helperArguments)

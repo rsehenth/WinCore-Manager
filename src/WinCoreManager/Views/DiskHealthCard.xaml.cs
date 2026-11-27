@@ -13,6 +13,15 @@ public partial class DiskHealthCard : UserControl
     public static readonly DependencyProperty DetailedProperty =
         DependencyProperty.Register(nameof(Detailed), typeof(bool), typeof(DiskHealthCard));
 
+    /// <summary>Versão do Painel: uma linha por disco dentro de um único cartão.</summary>
+    public static readonly DependencyProperty CompactProperty = DependencyProperty.Register(nameof(Compact), typeof(bool),
+        typeof(DiskHealthCard), new PropertyMetadata(false, (card, args) =>
+        {
+            var compact = (bool)args.NewValue;
+            ((DiskHealthCard)card).CompactCard.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
+            ((DiskHealthCard)card).FullView.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        }));
+
     public static readonly DependencyProperty ItemWidthProperty =
         DependencyProperty.Register(nameof(ItemWidth), typeof(double), typeof(DiskHealthCard), new PropertyMetadata(double.NaN));
 
@@ -28,6 +37,12 @@ public partial class DiskHealthCard : UserControl
     {
         get => (bool)GetValue(DetailedProperty);
         set => SetValue(DetailedProperty, value);
+    }
+
+    public bool Compact
+    {
+        get => (bool)GetValue(CompactProperty);
+        set => SetValue(CompactProperty, value);
     }
 
     public double ItemWidth

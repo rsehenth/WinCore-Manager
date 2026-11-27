@@ -22,22 +22,28 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
         if (disk.IsInvalid) return new(Error(Marshal.GetLastPInvokeError()), []);
         var status = VerifyIdentity(disk, privateSerial);
         if (status != ReadingState.Available) return new(status, []);
+        return ReadNative(disk);
+    }
+
+    internal static DiskTemperatureResult ReadNative(SafeFileHandle disk)
+    {
         Span<byte> buffer = stackalloc byte[4096];
-        status = Query(disk, DeviceTemperature, buffer, out var length);
+        var status = Query(disk, DeviceTemperature, buffer, out var length);
         if (status != ReadingState.Available) return new(status, []);
         return ParseTemperatures(buffer[..length]);
     }
 
     // A query handle requests zero desired access and supports only the read-only queries used here.
     internal static SafeFileHandle OpenQueryHandle(uint number) =>
-        CreateFile($@"\\.\PhysicalDrive{number}", 0, 3, 0, 3, 0, 0);
+        CreateFile($@"\\.\PhysicalDrive{number}", 0, 3, 0, 3, 0x40000000, 0); // FILE_FLAG_OVERLAPPED
 
-    internal static ReadingState VerifyIdentity(SafeFileHandle disk, string privateSerial)
+    internal static ReadingState VerifyIdentity(SafeFileHandle disk, string privateSerial, uint? bus = null)
     {
         Span<byte> buffer = stackalloc byte[4096];
         var status = Query(disk, DeviceDescriptor, buffer, out var length);
         if (status != ReadingState.Available) return status;
-        return string.Equals(ReadSerial(buffer[..length]), privateSerial, StringComparison.OrdinalIgnoreCase)
+        return length >= 36 && (!bus.HasValue || BinaryPrimitives.ReadUInt32LittleEndian(buffer[28..]) == bus)
+            && string.Equals(ReadSerial(buffer[..length]), privateSerial, StringComparison.OrdinalIgnoreCase)
             ? ReadingState.Available : ReadingState.NoReading;
     }
 
@@ -67,7 +73,7 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
             var span = buffer[(header + n * entry)..];
             var index = BinaryPrimitives.ReadUInt16LittleEndian(span);
             var value = BinaryPrimitives.ReadInt16LittleEndian(span[2..]);
-            if (value is >= -273 and < short.MaxValue) values.Add((index, value));
+            if (ValidTemperature(value)) values.Add((index, value));
         }
         var unique = values.GroupBy(value => value.Index).Where(group => group.Count() == 1).Select(group => group.Single()).ToArray();
         return new(unique.Length > 0 ? ReadingState.Available : ReadingState.NoReading, unique);
@@ -79,14 +85,41 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
         uint* request = stackalloc uint[3] { property, 0, 0 };
         fixed (byte* output = buffer)
         {
-            if (!DeviceIoControl(disk, QueryProperty, request, 12, output, (uint)buffer.Length, out var written, 0))
+            var status = Invoke(disk, QueryProperty, request, 12, output, (uint)buffer.Length, out var written);
+            if (status != ReadingState.Available)
             {
                 length = 0;
-                return Error(Marshal.GetLastPInvokeError());
+                return status;
             }
             length = written <= buffer.Length ? (int)written : 0;
             return length > 0 ? ReadingState.Available : ReadingState.Error;
         }
+    }
+
+    internal static bool ValidTemperature(int value) => value is >= -40 and <= 125;
+
+    internal static ReadingState Invoke(SafeFileHandle disk, uint code, void* input, uint inputLength,
+        void* output, uint outputLength, out uint written)
+    {
+        using var signal = CreateEvent(0, true, false, null);
+        written = 0;
+        if (signal.IsInvalid) return Error(Marshal.GetLastPInvokeError());
+
+        var operation = new NativeOverlapped { EventHandle = signal.DangerousGetHandle() };
+        if (DeviceIoControl(disk, code, input, inputLength, output, outputLength, null, &operation))
+            return GetOverlappedResult(disk, &operation, out written, false)
+                ? ReadingState.Available : Error(Marshal.GetLastPInvokeError());
+        var error = Marshal.GetLastPInvokeError();
+        if (error != 997) return Error(error); // ERROR_IO_PENDING
+        var wait = WaitForSingleObject(signal, 2_000);
+        if (wait == 0)
+            return GetOverlappedResult(disk, &operation, out written, false)
+                ? ReadingState.Available : Error(Marshal.GetLastPInvokeError());
+
+        // Keep the kernel's buffers alive until the canceled operation has drained.
+        CancelIoEx(disk, &operation);
+        GetOverlappedResult(disk, &operation, out _, true);
+        return wait == 258 ? ReadingState.TimedOut : ReadingState.Error;
     }
 
     internal static ReadingState Error(int error) => error switch
@@ -102,6 +135,20 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal static extern bool DeviceIoControl(SafeFileHandle device, uint code, void* input, uint inputLength,
-        void* output, uint outputLength, out uint written, nint overlapped);
+    private static extern bool DeviceIoControl(SafeFileHandle device, uint code, void* input, uint inputLength,
+        void* output, uint outputLength, uint* written, NativeOverlapped* overlapped);
+
+    [DllImport("kernel32.dll", EntryPoint = "CreateEventW", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern SafeWaitHandle CreateEvent(nint security, bool manualReset, bool initialState, string? name);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint WaitForSingleObject(SafeWaitHandle signal, uint milliseconds);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetOverlappedResult(SafeFileHandle disk, NativeOverlapped* operation, out uint written, bool wait);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CancelIoEx(SafeFileHandle disk, NativeOverlapped* operation);
 }

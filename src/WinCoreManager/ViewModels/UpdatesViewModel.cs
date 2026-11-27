@@ -166,6 +166,8 @@ public partial class UpdatesViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowEmptyState));
         OnPropertyChanged(nameof(EmptyStateTitle));
         OnPropertyChanged(nameof(UpdateListSummary));
+        OnPropertyChanged(nameof(AvailableCount));
+        OnPropertyChanged(nameof(LastScanTime));
     }
 
     private void RecountSelected()
@@ -615,6 +617,7 @@ public partial class UpdatesViewModel : ViewModelBase
         {
             _scanCts = null;
             RecountSelected();
+            NotifySummaryChanged();
             IsScanning = false;
             CurrentOperation = string.Empty;
         }

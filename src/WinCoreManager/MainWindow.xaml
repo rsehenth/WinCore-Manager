@@ -5,9 +5,10 @@
         Language="{Binding Language, Source={x:Static loc:LocalizationService.Current}}"
         xmlns:vm="clr-namespace:WinCoreManager.ViewModels"
         xmlns:views="clr-namespace:WinCoreManager.Views"
+        xmlns:h="clr-namespace:WinCoreManager.Helpers"
         Title="WinCore Manager"
-        Width="1160"
-        Height="760"
+        Width="1280"
+        Height="820"
         MinWidth="840"
         MinHeight="420"
         WindowStartupLocation="CenterScreen"
@@ -18,6 +19,7 @@
         FontSize="14">
 
     <Window.Resources>
+        <h:ResourceKeyConverter x:Key="IconByKey" />
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
             <views:DashboardPage />
         </DataTemplate>
@@ -42,6 +44,9 @@
         <DataTemplate DataType="{x:Type vm:HardwareViewModel}">
             <views:HardwarePage />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SensorPanelViewModel}">
+            <views:SensorPanel />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:EssentialsViewModel}">
             <views:EssentialsPage />
         </DataTemplate>
@@ -58,34 +63,39 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240" />
+            <ColumnDefinition x:Name="SidebarColumn" Width="248" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
         <Border Grid.Column="0"
-                Background="{DynamicResource SidebarBgBrush}"
-                BorderBrush="{DynamicResource GridLineBrush}"
+                Background="{DynamicResource SidebarGradientBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="0,0,1,0">
             <DockPanel>
                 <!-- Marca -->
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="20,18,16,14">
-                    <Image Source="pack://application:,,,/WinCoreManager;component/Assets/app.ico" Width="28" Height="28"
-                           RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="WinCore Manager" />
-                    <TextBlock Text="WinCore Manager"
-                               Margin="12,0,0,0"
-                               VerticalAlignment="Center"
-                               FontFamily="{StaticResource FontDisplay}"
-                               FontSize="15"
-                               FontWeight="SemiBold" />
-                </StackPanel>
+                <Grid DockPanel.Dock="Top" Margin="18,14,14,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="44" Height="44" CornerRadius="{StaticResource RadiusMd}" Padding="3"
+                            Background="{DynamicResource TileBlueBrush}" BorderBrush="{DynamicResource GlowBorderBrush}" BorderThickness="1">
+                        <Image Source="pack://application:,,,/WinCoreManager;component/Assets/logo.png"
+                               RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="WinCore Manager" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="WinCore Manager" FontFamily="{StaticResource FontDisplay}" FontSize="16" FontWeight="Bold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock x:Name="BrandTagline" Text="{loc:Loc Shell.Tagline}" Style="{StaticResource CaptionText}" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
 
-                <!-- Rodapé -->
-                <Border DockPanel.Dock="Bottom"
-                        BorderBrush="{DynamicResource GridLineBrush}"
-                        BorderThickness="0,1,0,0"
-                        Padding="0,4,0,14">
-                    <StackPanel x:Name="FooterNav">
+                <!-- Rodapé: montanhas atrás do topo dos links -->
+                <Grid DockPanel.Dock="Bottom">
+                    <Image x:Name="SidebarArt" Source="pack://application:,,,/WinCoreManager;component/Assets/Nebula/montanhas-painel.png"
+                           Stretch="Uniform" VerticalAlignment="Top" Opacity="{DynamicResource ArtOpacity}" IsHitTestVisible="False" />
+                    <StackPanel x:Name="FooterNav" VerticalAlignment="Bottom" Margin="0,0,0,10">
                         <TextBlock Text="{loc:Localized About.LinkMessage}" TextWrapping="Wrap" Margin="20,0"
                                    AutomationProperties.LiveSetting="Polite">
                             <TextBlock.Style>
@@ -98,27 +108,26 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                        <Button x:Name="FixMyPcLink" Content="{loc:Loc UI.TryFixMyPC}" Tag="&#xE8A7;"
+                        <Button x:Name="FixMyPcLink" Content="{loc:Loc UI.TryFixMyPC}" Tag="{StaticResource Icon.External}"
                                 Command="{Binding About.OpenFixMyPcCommand}" Style="{StaticResource NavLinkButton}" />
-                        <RadioButton x:Name="AboutNav" Content="{loc:Localized AboutNavItem.Title}" Tag="{Binding AboutNavItem.Glyph}"
+                        <RadioButton x:Name="AboutNav" Content="{loc:Localized AboutNavItem.Title}" Tag="{StaticResource Icon.Info}"
                                      GroupName="nav" IsChecked="{Binding AboutNavItem.IsSelected, Mode=TwoWay}"
                                      Style="{StaticResource NavRadioButton}" />
-                        <TextBlock x:Name="VersionLabel" Style="{StaticResource CaptionText}"
-                                   Margin="20,4,12,0" Foreground="{DynamicResource TextMutedBrush}">
+                        <TextBlock x:Name="VersionLabel" Style="{StaticResource CaptionText}" Margin="28,2,12,0">
                             <Run Text="{loc:Loc UI.Version}" /><Run Text="{Binding AppVersion, Mode=OneWay}" />
                         </TextBlock>
                     </StackPanel>
-                </Border>
+                </Grid>
 
                 <!-- Navegação -->
                 <ScrollViewer x:Name="MainNavigationScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <ItemsControl ItemsSource="{Binding NavItems}"
                                   KeyboardNavigation.DirectionalNavigation="Cycle"
-                                  VerticalAlignment="Top">
+                                  VerticalAlignment="Top" Focusable="False">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <RadioButton Content="{loc:Localized Title}"
-                                             Tag="{Binding Glyph}"
+                                             Tag="{Binding Glyph, Converter={StaticResource IconByKey}}"
                                              GroupName="nav"
                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                              Style="{StaticResource NavRadioButton}" />
@@ -129,8 +138,8 @@
             </DockPanel>
         </Border>
 
-        <ContentControl Grid.Column="1"
-                        Content="{Binding CurrentViewModel}"
-                        IsTabStop="False" />
+        <Border Grid.Column="1" Background="{DynamicResource PageGradientBrush}">
+            <ContentControl Content="{Binding CurrentViewModel}" IsTabStop="False" />
+        </Border>
     </Grid>
 </Window>

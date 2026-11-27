@@ -47,7 +47,9 @@ public sealed class DiskHealthCardTests
         Assert.Equal([false, true], worn.Facts.Select(fact => fact.Flagged));
 
         var hdd = Row(new(ReadingState.Available, DiskHealthState.Healthy, "SMART", [], 30), "HDD", "USB");
-        Assert.Equal("Este disco não informa desgaste.", hdd.Note);
+        Assert.Null(hdd.Note);
+        Assert.True(hdd.IsMechanical);
+        Assert.False(hdd.ShowsWear);
         Assert.Equal("USB", Assert.Single(hdd.Facts).Value);
         Assert.Equal("HDD", hdd.TypeLabel);
 

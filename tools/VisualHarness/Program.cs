@@ -25,6 +25,10 @@ internal static partial class Program
         for (var i = 0; i < argv.Length - 1; i += 2) Args[argv[i].TrimStart('-')] = argv[i + 1];
         if (Args.TryGetValue("disk-benchmark", out var count))
             return MeasureDiskScan(int.Parse(count), Args["out"]);
+        if (Args.TryGetValue("host-readonly", out var drive))
+            return MeasureCandidateHost(drive, Args["out"]);
+        if (Args.ContainsKey("telemetry-readonly") || Args.ContainsKey("cpu-temperature-readonly"))
+            return ProbeTelemetry(Args["out"], Args.ContainsKey("cpu-temperature-readonly"));
         var app = new App(services =>
         {
             services.AddSingleton<IWinGetService, FixtureWinGet>();
@@ -41,6 +45,7 @@ internal static partial class Program
             services.AddSingleton<ISettingsService>(_ => new SettingsService(Path.Combine(Args["out"], "isolated-settings"),
                 Path.Combine(Args["out"], "isolated-local")));
             services.AddSingleton<IProgramInventoryService, FixturePrograms>();
+            if (Args.ContainsKey("nebula")) ConfigureNebula(services);
             if (Args.ContainsKey("activation-fixture"))
             {
                 services.AddSingleton<IWindowsActivationService, FixtureActivation>();
@@ -49,9 +54,14 @@ internal static partial class Program
         app.InitializeComponent();
         app.Startup += (_, _) => app.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
         {
+            var exit = 0;
             try { await RunAsync(app); }
-            catch (Exception ex) { File.WriteAllText(Path.Combine(Args["out"], "harness-error.txt"), ex.ToString()); }
-            finally { app.Shutdown(); }
+            catch (Exception ex)
+            {
+                exit = 1;
+                File.WriteAllText(Path.Combine(Args["out"], "harness-error.txt"), ex.ToString());
+            }
+            finally { app.Shutdown(exit); }
         }));
         return app.Run();
     }
@@ -81,6 +91,16 @@ internal static partial class Program
         await Settle(300);
 
         var items = vm.NavItems.Append(vm.AboutNavItem).ToList();
+        if (Args.ContainsKey("nebula"))
+        {
+            await CaptureNebula(window, vm, outDir, tag, scale);
+            return;
+        }
+        if (Args.ContainsKey("telemetry-ui"))
+        {
+            await CaptureTelemetry(window, vm, outDir, tag, scale);
+            return;
+        }
         if (Args.ContainsKey("rc3"))
         {
             await CaptureRc3(window, vm, outDir, tag, scale);
@@ -158,16 +178,9 @@ internal static partial class Program
 
         if (Args.ContainsKey("sensors"))
         {
-            items[7].IsSelected = true;
-            await Settle(6000);
-            var hw = vm.Hardware;
-            var panel = hw.GetType().GetMethod("CreateSensorPanel")!.Invoke(hw, null)!;
-            var type = typeof(MainWindow).Assembly.GetType("WinCoreManager.Views.SensorWindow")!;
-            var sw = (Window)Activator.CreateInstance(type, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public, null, new[] { panel }, null)!;
-            sw.Owner = window; sw.Width = 760; sw.Height = 620; sw.Show();
-            await Settle(5000);
-            Shot((FrameworkElement)sw.Content, Path.Combine(outDir, $"{tag}-sensores.png"), scale);
-            sw.Close();
+            vm.OpenSensors();
+            await Settle(8000);
+            Shot((FrameworkElement)window.Content, Path.Combine(outDir, $"{tag}-sensors.png"), scale);
         }
     }
 
@@ -244,7 +257,7 @@ internal static partial class Program
         public string ExecutablePath => @"C:\WindowsApps\winget.exe";
         public WinGetAvailability LastDetection => new() { IsInstalled = true, Version = "1.12.0", ExecutablePath = ExecutablePath };
         public Task<WinGetAvailability> DetectAsync(CancellationToken cancellationToken = default) => Task.FromResult(LastDetection);
-        public Task<WinGetScanResult> ListUpdatesAsync(CancellationToken cancellationToken = default) => Task.FromResult(new WinGetScanResult());
+        public Task<WinGetScanResult> ListUpdatesAsync(CancellationToken cancellationToken = default) => Task.FromResult(new WinGetScanResult { Packages = Args.ContainsKey("nebula") ? NebulaPackages() : [] });
         public Task<ProcessRunResult> UpgradePackageAsync(WinGetPackage package, Action<string>? onOutputLine, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
     }

@@ -65,7 +65,7 @@ internal static class DiskSpaceLayout
     {
         name = name.Trim();
         extension = extension.Trim().TrimStart('.');
-        return files.Where(file => file.Name.Contains(name, StringComparison.OrdinalIgnoreCase)
+        return files.Where(file => (file.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || file.Path.Contains(name, StringComparison.OrdinalIgnoreCase))
             && (extension.Length == 0 || file.Extension.AsSpan().TrimStart('.').Equals(extension, StringComparison.OrdinalIgnoreCase)));
     }
 }

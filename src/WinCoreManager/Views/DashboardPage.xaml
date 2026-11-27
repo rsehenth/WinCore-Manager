@@ -3,177 +3,337 @@
              xmlns:views="clr-namespace:WinCoreManager.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:WinCoreManager.Localization"
-             xmlns:h="clr-namespace:WinCoreManager.Helpers"
-             xmlns:m="clr-namespace:WinCoreManager.Models">
+             xmlns:h="clr-namespace:WinCoreManager.Helpers">
 
     <UserControl.Resources>
         <h:HistoryStatusToBrushConverter x:Key="StatusToBrush" />
         <h:HistoryTypeToLabelConverter x:Key="TypeToLabel" />
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <h:InverseBooleanToVisibilityConverter x:Key="HiddenWhenTrue" />
         <h:HistoryStatusToLabelConverter x:Key="StatusToLabel" />
+        <h:ResourceKeyConverter x:Key="IconByKey" />
+
+        <Style x:Key="ModuleTile" TargetType="Button" BasedOn="{StaticResource AppButton}">
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="Margin" Value="0,0,12,12" />
+            <Setter Property="MinHeight" Value="86" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style x:Key="TileIcon" TargetType="Border">
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Height" Value="46" />
+            <Setter Property="Margin" Value="0,0,14,0" />
+            <Setter Property="CornerRadius" Value="{StaticResource RadiusMd}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource InsetBgBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
+        </Style>
+        <Style x:Key="TileCaption" TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="MaxHeight" Value="34" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1040" HorizontalAlignment="Stretch">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1320">
 
-            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-            <TextBlock Text="{loc:Loc UI.SystemAndWinGetStatusAtAGlance}"
-                       Style="{StaticResource PageSubtitleText}"
-                       Margin="0,4,0,20" />
+            <!-- Cabeçalho com a arte de montanhas e mascote -->
+            <Grid MinHeight="78" Margin="0,0,0,14">
+                <Image Source="pack://application:,,,/WinCoreManager;component/Assets/Nebula/banner-bode-e-montanhas.png"
+                       HorizontalAlignment="Right" VerticalAlignment="Center" Height="96" Stretch="Uniform" Margin="0,-14,0,-6"
+                       Opacity="{DynamicResource ArtOpacity}" IsHitTestVisible="False">
+                    <Image.OpacityMask>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="Transparent" Offset="0" />
+                            <GradientStop Color="Black" Offset="0.35" />
+                            <GradientStop Color="Black" Offset="0.92" />
+                            <GradientStop Color="Transparent" Offset="1" />
+                        </LinearGradientBrush>
+                    </Image.OpacityMask>
+                </Image>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="520">
+                    <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+                    <TextBlock Text="{loc:Loc UI.SystemAndWinGetStatusAtAGlance}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
+                </StackPanel>
+            </Grid>
 
-            <!-- Atualizações -->
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Border Style="{StaticResource IconTile}" Margin="0,0,16,0">
-                        <TextBlock Text="&#xE895;"
-                                   Style="{StaticResource IconText}"
-                                   FontSize="18"
-                                   Foreground="{DynamicResource AccentTextBrush}"
-                                   HorizontalAlignment="Center" />
-                    </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{loc:Loc UI.Updates}" Style="{StaticResource SectionText}" />
-                        <TextBlock Text="{loc:Localized UpdatesSummaryText}"
-                                   Style="{StaticResource CaptionText}"
-                                   FontSize="13"
-                                   Margin="0,4,0,0"
-                                   TextWrapping="Wrap"
-                                   HorizontalAlignment="Left" />
-                        <TextBlock Text="{loc:Localized WingetStatusText}"
-                                   Style="{StaticResource CaptionText}"
-                                   Foreground="{DynamicResource TextMutedBrush}"
-                                   Margin="0,4,0,0"
-                                   HorizontalAlignment="Left" />
-                    </StackPanel>
-                    <Button Grid.Column="2"
-                            Content="{loc:Loc UI.OpenUpdates}"
-                            Style="{StaticResource PrimaryButton}"
-                            Command="{Binding GoToUpdatesCommand}"
-                            Margin="16,0,0,0"
-                            VerticalAlignment="Center" />
-                </Grid>
+            <!-- Boas-vindas + situação real das atualizações -->
+            <Border Style="{StaticResource HeroCard}" Padding="22,18" Margin="0,0,0,14">
+                <h:SplitPanel Breakpoint="760" Ratio="0.62">
+                    <DockPanel VerticalAlignment="Center">
+                        <Image Source="pack://application:,,,/WinCoreManager;component/Assets/logo.png" Width="56" Height="56" Margin="0,0,18,0"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc Dashboard.Welcome}" FontFamily="{StaticResource FontDisplay}" FontSize="24" FontWeight="Bold"
+                                       Foreground="{DynamicResource OnHeroBrush}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc Dashboard.WelcomeText}" Foreground="{DynamicResource OnHeroMutedBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel VerticalAlignment="Center">
+                        <Path Data="{StaticResource Icon.Update}" Style="{StaticResource LineIcon}" Width="30" Height="30" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource OnHeroAccentBrush}" />
+                        <TextBlock Text="{loc:Localized UpdatesSummaryText}" Foreground="{DynamicResource OnHeroBrush}" TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+                    </DockPanel>
+                </h:SplitPanel>
             </Border>
 
-            <!-- Manutenção -->
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Border Style="{StaticResource IconTile}" Margin="0,0,16,0">
-                        <TextBlock Text="&#xE90F;"
-                                   Style="{StaticResource IconText}"
-                                   FontSize="18"
-                                   Foreground="{DynamicResource AccentTextBrush}"
-                                   HorizontalAlignment="Center" />
-                    </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{loc:Loc UI.Maintenance}" Style="{StaticResource SectionText}" />
-                        <TextBlock Text="{loc:Localized MaintenanceStatusText}"
-                                   Style="{StaticResource CaptionText}"
-                                   FontSize="13"
-                                   Margin="0,4,0,0"
-                                   TextWrapping="Wrap"
-                                   HorizontalAlignment="Left" />
-                    </StackPanel>
-                    <Button Grid.Column="2"
-                            Content="{loc:Loc UI.OpenMaintenance}"
-                            Command="{Binding GoToMaintenanceCommand}"
-                            Margin="16,0,0,0"
-                            VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-
-            <views:DiskHealthCard Margin="0,8,0,8" />
-
-            <Border Style="{StaticResource CardBorder}" Margin="0,16,0,0">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Border Style="{StaticResource IconTile}" Margin="0,0,16,0">
-                            <TextBlock Text="&#xE770;" Style="{StaticResource IconText}"
-                                       Foreground="{DynamicResource AccentTextBrush}" HorizontalAlignment="Center" />
+            <!-- Acesso rápido -->
+            <h:TileGrid MinItemWidth="228" Margin="0,0,-12,2">
+                <Button Style="{StaticResource ModuleTile}" Background="{DynamicResource TileBlueBrush}" Command="{Binding GoToUpdatesCommand}"
+                        AutomationProperties.Name="{loc:Loc UI.OpenUpdates}">
+                    <DockPanel>
+                        <Border Style="{StaticResource TileIcon}">
+                            <Path Data="{StaticResource Icon.Update}" Style="{StaticResource LineIcon}" Width="24" Height="24" TextElement.Foreground="{DynamicResource CyanBrush}" />
                         </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="{loc:Loc WindowsCard.Title}" Style="{StaticResource SectionText}" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding Activation.Name}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc UI.Updates}" Style="{StaticResource SectionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Localized WingetStatusText}" Style="{StaticResource TileCaption}" />
                         </StackPanel>
-                    </Grid>
+                    </DockPanel>
+                </Button>
+                <Button Style="{StaticResource ModuleTile}" Background="{DynamicResource TilePurpleBrush}" Command="{Binding GoToMaintenanceCommand}"
+                        AutomationProperties.Name="{loc:Loc UI.OpenMaintenance}">
+                    <DockPanel>
+                        <Border Style="{StaticResource TileIcon}">
+                            <Path Data="{StaticResource Icon.Wrench}" Style="{StaticResource LineIcon}" Width="24" Height="24" TextElement.Foreground="{DynamicResource PurpleBrush}" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc UI.Maintenance}" Style="{StaticResource SectionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Localized MaintenanceStatusText}" Style="{StaticResource TileCaption}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Button>
+                <Button Style="{StaticResource ModuleTile}" Background="{DynamicResource TileAmberBrush}" Command="{Binding OpenPageCommand}" CommandParameter="cleanup"
+                        AutomationProperties.Name="{loc:Loc Dashboard.OpenCleanup}">
+                    <DockPanel>
+                        <Border Style="{StaticResource TileIcon}">
+                            <Path Data="{StaticResource Icon.Clean}" Style="{StaticResource LineIcon}" Width="24" Height="24" TextElement.Foreground="{DynamicResource WarningBrush}" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc Message.Cleanup}" Style="{StaticResource SectionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc Dashboard.CleanupCard}" Style="{StaticResource TileCaption}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Button>
+                <Button Style="{StaticResource ModuleTile}" Background="{DynamicResource TileCyanBrush}" Command="{Binding OpenPageCommand}" CommandParameter="tweaks"
+                        AutomationProperties.Name="{loc:Loc Message.Tweaks}">
+                    <DockPanel>
+                        <Border Style="{StaticResource TileIcon}">
+                            <Path Data="{StaticResource Icon.Sliders}" Style="{StaticResource LineIcon}" Width="24" Height="24" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:Loc Message.Tweaks}" Style="{StaticResource SectionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc Dashboard.TweaksCard}" Style="{StaticResource TileCaption}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Button>
+            </h:TileGrid>
 
-                    <WrapPanel Margin="0,14,0,4">
-                        <StackPanel MinWidth="120" Margin="0,0,24,8">
-                            <TextBlock Text="{loc:Loc WindowsCard.Edition}" Style="{StaticResource CaptionText}" />
-                            <TextBlock Text="{Binding Activation.Edition}" FontWeight="SemiBold" Margin="0,3,0,0" />
+            <!-- Desempenho e sistema -->
+            <h:SplitPanel Breakpoint="860" Ratio="0.58" Margin="0,0,0,14">
+                <Border Style="{StaticResource CardBorder}">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Content="{loc:Loc UI.Sensors}"
+                                    Command="{Binding OpenPageCommand}" CommandParameter="sensors" Margin="8,-6,-8,0" />
+                            <Path Data="{StaticResource Icon.Chart}" Style="{StaticResource LineIcon}" Margin="0,0,10,0" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                            <TextBlock Text="{loc:Loc Dashboard.Performance}" Style="{StaticResource SectionText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                        </DockPanel>
+                        <!-- Estado e hora da leitura: valores de uma sessão pausada nunca parecem atuais. -->
+                        <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                            <TextBlock Text="{loc:Localized Sensors.Status}" Style="{StaticResource OptionalCaptionText}" />
+                            <TextBlock Text="{loc:Localized Sensors.LastUpdate}" Style="{StaticResource OptionalCaptionText}" Foreground="{DynamicResource TextMutedBrush}" />
                         </StackPanel>
-                        <StackPanel MinWidth="110" Margin="0,0,24,8">
-                            <TextBlock Text="{loc:Loc WindowsCard.Version}" Style="{StaticResource CaptionText}" />
-                            <TextBlock Text="{Binding Activation.DisplayVersion}" FontWeight="SemiBold" Margin="0,3,0,0" />
-                        </StackPanel>
-                        <StackPanel MinWidth="90" Margin="0,0,24,8">
-                            <TextBlock Text="{loc:Loc WindowsCard.Build}" Style="{StaticResource CaptionText}" />
-                            <TextBlock Text="{Binding Activation.Build}" FontWeight="SemiBold" Margin="0,3,0,0" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="{loc:Loc WindowsCard.Status}" Style="{StaticResource CaptionText}" />
-                            <TextBlock Text="{Binding Activation.StatusText}" FontWeight="SemiBold" Margin="0,3,0,0"
+                        <ItemsControl ItemsSource="{Binding Gauges}" Focusable="False" Margin="0,12,0,0" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <h:TileGrid MinItemWidth="132" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="2,0,2,6">
+                                        <Grid Width="124" Height="124">
+                                            <h:ArcGauge Value="{Binding Percent}" Track="{DynamicResource ToggleOffBrush}">
+                                                <h:ArcGauge.Style>
+                                                    <Style TargetType="h:ArcGauge">
+                                                        <Setter Property="Stroke" Value="{DynamicResource CyanBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IconKey}" Value="Icon.Ram">
+                                                                <Setter Property="Stroke" Value="{DynamicResource PurpleBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IconKey}" Value="Icon.Gpu">
+                                                                <Setter Property="Stroke" Value="{DynamicResource SuccessBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IconKey}" Value="Icon.Disk">
+                                                                <Setter Property="Stroke" Value="{DynamicResource AccentBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </h:ArcGauge.Style>
+                                            </h:ArcGauge>
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock Text="{Binding Value}" Style="{StaticResource ValueText}" FontSize="22" HorizontalAlignment="Center" />
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                                                    <Path Data="{Binding IconKey, Converter={StaticResource IconByKey}}" Style="{StaticResource LineIcon}" Width="14" Height="14"
+                                                          Margin="0,0,5,0" TextElement.Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                    <TextBlock Text="{loc:Localized Label}" Style="{StaticResource CaptionText}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="{loc:Localized Detail}" Style="{StaticResource CaptionText}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,-6,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Image Source="pack://application:,,,/WinCoreManager;component/Assets/Nebula/ondas-windows-azuis.png" Width="170"
+                               HorizontalAlignment="Right" VerticalAlignment="Bottom" Stretch="Uniform" Margin="0,0,-18,-18"
+                               Opacity="{DynamicResource ArtOpacity}" IsHitTestVisible="False" />
+                        <StackPanel>
+                            <DockPanel>
+                                <Path Data="{StaticResource Icon.Windows}" Style="{StaticResource LineIcon}" Margin="0,0,10,0" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                                <TextBlock Text="{loc:Loc WindowsCard.Title}" Style="{StaticResource SectionText}" TextWrapping="Wrap" />
+                            </DockPanel>
+                            <TextBlock Text="{Binding Activation.Name}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,10,0,0" />
+
+                            <WrapPanel Margin="0,8,0,0">
+                                <StackPanel Margin="0,0,20,8">
+                                    <TextBlock Text="{loc:Loc WindowsCard.Edition}" Style="{StaticResource CaptionText}" />
+                                    <TextBlock Text="{Binding Activation.Edition}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,20,8">
+                                    <TextBlock Text="{loc:Loc WindowsCard.Version}" Style="{StaticResource CaptionText}" />
+                                    <TextBlock Text="{Binding Activation.DisplayVersion}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,20,8">
+                                    <TextBlock Text="{loc:Loc WindowsCard.Build}" Style="{StaticResource CaptionText}" />
+                                    <TextBlock Text="{Binding Activation.Build}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,0,8">
+                                    <TextBlock Text="{loc:Loc WindowsCard.Status}" Style="{StaticResource CaptionText}" />
+                                    <TextBlock Text="{Binding Activation.StatusText}" FontWeight="SemiBold" AutomationProperties.LiveSetting="Polite">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Activation.Snapshot.State}" Value="Activated">
+                                                        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Activation.Snapshot.State}" Value="NotActivated">
+                                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Activation.Snapshot.State}" Value="Grace">
+                                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Activation.Checking}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </WrapPanel>
+
+                            <!-- Resumo do inventário compartilhado com Meu Computador -->
+                            <ItemsControl ItemsSource="{Binding Hardware.SummaryCards}" Focusable="False" Margin="0,0,90,6">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,3">
+                                            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource CaptionText}" />
+                                            <TextBlock Text="{loc:Localized Summary}" FontSize="13" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <WrapPanel>
+                                <Button x:Name="ActivateWindowsButton" Content="{loc:Loc WindowsCard.Activate}"
+                                        Click="OpenActivationRepository" IsEnabled="{Binding Activation.CanActivate}"
+                                        Visibility="{Binding Activation.ShowActivate, Converter={StaticResource BoolToVis}}"
+                                        ToolTip="{loc:Loc WindowsCard.OpenRepository}" Margin="0,0,8,4" />
+                                <Button x:Name="ActivationSettingsButton" Content="{Binding Activation.SettingsLabel}"
+                                        Command="{Binding Activation.OpenSettingsCommand}" Margin="0,0,8,4" />
+                                <Button x:Name="RefreshActivationButton" Content="{loc:Loc WindowsCard.Refresh}"
+                                        Command="{Binding Activation.RefreshCommand}" Margin="0,0,0,4" />
+                            </WrapPanel>
+                            <TextBlock Text="{Binding Activation.OpenFailureText}" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource DangerTextBrush}" Margin="0,8,0,0"
                                        AutomationProperties.LiveSetting="Polite">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Activation.Snapshot.State}" Value="Activated">
-                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Activation.Snapshot.State}" Value="NotActivated">
-                                                <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Activation.Snapshot.State}" Value="Grace">
-                                                <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Activation.Checking}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                            <DataTrigger Binding="{Binding Activation.OpenFailed}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
                         </StackPanel>
-                    </WrapPanel>
+                    </Grid>
+                </Border>
+            </h:SplitPanel>
 
-                    <WrapPanel>
-                        <Button x:Name="ActivateWindowsButton" Content="{loc:Loc WindowsCard.Activate}"
-                                Click="OpenActivationRepository" IsEnabled="{Binding Activation.CanActivate}"
-                                Visibility="{Binding Activation.ShowActivate, Converter={StaticResource BoolToVis}}"
-                                ToolTip="{loc:Loc WindowsCard.OpenRepository}" Margin="0,0,8,4" />
-                        <Button x:Name="ActivationSettingsButton" Content="{Binding Activation.SettingsLabel}"
-                                Command="{Binding Activation.OpenSettingsCommand}" Margin="0,0,8,4" />
-                        <Button x:Name="RefreshActivationButton" Content="{loc:Loc WindowsCard.Refresh}"
-                                Command="{Binding Activation.RefreshCommand}" Margin="0,0,0,4" />
-                    </WrapPanel>
-                    <TextBlock Text="{Binding Activation.OpenFailureText}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource DangerTextBrush}" Margin="0,8,0,0"
-                               AutomationProperties.LiveSetting="Polite">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Activation.OpenFailed}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
+            <!-- Discos e atividade recente -->
+            <h:SplitPanel Breakpoint="860" Ratio="0.62" Margin="0,0,0,14">
+                <views:DiskHealthCard Compact="True" />
+                <Border Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,8">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Content="{loc:Loc Dashboard.ViewHistory}"
+                                    Command="{Binding GoToHistoryCommand}" Margin="8,-6,-8,0" />
+                            <Path Data="{StaticResource Icon.History}" Style="{StaticResource LineIcon}" Margin="0,0,10,0" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                            <TextBlock Text="{loc:Loc Dashboard.RecentActivity}" Style="{StaticResource SectionText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                        </DockPanel>
+                        <TextBlock Text="{loc:Loc Dashboard.NoActivity}" Style="{StaticResource EmptyStateText}" Margin="0,18"
+                                   Visibility="{Binding HasRecentItems, Converter={StaticResource HiddenWhenTrue}}" />
+                        <ItemsControl ItemsSource="{Binding RecentItems}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource GridLineBrush}" Padding="0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Width="10" Height="10" Margin="0,0,12,0" Fill="{Binding Status, Converter={StaticResource StatusToBrush}}" />
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Target}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Target}" />
+                                                <TextBlock Style="{StaticResource CaptionText}">
+                                                    <Run Text="{loc:Localized Type, Converter={StaticResource TypeToLabel}}" /><Run Text=" · " />
+                                                    <Run Text="{loc:Localized Status, Converter={StaticResource StatusToLabel}}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{loc:Localized Timestamp.LocalDateTime, NumberFormat=g}" Style="{StaticResource CaptionText}"
+                                                       VerticalAlignment="Center" Margin="10,0,0,0" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </h:SplitPanel>
+
+            <!-- Ações rápidas: apenas abrem as páginas; nada é executado daqui. -->
+            <Border Style="{StaticResource CardBorder}">
+                <WrapPanel>
+                    <Path Data="{StaticResource Icon.Bolt}" Style="{StaticResource LineIcon}" Margin="0,0,10,8" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                    <TextBlock Text="{loc:Loc Dashboard.QuickActions}" Style="{StaticResource SectionText}" VerticalAlignment="Center" Margin="0,0,18,8" />
+                    <Button Style="{StaticResource PrimaryButton}" Content="{loc:Loc UI.OpenUpdates}" Command="{Binding GoToUpdatesCommand}" Margin="0,0,10,8" />
+                    <Button Content="{loc:Loc UI.OpenMaintenance}" Command="{Binding GoToMaintenanceCommand}" Margin="0,0,10,8" />
+                    <Button Content="{loc:Loc Dashboard.OpenCleanup}" Command="{Binding OpenPageCommand}" CommandParameter="cleanup" Margin="0,0,10,8" />
+                    <Button Content="{loc:Loc Dashboard.OpenInventory}" Command="{Binding OpenPageCommand}" CommandParameter="hardware" Margin="0,0,0,8" />
+                </WrapPanel>
             </Border>
         </StackPanel>
     </ScrollViewer>

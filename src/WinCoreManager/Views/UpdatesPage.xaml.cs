@@ -34,6 +34,7 @@ public partial class UpdatesPage : UserControl
         Unloaded += (_, _) => Detach();
         SizeChanged += (_, _) =>
         {
+            SummaryCards.Visibility = ActualHeight < 820 || ActualWidth < 720 ? Visibility.Collapsed : Visibility.Visible;
             UpdatePadding();
             FitDetailsRow();
         };
@@ -176,6 +177,9 @@ public partial class UpdatesPage : UserControl
         {
             _compact = compact;
             PageGrid.Margin = compact ? new Thickness(16, 12, 16, 12) : _pagePadding;
+            PageHeading.FontSize = compact ? 20 : 30;
+            Header.Tag = compact ? null : FindResource("Icon.Update");
+            PackagesGrid.RowHeight = compact ? 38 : 46;
             FitUpdateControls();
         }
 

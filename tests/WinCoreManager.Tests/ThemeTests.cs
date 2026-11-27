@@ -95,7 +95,7 @@ public class ThemeTests
         {
             service.Initialize();
             Assert.Equal(AppTheme.Light, service.Current);
-            Assert.Equal(Color.FromRgb(0xF6, 0xF7, 0xF8), BrushColor("WindowBgBrush"));
+            Assert.Equal(Color.FromRgb(0xEE, 0xF3, 0xFA), BrushColor("WindowBgBrush"));
             Assert.Equal(0, settings.Saves);
             Assert.Null(settings.Settings.Theme);
         }
@@ -116,12 +116,12 @@ public class ThemeTests
             Assert.True(service.Select(AppTheme.Light));
             Assert.Equal(AppTheme.Light, service.Current);
             Assert.Equal("Light", settings.Settings.Theme);
-            Assert.Equal(Color.FromRgb(0xF6, 0xF7, 0xF8), BrushColor("WindowBgBrush"));
+            Assert.Equal(Color.FromRgb(0xEE, 0xF3, 0xFA), BrushColor("WindowBgBrush"));
             Assert.Equal(Color.FromRgb(0xFF, 0xFF, 0xFF), BrushColor("CardBgBrush"));
 
             Assert.True(service.Select(AppTheme.Dark));
             Assert.Equal("Dark", settings.Settings.Theme);
-            Assert.Equal(Color.FromRgb(0x1B, 0x1C, 0x20), BrushColor("WindowBgBrush"));
+            Assert.Equal(Color.FromRgb(0x07, 0x0F, 0x1E), BrushColor("WindowBgBrush"));
             Assert.Equal([AppTheme.Light, AppTheme.Dark], raised);
             Assert.Equal(2, settings.Saves);
         }
@@ -352,12 +352,12 @@ public class ThemeTests
         try
         {
             ThemeResources.Install(Application.Current.Resources, AppTheme.Dark);
-            Assert.Equal(Color.FromRgb(0x23, 0x24, 0x28), ((SolidColorBrush)card.Background).Color);
+            Assert.Equal(Color.FromRgb(0x0C, 0x1B, 0x30), ((SolidColorBrush)card.Background).Color);
 
             service.Apply(AppTheme.Light);
 
             Assert.Equal(Color.FromRgb(0xFF, 0xFF, 0xFF), ((SolidColorBrush)card.Background).Color);
-            Assert.Equal(Color.FromRgb(0xF6, 0xF7, 0xF8), ((SolidColorBrush)secondary.Background).Color);
+            Assert.Equal(Color.FromRgb(0xEE, 0xF3, 0xFA), ((SolidColorBrush)secondary.Background).Color);
             Assert.Same(card, main.Content);
             Assert.Equal("campo", secondaryField.Text);
             Assert.Contains(secondary, Application.Current.Windows.Cast<Window>());
@@ -382,14 +382,14 @@ public class ThemeTests
             ThemeResources.Install(Application.Current.Resources, AppTheme.Light);
             window.Show();
             window.UpdateLayout();
-            Assert.Equal(Color.FromRgb(0xF6, 0xF7, 0xF8), ((SolidColorBrush)window.Background).Color);
-            Assert.Equal(Color.FromRgb(0x1B, 0x1D, 0x21), ((SolidColorBrush)window.Foreground).Color);
+            Assert.Equal(Color.FromRgb(0xEE, 0xF3, 0xFA), ((SolidColorBrush)window.Background).Color);
+            Assert.Equal(Color.FromRgb(0x0F, 0x1F, 0x36), ((SolidColorBrush)window.Foreground).Color);
             var panel = (SensorPanel)window.Content;
             var pause = (Button)panel.FindName("SensorPauseButton")!;
             Assert.NotNull(pause);
 
             new ThemeService(new RecordingSettings(), Application.Current).Apply(AppTheme.Dark);
-            Assert.Equal(Color.FromRgb(0x1B, 0x1C, 0x20), ((SolidColorBrush)window.Background).Color);
+            Assert.Equal(Color.FromRgb(0x07, 0x0F, 0x1E), ((SolidColorBrush)window.Background).Color);
             Assert.Same(pause, panel.FindName("SensorPauseButton"));
         }
         finally
@@ -440,7 +440,7 @@ public class ThemeTests
             ThemeResources.Install(Application.Current.Resources, AppTheme.Light);
             var selected = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(0)!;
             Assert.True(selected.IsSelected);
-            Assert.Equal(Color.FromRgb(0xE6, 0xEC, 0xF6), ((SolidColorBrush)selected.Background).Color);
+            Assert.Equal(Color.FromRgb(0xDD, 0xEB, 0xFD), ((SolidColorBrush)selected.Background).Color);
         }
         finally
         {
@@ -537,7 +537,7 @@ public class ThemeTests
             Assert.Equal("Dark", settings.Settings.Theme);
             Assert.Equal("Aparência alterada para Dark — Escuro.", viewModel.StatusNote);
             Assert.Contains("Dark — Escuro", Descendants<TextBlock>(page).Select(t => t.Text));
-            Assert.Equal(Color.FromRgb(0x23, 0x24, 0x28), BrushColor("CardBgBrush"));
+            Assert.Equal(Color.FromRgb(0x0C, 0x1B, 0x30), BrushColor("CardBgBrush"));
         }
         finally
         {

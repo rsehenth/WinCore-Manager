@@ -69,7 +69,7 @@ try {
     Check ($program.Contains('NotifyFailure(root);')) 'Failure notification hook missing.'
     [IO.File]::WriteAllText($programPath, $program.Replace('NotifyFailure(root);', 'File.WriteAllText(Path.Combine(root, "Data", "failure"), ex.ToString());'), $utf8)
     Publish "$src/WinCoreManager.Update/WinCoreManager.Update.csproj" $helper @(
-        '-p:PublishSingleFile=true','-p:IncludeNativeLibrariesForSelfExtract=true')
+        '-p:PublishSingleFile=true','-p:IncludeNativeLibrariesForSelfExtract=true', '-p:PublishTrimmed=true')
 
     [IO.File]::WriteAllText("$fixture/WinCoreManager.csproj", @'
 <Project Sdk="Microsoft.NET.Sdk">

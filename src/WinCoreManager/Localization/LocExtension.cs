@@ -193,7 +193,8 @@ internal static partial class PresentationText
             (index == 1 && template.Key == "Message.RestoreFailed01") ||
             (index == 2 && template.Key == "Message.ResidueHistoryDetails" && text == LocalizationService.Source("Message.ResidueHistoryNoBackups")) ||
             (LocalizedMeasurement().IsMatch(text) && template.Key is "Message.Capacity0Used1Free2" or
-                "Message.PotentialSavings0SizesAvailableFor1Of" or "Message.0CategorySelectedEstimatedSize1" or "Cleanup.Result")
+                "Message.PotentialSavings0SizesAvailableFor1Of" or "Message.0CategorySelectedEstimatedSize1" or "Cleanup.Result" or
+                "Dashboard.Free" or "Dashboard.DiskSpace")
             ? Translate(text, culture, depth + 1)
             : text;
         return true;
@@ -221,10 +222,12 @@ internal static partial class PresentationText
                 !key.StartsWith("About.", StringComparison.Ordinal) &&
                 !key.StartsWith("UpdatesDiagnostics.", StringComparison.Ordinal) &&
                 !key.StartsWith("DiskHealth.", StringComparison.Ordinal) &&
+                !key.StartsWith("Sensors.", StringComparison.Ordinal) &&
                 !key.StartsWith("ResidueAdvanced.", StringComparison.Ordinal) &&
                 !key.StartsWith("Optional.", StringComparison.Ordinal) &&
                 !key.StartsWith("Uninstaller.", StringComparison.Ordinal) &&
-                !key.StartsWith("Updater.", StringComparison.Ordinal))
+                !key.StartsWith("Updater.", StringComparison.Ordinal) &&
+                !key.StartsWith("Dashboard.", StringComparison.Ordinal))
             {
                 continue;
             }

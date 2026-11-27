@@ -1,8 +1,29 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using WinCoreManager.Localization;
 using WinCoreManager.ViewModels;
 
 namespace WinCoreManager.Views;
+
+/// <summary>Título (recurso de origem) da seção de inventário → ícone.</summary>
+public sealed class HardwareIconConverter : IValueConverter
+{
+    private static readonly (string Title, string Icon)[] Icons =
+    [
+        ("Message.OperatingSystem", "Icon.Windows"), ("Message.Processor", "Icon.Cpu"), ("Message.GraphicsCard", "Icon.Gpu"),
+        ("Message.MemoryRAM", "Icon.Ram"), ("Message.Storage", "Icon.Disk"),
+    ];
+
+    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var key = Icons.FirstOrDefault(item => Equals(value, LocalizationService.Source(item.Title))).Icon ?? "Icon.Computer";
+        return Application.Current?.TryFindResource(key);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
+}
 
 public partial class HardwarePage : UserControl
 {
@@ -10,14 +31,7 @@ public partial class HardwarePage : UserControl
 
     private void OnOpenSensors(object sender, RoutedEventArgs e)
     {
-        var owner = Window.GetWindow(this);
-        if (owner?.OwnedWindows.OfType<SensorWindow>().FirstOrDefault() is { } existing)
-        {
-            if (existing.WindowState == WindowState.Minimized) existing.WindowState = WindowState.Normal;
-            existing.Activate();
-            return;
-        }
-        if (DataContext is not HardwareViewModel viewModel) return;
-        new SensorWindow(viewModel.CreateSensorPanel()) { Owner = owner }.Show();
+        if (Window.GetWindow(this)?.DataContext is MainViewModel viewModel)
+            viewModel.OpenSensors();
     }
 }

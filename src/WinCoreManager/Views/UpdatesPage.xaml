@@ -58,12 +58,11 @@
 
         <!-- Cabeçalho -->
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <DockPanel>
-                <Button DockPanel.Dock="Right" Content="{loc:Loc UpdatesDiagnostics.History}" Click="ShowAttemptHistory"
-                        VerticalAlignment="Center" Margin="12,0,0,0" />
-                <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-            </DockPanel>
-            <TextBlock Margin="0,4,0,0" TextTrimming="CharacterEllipsis"
+            <HeaderedContentControl x:Name="Header" Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Update}" Margin="0">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <TextBlock x:Name="PageHeading" Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+            <TextBlock Margin="0,2,0,0" TextTrimming="CharacterEllipsis"
                        ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
                        AutomationProperties.LiveSetting="Polite">
                 <TextBlock.Style>
@@ -79,6 +78,65 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+                <Button Content="{loc:Loc UpdatesDiagnostics.History}" Click="ShowAttemptHistory" />
+            </HeaderedContentControl>
+
+            <!-- Resumo real da sessão; recolhido em janelas baixas para preservar a lista. -->
+            <h:TileGrid x:Name="SummaryCards" MinItemWidth="190" Margin="0,14,-12,-12">
+                <Border Style="{StaticResource StatCard}" Background="{DynamicResource TileBlueBrush}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Download}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource CyanBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Updates.CardAvailable}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock FontSize="20">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource ValueText}">
+                                        <Setter Property="Text" Value="{Binding AvailableCount}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding LastScanTime}" Value="{x:Null}">
+                                                <Setter Property="Text" Value="—" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Check}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource SuccessBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Updates.CardSelected}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding SelectedCount}" Style="{StaticResource ValueText}" FontSize="20" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Box}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource PurpleBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Updates.CardHidden}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding HiddenUpdates.Count}" Style="{StaticResource ValueText}" FontSize="20" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource StatCard}">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Calendar}" Style="{StaticResource LineIcon}" Width="24" Height="24" Margin="0,0,14,0"
+                              TextElement.Foreground="{DynamicResource CyanBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Updates.CardLastScan}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Localized LastScanTime.LocalDateTime, NumberFormat=g, NullText=—}" Style="{StaticResource ValueText}" FontSize="16" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </h:TileGrid>
             <Border x:Name="UpdateInterruptionPanel" Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,8,0,0"
                     Visibility="{Binding HasInterruptedUpdate, Converter={StaticResource BoolToVis}}">
                 <StackPanel>
@@ -231,7 +289,7 @@
                               ItemsSource="{Binding Rows}"
                               IsReadOnly="False"
                               SelectionMode="Single"
-                              RowHeight="40"
+                              RowHeight="46"
                               HeadersVisibility="Column"
                               Visibility="{Binding ManagingHiddenUpdates, Converter={StaticResource InverseBoolToVis}}"
                               AutomationProperties.Name="{loc:Loc UI.AvailableUpdatesList}">
@@ -325,6 +383,8 @@
                             <DataGridTemplateColumn x:Name="PackageStatusColumn" Header="{loc:Loc UI.Status}" Width="124" SortMemberPath="StatusText" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
+                                        <Border x:Name="statusPill" CornerRadius="6" BorderThickness="1" BorderBrush="Transparent"
+                                                Padding="6,3" HorizontalAlignment="Left">
                                         <DockPanel ToolTip="{loc:Localized StatusText}">
                                             <TextBlock x:Name="statusIcon"
                                                        DockPanel.Dock="Left"
@@ -343,6 +403,7 @@
                                                        TextTrimming="CharacterEllipsis"
                                                        Foreground="{Binding StatusBrush}" />
                                         </DockPanel>
+                                        </Border>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{loc:Localized Status}" Value="Queued">
                                                 <Setter TargetName="statusIcon" Property="Text" Value="&#xE121;" />
@@ -369,12 +430,14 @@
                                                 </MultiDataTrigger.ExitActions>
                                             </MultiDataTrigger>
                                             <DataTrigger Binding="{loc:Localized Status}" Value="Success">
+                                                <Setter TargetName="statusPill" Property="Background" Value="{DynamicResource SuccessSubtleBrush}" />
                                                 <Setter TargetName="statusIcon" Property="Text" Value="&#xE73E;" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{loc:Localized Status}" Value="SuccessRebootRequired">
                                                 <Setter TargetName="statusIcon" Property="Text" Value="&#xE73E;" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{loc:Localized Status}" Value="Failed">
+                                                <Setter TargetName="statusPill" Property="Background" Value="{DynamicResource DangerSubtleBrush}" />
                                                 <Setter TargetName="statusIcon" Property="Text" Value="&#xE711;" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{loc:Localized Status}" Value="Cancelled">

@@ -83,8 +83,9 @@ public sealed class HardwareSensorTests
         Assert.DoesNotContain(batch.Groups[1].Readings, r => r.Unit == "°C");
         Assert.Contains(batch.Notices, n => n.Category.StartsWith("Disco 1", StringComparison.Ordinal) && n.State == ReadingState.Restricted);
         Assert.DoesNotContain("INTERNAL", System.Text.Json.JsonSerializer.Serialize(batch));
+        var requests = wmi.Requests.Count;
         Assert.Same(batch, provider.Read(default));
-        Assert.Single(wmi.Requests);
+        Assert.Equal(requests, wmi.Requests.Count);
     }
 
     [Fact]
@@ -99,7 +100,8 @@ public sealed class HardwareSensorTests
         Assert.Equal(0, factory.Creates);
         Assert.True(await enumerator.MoveNextAsync());
         Assert.Equal(0, slow.Reads);
-        Assert.True(await enumerator.MoveNextAsync());
+        while (enumerator.Current.Groups.Count < 2)
+            Assert.True(await enumerator.MoveNextAsync());
         Assert.Equal(1, slow.Reads);
         for (var sample = 0; sample < 20; sample++)
         {
@@ -111,6 +113,32 @@ public sealed class HardwareSensorTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await enumerator.MoveNextAsync());
         Assert.Equal(1, fast.Disposals);
         Assert.Equal(1, slow.Disposals);
+    }
+
+    [Fact]
+    public async Task A_slow_disk_read_does_not_hold_back_fast_sensor_samples()
+    {
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var cpu = new FakeProvider("CPU");
+        var disk = new FakeProvider("Storage", TimeSpan.FromSeconds(45))
+        {
+            Reading = token => { entered.Set(); release.Wait(token); }
+        };
+        var scheduler = new SensorScheduler(new FakeFactory(() => [cpu, disk]), TimeProvider.System, TimeSpan.FromMilliseconds(1));
+        await using var reader = scheduler.ObserveAsync(stop.Token).GetAsyncEnumerator();
+        try
+        {
+            Assert.True(await reader.MoveNextAsync());
+            Assert.True(await reader.MoveNextAsync());
+            await WaitUntil(() => entered.IsSet);
+            var previous = cpu.Reads;
+            Assert.True(await reader.MoveNextAsync());
+            Assert.Equal(previous + 1, cpu.Reads);
+            Assert.Equal("CPU", Assert.Single(reader.Current.Groups).Name);
+        }
+        finally { release.Set(); }
     }
 
     [Fact]
@@ -201,7 +229,7 @@ public sealed class HardwareSensorTests
     });
 
     [Fact]
-    public void Modulo_importa_apenas_consultas_nativas_e_nenhum_driver_de_terceiro()
+    public void Modulo_importa_consultas_nativas_e_limita_dependencias_diretas_de_sensores()
     {
         var assembly = typeof(HardwareReading).Assembly;
         var imports = assembly.GetTypes().Where(type => type.Namespace == typeof(HardwareReading).Namespace)
@@ -212,12 +240,14 @@ public sealed class HardwareSensorTests
         [
             "GetFirmwareType", "GetPhysicallyInstalledSystemMemory", "GlobalMemoryStatusEx", "CreateDXGIFactory1",
             "EnumDisplayDevicesW", "EnumDisplaySettingsW", "GetSystemTimes", "GetActiveProcessorGroupCount",
-            "GetActiveProcessorCount", "CallNtPowerInformation", "LoadLibraryExW", "CreateFileW", "DeviceIoControl"
+            "GetActiveProcessorCount", "CallNtPowerInformation", "LoadLibraryExW", "CreateFileW", "DeviceIoControl",
+            "CreateEventW", "WaitForSingleObject", "GetOverlappedResult", "CancelIoEx"
         ];
         Assert.NotEmpty(imports);
         Assert.All(imports, import => Assert.Contains(import, approved));
+        Assert.Contains(assembly.GetReferencedAssemblies(), dependency => dependency.Name == "LibreHardwareMonitorLib");
         Assert.DoesNotContain(assembly.GetReferencedAssemblies(), dependency =>
-            dependency.Name is "LibreHardwareMonitorLib" or "RAMSPDToolkit" or "HidSharp");
+            dependency.Name is "RAMSPDToolkit" or "HidSharp");
     }
 
     [Theory]

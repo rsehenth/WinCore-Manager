@@ -28,9 +28,14 @@
     </UserControl.Resources>
     <ScrollViewer x:Name="TweaksScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1040">
-            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-            <TextBlock Text="{loc:Loc UI.ReviewAndAdjustWindowsSettingsEachSettingShows}"
-                       Style="{StaticResource PageSubtitleText}" Margin="0,4,0,12" />
+            <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Sliders}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+                        <TextBlock Text="{loc:Loc UI.ReviewAndAdjustWindowsSettingsEachSettingShows}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </HeaderedContentControl>
             <WrapPanel Margin="0,0,0,4">
                 <Button Content="{loc:Loc UI.Refresh}" Command="{Binding RefreshCommand}" Margin="0,0,8,4" />
                 <Button x:Name="UndoTweakButton" Content="{loc:Loc UI.UndoLastChange}" Command="{Binding UndoCommand}" Margin="0,0,8,4" />

@@ -16,6 +16,14 @@ public partial class CleanupRow(CleanupCategory category) : ObservableObject
         "WinCore.Npm" or "WinCore.Pip" or "WinCore.NuGet" => "Cleanup.GroupDevelopment",
         _ => "Cleanup.GroupWindows",
     });
+    /// <summary>Ícone do grupo (chave em Themes/Icons.xaml).</summary>
+    public string GroupIcon => Category.Id switch
+    {
+        "WinCore.Chrome" or "WinCore.Edge" or "WinCore.Brave" or "WinCore.Firefox" => "Icon.External",
+        "WinCore.Discord" or "WinCore.Nvidia" or "WinCore.Amd" => "Icon.Box",
+        "WinCore.Npm" or "WinCore.Pip" or "WinCore.NuGet" => "Icon.Cpu",
+        _ => "Icon.Windows",
+    };
     public bool NeedsAttention => Category.Bytes is null || Category.Items > 0 && !Selectable;
     public string Description => Category.Description;
     public string Size => CleanupService.FormatBytes(Category.Bytes);
@@ -51,6 +59,7 @@ public partial class CleanupViewModel : ViewModelBase
     [ObservableProperty] private bool _hasUsage;
     [ObservableProperty] private string _selectionText = LocalizationService.Source("Message.CleanupAnalyzeFirst");
     [ObservableProperty] private LocalizedMessages _status = new();
+    [ObservableProperty] private string _selectedSizeText = "—";
     [ObservableProperty] private string _message = "";
     [ObservableProperty] private string _resultDetails = "";
     [ObservableProperty] private bool _hasResultDetails;
@@ -245,6 +254,8 @@ public partial class CleanupViewModel : ViewModelBase
                 CleanupService.FormatBytes(selected.Sum(row => row.Category.Bytes.GetValueOrDefault())))
             : LocalizationService.Source(DirectCategories.Count == 0 ? "Message.CleanupAnalyzeFirst"
                 : DirectCategories.Any(row => row.Selectable) ? "Cleanup.SelectToClean" : "Cleanup.NothingToSelect");
+        SelectedSizeText = selected.Length > 0
+            ? CleanupService.FormatBytes(selected.Sum(row => row.Category.Bytes.GetValueOrDefault())) : "—";
         EmptyCommand.NotifyCanExecuteChanged();
         EmptyNativeCommand.NotifyCanExecuteChanged();
     }

@@ -2,7 +2,6 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using WinCoreManager.Services.DiskSpace;
 using WinCoreManager.Views;
@@ -14,96 +13,72 @@ internal static partial class Program
     private static async Task CaptureDiskSpace(Window owner, string output, string tag, double scale)
     {
         await Settle(500);
-        var cleanup = Descendant<CleanupPage>(owner);
-        var open = (Button)cleanup.FindName("AnalyzeSpaceButton");
+        var open = (Button)Descendant<CleanupPage>(owner).FindName("AnalyzeSpaceButton");
         Shot((FrameworkElement)owner.Content, Path.Combine(output, $"{tag}-01-limpeza.png"), scale);
+        var modal = new TaskCompletionSource();
+        _ = owner.Dispatcher.BeginInvoke(new Action(async () =>
+        {
+            var configuration = owner.OwnedWindows.OfType<DiskAnalysisDialog>().Single();
+            try
+            {
+                await WaitFor(() => Control<Button>(configuration, "Begin").IsEnabled);
+                Shot((FrameworkElement)configuration.Content, Path.Combine(output, $"{tag}-02-configuracao.png"), scale);
+                modal.SetResult();
+            }
+            catch (Exception exception) { modal.SetException(exception); }
+            finally { configuration.Close(); }
+        }));
         open.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        var real = owner.OwnedWindows.OfType<DiskSpaceWindow>().Single();
-        await WaitFor(() => Control<ComboBox>(real, "VolumePicker").IsEnabled);
-        real.Close();
+        await modal.Task;
 
         const long GiB = 1024L * 1024 * 1024;
         var drive = new DiskVolume(@"C:\", "Windows", "synthetic-c", 512 * GiB, 196 * GiB);
-        var dataDrive = new DiskVolume(@"D:\", "Projetos", "synthetic-d", 1024 * GiB, 822 * GiB);
-        var attempts = 0;
+        var target = new DiskScanTarget(drive);
+        var request = new DiskAnalysisOptions([target], true, true);
+        var result = DiskResult(drive);
+        var firstFolder = result.Root.Children[0];
+        var firstFile = result.Largest[0];
+        var secondFile = result.Largest[1];
+        var duplicated = secondFile with { Name = "archive-copy.zip" };
         using var step = new AutoResetEvent(false);
-        var window = new DiskSpaceWindow(() => [drive, dataDrive], (volume, report, token) =>
+        var window = new DiskSpaceWindow(request, (_, report, token) =>
         {
-            if (Interlocked.Increment(ref attempts) == 1)
-            {
-                report?.Invoke(new(18214, 1460, 2, 3, 8, 0, 0, 84 * GiB, 81 * GiB, TimeSpan.FromSeconds(2)));
-                token.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
-                token.ThrowIfCancellationRequested();
-            }
-            else
-            {
-                report?.Invoke(new(31237, 5184, 4, 6, 18, 0, 0, 164 * GiB, 155 * GiB, TimeSpan.FromSeconds(3)));
-                WaitHandle.WaitAny([step, token.WaitHandle], TimeSpan.FromSeconds(12));
-                token.ThrowIfCancellationRequested();
-            }
-
-            return DiskResult(volume);
+            report(new(target, 1, 1, 18214, 1460, 84 * GiB, TimeSpan.FromSeconds(2),
+                [new(firstFile.Path, firstFile.LogicalBytes), new(secondFile.Path, secondFile.LogicalBytes)],
+                [new(firstFolder.Path, firstFolder.LogicalBytes)]));
+            WaitHandle.WaitAny([step, token.WaitHandle], TimeSpan.FromSeconds(12));
+            token.ThrowIfCancellationRequested();
+            return new([result], [], true,
+                new([new(secondFile.LogicalBytes, [new(drive, secondFile), new(drive, duplicated)])], 12, 1, 0),
+                TimeSpan.FromSeconds(8));
         })
         {
             Owner = owner,
             Width = double.Parse(Args.GetValueOrDefault("disk-width", "1040"), CultureInfo.InvariantCulture),
-            Height = double.Parse(Args.GetValueOrDefault("disk-height", "754"), CultureInfo.InvariantCulture),
+            Height = double.Parse(Args.GetValueOrDefault("disk-height", "680"), CultureInfo.InvariantCulture),
         };
 
         window.Show();
         try
         {
-            await WaitFor(() => Control<Button>(window, "StartButton").IsEnabled);
-            Save("02-unidade");
-            var volumePicker = Control<ComboBox>(window, "VolumePicker");
-            volumePicker.IsDropDownOpen = true;
-            await Settle(250);
-            Save("03-unidades");
-            volumePicker.IsDropDownOpen = false;
-
-            Click("StartButton");
-            await WaitFor(() => Control<ProgressBar>(window, "ScanProgress").IsVisible);
-            await Settle(250);
-            Save("04-progresso");
-            Click("CancelButton");
-            await WaitFor(() => Control<Button>(window, "StartButton").IsEnabled);
-            Save("05-cancelada");
-
-            Click("StartButton");
+            await WaitFor(() => Control<ItemsControl>(window, "PreviewFiles").Items.Count > 0);
+            await Settle(200);
+            Save("03-previa");
             step.Set();
             await WaitFor(() => Control<Grid>(window, "ResultArea").IsVisible);
-            await Settle(250);
-            Save("06-visao-geral");
-            PrintWindow(window, Path.Combine(output, $"{tag}-06-janela-real.png"));
-            var map = Control<Canvas>(window, "SpaceMap");
-            var tile = map.Children.OfType<Button>().First();
-            var tooltip = new ToolTip { Content = tile.ToolTip, PlacementTarget = tile, Placement = PlacementMode.Mouse };
-            tooltip.IsOpen = true;
-            await Settle(150);
-            Shot(tooltip, Path.Combine(output, $"{tag}-07-tooltip.png"), scale);
-            tooltip.IsOpen = false;
-            tile.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            await Settle(150);
-            Save("08-mapa-explorado");
-
+            await Settle(200);
+            Save("04-visao-geral");
             var tabs = Control<TabControl>(window, "ResultTabs");
-            tabs.SelectedIndex = 1;
-            await Settle(250);
-            Save("09-arvore");
-            tabs.SelectedIndex = 2;
-            await Settle(250);
-            Save("10-arquivos");
-
-            var grid = Control<DataGrid>(window, "FileGrid");
-            grid.SelectedIndex = 0;
-            Control<TextBox>(window, "ExtensionFilter").Text = ".zip";
-            await Settle(150);
-            Save("11-filtro");
+            foreach (var (index, name) in new[] { (1, "05-pastas"), (2, "06-arquivos"), (3, "07-duplicados") })
+            {
+                tabs.SelectedIndex = index;
+                await Settle(200);
+                Save(name);
+            }
         }
         finally { window.Close(); }
 
-        T Control<T>(Window dialog, string name) => (T)dialog.FindName(name);
-        void Click(string name) => Control<Button>(window, name).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        static T Control<T>(Window dialog, string name) => (T)dialog.FindName(name);
         void Save(string suffix) => Shot((FrameworkElement)window.Content, Path.Combine(output, $"{tag}-{suffix}.png"), scale);
     }
 
@@ -135,7 +110,10 @@ internal static partial class Program
                 (130 - index) * 1024L * 1024, (130 - index) * 1024L * 1024, date)),
         ];
         return new(volume, root, largest, new(root.FileCount, 8937, 17, 48, 32, 0, 0,
-            root.LogicalBytes, root.AllocatedBytes, TimeSpan.FromSeconds(28)));
+            root.LogicalBytes, root.AllocatedBytes, TimeSpan.FromSeconds(28)))
+        {
+            LargestFolders = root.Children.OrderByDescending(folder => folder.LogicalBytes).ToArray()
+        };
 
         DiskDirectory Folder(DiskDirectory parent, string name, long gib, long files)
         {

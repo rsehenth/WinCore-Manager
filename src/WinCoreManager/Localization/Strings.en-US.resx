@@ -3674,7 +3674,7 @@ Installed version: {0}. WinCore Manager will close to apply the update after ver
   <data name="Message.CompleteRepairFailed" xml:space="preserve"><value>Complete Repair failed: {0}</value></data>
   <data name="Message.ResidueOutcomeFailed" xml:space="preserve"><value>failed: {0}</value></data>
   <data name="Message.ResidueOutcomeBlocked" xml:space="preserve"><value>blocked: {0}</value></data>
-  <data name="Message.Essentials" xml:space="preserve"><value>Essentials</value></data>
+  <data name="Message.Essentials" xml:space="preserve"><value>App Center</value></data>
   <data name="Essentials.Title" xml:space="preserve"><value>Essential Apps Center</value></data>
   <data name="Essentials.Subtitle" xml:space="preserve"><value>Discover useful components, drivers, and tools to set up your Windows PC.</value></data>
   <data name="Essentials.Intro" xml:space="preserve"><value>Choose what fits your computer and apps. Links open in your default browser.</value></data>
@@ -4193,7 +4193,7 @@ Installed version: {0}. WinCore Manager will close to apply the update after ver
   <data name="About.Development" xml:space="preserve"><value>Development build</value></data>
   <data name="About.FeatureDashboard" xml:space="preserve"><value>Dashboard</value></data>
   <data name="About.FeatureDashboardDetails" xml:space="preserve"><value>System and recent operation overview.</value></data>
-  <data name="About.FeatureEssentials" xml:space="preserve"><value>Essentials</value></data>
+  <data name="About.FeatureEssentials" xml:space="preserve"><value>App Center</value></data>
   <data name="About.FeatureEssentialsDetails" xml:space="preserve"><value>Detects registered installations and opens official pages.</value></data>
   <data name="About.FeatureSettings" xml:space="preserve"><value>Settings</value></data>
   <data name="About.FeatureSettingsDetails" xml:space="preserve"><value>Set language, theme, storage, and history retention.</value></data>
@@ -4220,8 +4220,8 @@ Installed version: {0}. WinCore Manager will close to apply the update after ver
   <data name="UpdatesDiagnostics.Message" xml:space="preserve"><value>Message</value></data>
   <data name="UpdatesDiagnostics.Excerpts" xml:space="preserve"><value>Diagnostic excerpts</value></data>
   <data name="About.Technologies" xml:space="preserve"><value>C# · WPF · .NET 10 · SQLite</value></data>
-  <data name="DiskSpace.Open" xml:space="preserve"><value>Analyze space</value></data>
-  <data name="DiskSpace.Title" xml:space="preserve"><value>Disk space analysis</value></data>
+  <data name="DiskSpace.Open" xml:space="preserve"><value>Advanced Space Analysis</value></data>
+  <data name="DiskSpace.Title" xml:space="preserve"><value>Advanced Space Analysis</value></data>
   <data name="DiskSpace.Intro" xml:space="preserve"><value>Find which files and folders take up the most space on your computer.</value></data>
   <data name="DiskSpace.Drive" xml:space="preserve"><value>Drive to analyze</value></data>
   <data name="DiskSpace.Start" xml:space="preserve"><value>Start analysis</value></data>
@@ -4267,7 +4267,7 @@ Installed version: {0}. WinCore Manager will close to apply the update after ver
   <data name="DiskSpace.AllocationColumn" xml:space="preserve"><value>Allocation</value></data>
   <data name="DiskSpace.Type" xml:space="preserve"><value>Extension</value></data>
   <data name="DiskSpace.Date" xml:space="preserve"><value>Modified</value></data>
-  <data name="DiskSpace.FilterName" xml:space="preserve"><value>Filter by name</value></data>
+  <data name="DiskSpace.FilterName" xml:space="preserve"><value>Name or path</value></data>
   <data name="DiskSpace.FilterExt" xml:space="preserve"><value>File extension</value></data>
   <data name="DiskSpace.Ranking" xml:space="preserve"><value>{0:N0} of {1:N0} ranked results · up to {2:N0} files stored</value></data>
   <data name="DiskSpace.MoreFiles" xml:space="preserve"><value>Show more files</value></data>
@@ -4748,7 +4748,7 @@ Installed version: {0}. WinCore Manager will close to apply the update after ver
     <value>No items in this tab match the current filter.</value>
   </data>
   <data name="About.DiskScopeCredit" xml:space="preserve">
-    <value>The SMART reader adapts portions of DiskScope (MIT).</value>
+    <value>Sensors and Drive Health share the SMART reader, which adapts portions of DiskScope (MIT).</value>
   </data>
   <data name="About.DiskScopeRepository" xml:space="preserve">
     <value>DiskScope repository</value>
@@ -4785,5 +4785,183 @@ Installed version: {0}. WinCore Manager will close to apply the update after ver
   </data>
   <data name="ResidueAdvanced.NonTransactionalRestored" xml:space="preserve">
     <value>Registry key recreated from the snapshot without a Registry transaction. Permissions (ACL), owner, and last-write time are not restored; review the key.</value>
+  </data>
+  <data name="DiskSpace.ConfigureIntro" xml:space="preserve"><value>Choose where to scan. WinCore shows how much space files use.</value></data>
+  <data name="DiskSpace.OneDrive" xml:space="preserve"><value>One local drive</value></data>
+  <data name="DiskSpace.AllDrives" xml:space="preserve"><value>All local drives</value></data>
+  <data name="DiskSpace.OneFolder" xml:space="preserve"><value>One folder on a local drive</value></data>
+  <data name="DiskSpace.Browse" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="DiskSpace.NoFolder" xml:space="preserve"><value>Select a folder</value></data>
+  <data name="DiskSpace.LocalFolderOnly" xml:space="preserve"><value>Choose a folder on a fixed local drive.</value></data>
+  <data name="DiskSpace.ConfigureAgain" xml:space="preserve"><value>New analysis</value></data>
+  <data name="DiskSpace.Fast" xml:space="preserve"><value>Quick scan</value></data>
+  <data name="DiskSpace.Full" xml:space="preserve"><value>Full scan</value></data>
+  <data name="DiskSpace.FastHint" xml:space="preserve"><value>Checks up to three subfolder levels and 1,800 folders per drive. Within each level, folders whose parent showed more data are checked first.</value></data>
+  <data name="DiskSpace.FindDuplicates" xml:space="preserve"><value>Find duplicate files</value></data>
+  <data name="DiskSpace.DuplicatesHint" xml:space="preserve"><value>Compares same-size files by SHA-256, even when names differ. This can make the scan longer. Files are listed for review.</value></data>
+  <data name="DiskSpace.Duplicates" xml:space="preserve"><value>Duplicates</value></data>
+  <data name="DiskSpace.DuplicateGroup" xml:space="preserve"><value>Group</value></data>
+  <data name="DiskSpace.DuplicatesSummary" xml:space="preserve"><value>{0:N0} groups confirmed by SHA-256 · {1:N0} same-size candidates · {2:N0} could not be checked · {3:N0} beyond the scan limit.</value></data>
+  <data name="DiskSpace.PreviewNotice" xml:space="preserve"><value>Live preview. The results below are partial. Final results appear when the scan completes.</value></data>
+  <data name="DiskSpace.AwaitingPreview" xml:space="preserve"><value>Waiting for items</value></data>
+  <data name="DiskSpace.LargestFolders" xml:space="preserve"><value>Largest folders</value></data>
+  <data name="DiskSpace.RichProgress" xml:space="preserve"><value>{0} · {1}/{2} · {3:N0} files · {4:N0} folders · {5} · {6} · {7}/s</value></data>
+  <data name="DiskSpace.HashProgress" xml:space="preserve"><value>Checking duplicate content · {0:N0}/{1:N0} files · {2}</value></data>
+  <data name="DiskSpace.AnalysisSummary" xml:space="preserve"><value>{0} · {1} · {2} of logical data · {3}</value></data>
+  <data name="DiskSpace.SkippedDrives" xml:space="preserve"><value>Unavailable scopes: {0}.</value></data>
+  <data name="DiskSpace.EstimatedCoverage" xml:space="preserve"><value>Estimated coverage by allocated space relative to used space: {0:P1}.</value></data>
+  <data name="DiskSpace.FastCoverage" xml:space="preserve"><value>{0:N0} folders and their descendants fell outside the quick-scan limits.</value></data>
+  <data name="DiskSpace.FolderOmitted" xml:space="preserve"><value>This folder was outside the quick-scan limits.</value></data>
+  <data name="DiskSpace.FilterPath" xml:space="preserve"><value>Filter by path</value></data>
+  <data name="DiskSpace.SelectedSpaceShare" xml:space="preserve"><value>{0}&#10;{1} · {2:P1} of this folder’s space&#10;{3}</value></data>
+  <data name="Sensors.Intro" xml:space="preserve"><value>Monitor usage and readings made available by Windows and your PC drivers.</value></data>
+  <data name="Sensors.Details" xml:space="preserve"><value>Sources and availability</value></data>
+  <data name="Sensors.DiskDetails" xml:space="preserve"><value>Drive Health</value></data>
+  <data name="Sensors.Unavailable" xml:space="preserve"><value>Unavailable readings</value></data>
+  <data name="Sensors.NvmeHealth" xml:space="preserve"><value>NVMe SMART health</value></data>
+  <data name="Sensors.DiskActive" xml:space="preserve"><value>Active time</value></data>
+  <data name="Sensors.DiskRead" xml:space="preserve"><value>Read bytes per second</value></data>
+  <data name="Sensors.DiskWrite" xml:space="preserve"><value>Write bytes per second</value></data>
+  <data name="Sensors.DiskActivityMissing" xml:space="preserve"><value>Windows did not expose activity counters for this disk.</value></data>
+  <data name="Sensors.GpuUsage" xml:space="preserve"><value>Busiest GPU engine utilization</value></data>
+  <data name="Sensors.GpuUsageMissing" xml:space="preserve"><value>Windows did not expose a utilization counter associated with this GPU.</value></data>
+  <data name="About.FeatureAdvanced" xml:space="preserve"><value>Advanced Space Analysis</value></data>
+  <data name="About.FeatureAdvancedDetails" xml:space="preserve"><value>Live previews, rankings, a space map, and duplicate file review.</value></data>
+  <data name="About.FeatureSensors" xml:space="preserve"><value>Sensors</value></data>
+  <data name="About.FeatureSensorsDetails" xml:space="preserve"><value>Windows and driver telemetry with DiskScope-based NVMe SMART readings.</value></data>
+  <data name="DiskSpace.Rerun" xml:space="preserve"><value>Run again</value></data>
+  <data name="Sensors.AvailableCount" xml:space="preserve"><value>Components with readings: {0:N0}</value></data>
+  <data name="Sensors.NoticeCount" xml:space="preserve"><value>Notices: {0:N0}</value></data>
+  <data name="Sensors.HideDetails" xml:space="preserve"><value>Hide sources</value></data>
+  <data name="DiskSpace.CancelSetup" xml:space="preserve"><value>Cancel</value></data>
+  <data name="DiskSpace.AnalyzedVolumes" xml:space="preserve"><value>{0:N0} drives scanned</value></data>
+  <data name="Sensors.CpuTemperature" xml:space="preserve">
+    <value>CPU temperature</value>
+  </data>
+  <data name="Sensors.CpuPackageUnsupported" xml:space="preserve">
+    <value>This provider found no supported Intel processor package.</value>
+  </data>
+  <data name="Sensors.CpuPackageUnavailable" xml:space="preserve">
+    <value>The Intel digital sensor returned no valid temperature. Check driver and IntelMSR module compatibility.</value>
+  </data>
+  <data name="Sensors.CpuLibraryUnavailable" xml:space="preserve">
+    <value>The LibreHardwareMonitor library could not be loaded.</value>
+  </data>
+  <data name="Sensors.CpuPawnIoMissing" xml:space="preserve">
+    <value>Intel DTS readings require the optional PawnIO 2.2 or later driver. The driver is not installed.</value>
+  </data>
+  <data name="Sensors.CpuPawnIoVersion" xml:space="preserve">
+    <value>The installed PawnIO version is older than 2.2.</value>
+  </data>
+  <data name="Sensors.CpuPawnIoDenied" xml:space="preserve">
+    <value>Windows denied this session access to the PawnIO driver.</value>
+  </data>
+  <data name="Sensors.CpuPawnIoNotReady" xml:space="preserve">
+    <value>PawnIO is listed as installed, but Windows could not open its device.</value>
+  </data>
+  <data name="Sensors.OtherBoardReadings" xml:space="preserve">
+    <value>Motherboard voltages, power, fan speeds and temperature require dedicated hardware support.</value>
+  </data>
+  <data name="DiskHealth.SmartLabel" xml:space="preserve">
+    <value>SMART status</value>
+  </data>
+  <data name="DiskHealth.IdentityUnavailable" xml:space="preserve">
+    <value>The physical disk identity could not be verified uniquely.</value>
+  </data>
+  <data name="Sensors.ReadingTimedOut" xml:space="preserve">
+    <value>Reading timed out</value>
+  </data>
+  <data name="Sensors.ShowCpuCores" xml:space="preserve">
+    <value>Show core temperatures ({0})</value>
+  </data>
+  <data name="Sensors.HideCpuCores" xml:space="preserve">
+    <value>Hide core temperatures</value>
+  </data>
+  <data name="Shell.Tagline" xml:space="preserve">
+    <value>Windows maintenance and diagnostics</value>
+  </data>
+  <data name="Dashboard.Welcome" xml:space="preserve">
+    <value>Welcome to WinCore Manager</value>
+  </data>
+  <data name="Dashboard.WelcomeText" xml:space="preserve">
+    <value>Manage and maintain Windows, reviewing every action before it runs.</value>
+  </data>
+  <data name="Dashboard.CleanupCard" xml:space="preserve">
+    <value>Analyze temporary files</value>
+  </data>
+  <data name="Dashboard.TweaksCard" xml:space="preserve">
+    <value>Reversible Windows adjustments</value>
+  </data>
+  <data name="Dashboard.Performance" xml:space="preserve">
+    <value>Live performance</value>
+  </data>
+  <data name="Dashboard.Free" xml:space="preserve">
+    <value>{0} free</value>
+  </data>
+  <data name="Dashboard.Disk" xml:space="preserve">
+    <value>Windows drive</value>
+  </data>
+  <data name="Dashboard.DiskUsed" xml:space="preserve">
+    <value>Used ({0})</value>
+  </data>
+  <data name="Dashboard.RecentActivity" xml:space="preserve">
+    <value>Recent activity</value>
+  </data>
+  <data name="Dashboard.NoActivity" xml:space="preserve">
+    <value>No activity recorded.</value>
+  </data>
+  <data name="Dashboard.ViewHistory" xml:space="preserve">
+    <value>View history</value>
+  </data>
+  <data name="Dashboard.QuickActions" xml:space="preserve">
+    <value>Quick actions</value>
+  </data>
+  <data name="Dashboard.OpenCleanup" xml:space="preserve">
+    <value>Open Cleanup</value>
+  </data>
+  <data name="Dashboard.OpenInventory" xml:space="preserve">
+    <value>View inventory</value>
+  </data>
+  <data name="Updates.CardAvailable" xml:space="preserve">
+    <value>Updates available</value>
+  </data>
+  <data name="Updates.CardSelected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="Updates.CardHidden" xml:space="preserve">
+    <value>Hidden by you</value>
+  </data>
+  <data name="Updates.CardLastScan" xml:space="preserve">
+    <value>Last check</value>
+  </data>
+  <data name="Cleanup.EstimatedSelection" xml:space="preserve">
+    <value>Estimated size of the selection</value>
+  </data>
+  <data name="Uninstaller.CardApps" xml:space="preserve">
+    <value>Installed apps</value>
+  </data>
+  <data name="Uninstaller.CardListed" xml:space="preserve">
+    <value>Shown in the list</value>
+  </data>
+  <data name="Uninstaller.CardSelected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="Uninstaller.CardTechnical" xml:space="preserve">
+    <value>Technical components</value>
+  </data>
+  <data name="Startup.CardTotal" xml:space="preserve">
+    <value>Entries found</value>
+  </data>
+  <data name="Startup.CardEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Startup.CardDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Dashboard.DiskSpace" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="Dashboard.Temperature" xml:space="preserve">
+    <value>Temperature: {0}</value>
   </data>
 </root>

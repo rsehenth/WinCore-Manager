@@ -30,8 +30,15 @@ UniGetUI's [`WinGetCliHelper.cs`](https://github.com/Devolutions/UniGetUI/blob/f
 | SQLitePCLRaw (bundle, config, core, provider), © SourceGear, LLC | 3.0.5 | Apache-2.0 | `SQLitePCLRaw-LICENSE.txt` |
 | SQLite native library (`e_sqlite3.dll`, NuGet package `SQLite`) | 3.53.4 | Public domain | `SQLite-NuGet-LICENSE.txt` |
 | YamlDotNet, © Antoine Aubry and contributors | 18.1.0 | MIT | `YamlDotNet.LICENSE.txt` |
+| [LibreHardwareMonitorLib](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/tree/3d331e3370efb858411f19511373eff65a218701) | 0.9.6 | MPL-2.0, with upstream third-party components | `LibreHardwareMonitorLib-LICENSE.txt`, `LibreHardwareMonitorLib-THIRD-PARTY-NOTICES.txt` |
+| [PawnIO.Modules](https://github.com/namazso/PawnIO.Modules/tree/0.1.6), copyright namazso and contributors | 0.1.6, signed modules embedded by LibreHardwareMonitor | LGPL-2.1-or-later | `PawnIO.Modules-LICENSE.txt` |
+| [DiskInfoToolkit](https://github.com/Blacktempel/DiskInfoToolkit/tree/25319eae5781e75bcf141e844ceab2afe94d40ea) and [RAMSPDToolkit-NDD](https://github.com/Blacktempel/RAMSPDToolkit/tree/3b47b960e0830fef344624ad5e389675d5f0a1ce) | 1.1.2 / 1.4.2 | MPL-2.0 | `DiskInfoToolkit-LICENSE.txt`, `RAMSPDToolkit-NDD-LICENSE.txt` |
+| [BlackSharp.Core](https://github.com/Blacktempel/BlackSharp/tree/c70b735c6cec123ee8a046ac4a0bc6c606f52cf0) | 1.0.7 | MPL-2.0 | `BlackSharp.Core-LICENSE.txt` |
+| [HidSharp](https://www.nuget.org/packages/HidSharp/2.6.4), copyright James F. Bellinger | 2.6.4 | Apache-2.0 | `HidSharp-LICENSE.txt` |
+| [Mono.Posix.NETStandard](https://www.nuget.org/packages/Mono.Posix.NETStandard/1.0.0) | 1.0.0 | MIT, with upstream third-party terms | `Mono.Posix.NETStandard-LICENSE.txt` |
+| [System.IO.Ports](https://github.com/dotnet/dotnet/tree/c2435c3e0f46de784341ac3ed62863ce77e117b4) and matching native assets where applicable | 10.0.3 | MIT | `NET-LICENSE.txt`, `System-IO-Ports-THIRD-PARTY-NOTICES.txt` |
 
-MIT and Apache-2.0 permit redistribution alongside MIT-licensed code, provided their notices are kept.
+The monitoring assemblies are distributed as unmodified, separately replaceable DLLs. Their corresponding MPL source is available at the revisions linked above. Any distributed changes to MPL-covered files must be made available under MPL-2.0. The PawnIO module source, build scripts and dependencies are available at the linked 0.1.6 release. WinCore Manager's MIT terms permit replacing components and reverse engineering to debug modifications to the LGPL modules. The official driver enforces its own signed-module policy.
 
 ## Build and test dependencies (not redistributed)
 
@@ -47,8 +54,10 @@ MIT and Apache-2.0 permit redistribution alongside MIT-licensed code, provided t
 - `src/WinCoreManager/Assets/app.ico` is the project's own mark.
 - Fonts and interface glyphs (Segoe UI, Segoe Fluent Icons, Segoe MDL2 Assets, Cascadia Mono, Consolas) are referenced from the user's Windows installation and are not redistributed.
 - NVIDIA NVML is called through the driver installed on the user's machine. No NVIDIA binary is distributed.
+- The optional [PawnIO driver and installer](https://github.com/namazso/PawnIO.Setup/releases/tag/2.2.0) are external to the package. The [driver license](https://github.com/namazso/PawnIO/blob/2.2.0/COPYING) is GPL-2.0-or-later with the upstream exception.
+- [smartmontools 7.5](https://github.com/smartmontools/smartmontools/releases/tag/RELEASE_7_5) was used as an external diagnostic reference. The GPL-licensed executable and source are absent from the distributed application.
 - WinGet, SFC, DISM, CHKDSK and other Windows tools are not distributed.
-- Applications listed under Essentials, and Microsoft Activation Scripts, are links to third-party sites. None of their code or binaries is included. Their names and trademarks belong to their owners.
+- Applications listed under App Center, and Microsoft Activation Scripts, are links to third-party sites. None of their code or binaries is included. Their names and trademarks belong to their owners.
 
 ## DiskScope — MIT
 
@@ -58,4 +67,7 @@ and NvmeHealth.cs at [DiskScope fc4ac0e](https://github.com/UnstableNT/diskscope
 WinCore uses its existing Windows storage device identity checks. It adds stricter
 validation, keeps unsupported metrics unavailable, and selects explicit Windows
 query operations. See distribution/Licencas/DiskScope.LICENSE.txt, also shipped
-in the Licencas directory in the portable package.
+in the Licencas directory in the portable package. The Sensors page shares this attributed
+reader for ATA and NVMe telemetry. Windows storage, WDDM and disk performance counters
+come from the installed Windows platform. Advanced Space Analysis uses the
+project scanner and the .NET SHA-256 API. WinDirStat served as a workflow reference.

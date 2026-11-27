@@ -22,6 +22,7 @@ public partial class MainViewModel : ObservableObject
     public CleanupViewModel Cleanup { get; }
     public TweaksViewModel Tweaks { get; }
     public HardwareViewModel Hardware { get; }
+    public SensorPanelViewModel Sensors { get; }
     public EssentialsViewModel Essentials { get; }
     public HistoryViewModel History { get; }
     public SettingsViewModel Settings { get; }
@@ -51,6 +52,8 @@ public partial class MainViewModel : ObservableObject
         Cleanup = cleanup;
         Tweaks = tweaks;
         Hardware = hardware;
+        Sensors = hardware.CreateSensorPanel();
+        Sensors.OpenDriveHealth = () => OnNavigateRequested(Maintenance);
         Essentials = essentials;
         History = history;
         Settings = settings;
@@ -58,19 +61,20 @@ public partial class MainViewModel : ObservableObject
 
         NavItems = new List<NavItem>
         {
-            new(LocalizationService.Source("Message.Dashboard"), "\uE80F", Dashboard, true, OnNavSelected),
-            new(LocalizationService.Source("Message.Updates"), "\uE895", Updates, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Maintenance"), "\uE90F", Maintenance, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Uninstaller"), "\uE74D", Uninstallers, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Startup"), "\uE7E8", Startup, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Cleanup"), "\uE894", Cleanup, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Tweaks"), "\uE9E9", Tweaks, false, OnNavSelected),
-            new(LocalizationService.Source("Message.MyComputer"), "\uE950", Hardware, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Essentials"), "\uE7B8", Essentials, false, OnNavSelected),
-            new(LocalizationService.Source("Message.History"), "\uE81C", History, false, OnNavSelected),
-            new(LocalizationService.Source("Message.Settings"), "\uE713", Settings, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Dashboard"), "Icon.Home", Dashboard, true, OnNavSelected),
+            new(LocalizationService.Source("Message.Updates"), "Icon.Update", Updates, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Maintenance"), "Icon.Wrench", Maintenance, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Uninstaller"), "Icon.Trash", Uninstallers, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Startup"), "Icon.Power", Startup, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Cleanup"), "Icon.Clean", Cleanup, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Tweaks"), "Icon.Sliders", Tweaks, false, OnNavSelected),
+            new(LocalizationService.Source("Message.MyComputer"), "Icon.Computer", Hardware, false, OnNavSelected),
+            new(LocalizationService.Source("UI.Sensors"), "Icon.Sensor", Sensors, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Essentials"), "Icon.Box", Essentials, false, OnNavSelected),
+            new(LocalizationService.Source("Message.History"), "Icon.History", History, false, OnNavSelected),
+            new(LocalizationService.Source("Message.Settings"), "Icon.Settings", Settings, false, OnNavSelected),
         };
-        AboutNavItem = new(LocalizationService.Source("Message.About"), "\uE946", About, false, OnNavSelected);
+        AboutNavItem = new(LocalizationService.Source("Message.About"), "Icon.Info", About, false, OnNavSelected);
 
         CurrentViewModel = Dashboard;
         Uninstallers.PackageChangesBlocked = Maintenance.PackageChangesBlocked = () => Updates.PackageChangesBlockedNow;
@@ -85,6 +89,15 @@ public partial class MainViewModel : ObservableObject
         Uninstallers.ApplicationBusy = Updates.BlocksPackageChanges;
         Maintenance.ApplicationUpdateRunning = Updates.BlocksPackageChanges;
         Dashboard.NavigateRequested += OnNavigateRequested;
+        Dashboard.Attach(Sensors, Hardware);
+        Dashboard.OpenPageRequested = page => OnNavigateRequested(page switch
+        {
+            "cleanup" => Cleanup,
+            "tweaks" => Tweaks,
+            "hardware" => Hardware,
+            "sensors" => Sensors,
+            _ => Dashboard,
+        });
         Maintenance.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(MaintenanceViewModel.PackageConflictRunning))
@@ -136,6 +149,8 @@ public partial class MainViewModel : ObservableObject
             }
         };
     }
+
+    internal void OpenSensors() => OnNavigateRequested(Sensors);
 
     private void OnNavigateRequested(ViewModelBase target)
     {

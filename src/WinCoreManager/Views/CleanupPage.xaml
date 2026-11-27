@@ -2,9 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:data="clr-namespace:System.Windows.Data;assembly=PresentationFramework"
-             xmlns:loc="clr-namespace:WinCoreManager.Localization">
+             xmlns:loc="clr-namespace:WinCoreManager.Localization"
+             xmlns:h="clr-namespace:WinCoreManager.Helpers"
+             xmlns:v="clr-namespace:WinCoreManager.Views">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <h:ResourceKeyConverter x:Key="IconByKey" />
+        <v:CleanupGroupSizeConverter x:Key="GroupSize" />
         <CollectionViewSource x:Key="GroupedCategories" Source="{Binding DirectCategories}">
             <CollectionViewSource.GroupDescriptions>
                 <data:PropertyGroupDescription PropertyName="Group" />
@@ -12,168 +16,243 @@
         </CollectionViewSource>
     </UserControl.Resources>
     <ScrollViewer x:Name="CleanupScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1040">
-            <Grid Margin="0,0,0,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Margin="0,0,14,0">
-                    <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-                    <TextBlock Text="{loc:Loc Message.CleanupIntro}"
-                               Style="{StaticResource PageSubtitleText}" TextWrapping="Wrap" Margin="0,4,0,0" />
-                </StackPanel>
-                <Button x:Name="AnalyzeSpaceButton" Grid.Column="1" Click="OnAnalyzeSpace" VerticalAlignment="Top"
-                        AutomationProperties.Name="{loc:Loc DiskSpace.Open}">
-                    <StackPanel Orientation="Horizontal">
-                        <Path Width="15" Height="15" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center"
-                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"
-                              Data="M1,8 L3,2 H13 L15,8 V13 H1 Z M1,8 H15 M4,10.5 H6 M10,10.5 H12" />
-                        <TextBlock Text="{loc:Loc DiskSpace.Open}" />
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1320">
+            <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Clean}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc Message.CleanupIntro}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
                     </StackPanel>
+                </HeaderedContentControl.Header>
+                <Button x:Name="AnalyzeSpaceButton" Click="OnAnalyzeSpace" AutomationProperties.Name="{loc:Loc DiskSpace.Open}" MaxWidth="260">
+                    <DockPanel>
+                        <Path Data="{StaticResource Icon.Disk}" Style="{StaticResource LineIcon}" Margin="0,0,8,0" />
+                        <TextBlock Text="{loc:Loc DiskSpace.Open}" TextWrapping="Wrap" Margin="0,4" />
+                    </DockPanel>
                 </Button>
-            </Grid>
+            </HeaderedContentControl>
 
-            <Border Style="{StaticResource CardBorder}" Padding="14,10">
+            <!-- Volume do Windows: capacidade e ocupação reais; potencial = soma das categorias medidas. -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,14">
                 <StackPanel>
-                    <TextBlock Text="{loc:Localized VolumeText}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" />
-                    <TextBlock Text="{loc:Localized CapacityText, BinarySizes=True}" Style="{StaticResource CaptionText}"
-                               TextWrapping="Wrap" Margin="0,4,0,0" />
-                    <TextBlock Text="{loc:Localized EstimateText, BinarySizes=True}" TextWrapping="Wrap"
-                               Foreground="{DynamicResource AccentTextBrush}" Margin="0,3,0,0" />
-                    <WrapPanel Margin="0,8,0,0">
-                        <Button Content="{loc:Loc Message.CleanupAnalyze}" Command="{Binding RefreshCommand}" Margin="0,0,8,4" />
-                        <Button Content="{loc:Loc UI.Cancel}" Command="{Binding CancelCommand}" Margin="0,0,0,4"
-                                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
-                    </WrapPanel>
+                    <h:SplitPanel Breakpoint="720" Ratio="0.68">
+                        <DockPanel VerticalAlignment="Center">
+                            <Border Style="{StaticResource IconTile}" Width="52" Height="52" Margin="0,0,16,0">
+                                <Path Data="{StaticResource Icon.Disk}" Style="{StaticResource LineIcon}" Width="26" Height="26"
+                                      TextElement.Foreground="{DynamicResource CyanBrush}" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{loc:Localized VolumeText}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Localized CapacityText, BinarySizes=True}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                <DockPanel Margin="0,8,0,0" Visibility="{Binding HasUsage, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock DockPanel.Dock="Right" FontWeight="SemiBold" Margin="12,0,0,0">
+                                        <Run Text="{Binding UsedPercent, StringFormat={}{0:0.0}, Mode=OneWay}" /><Run Text="%" />
+                                    </TextBlock>
+                                    <ProgressBar Height="10" Maximum="100" Value="{Binding UsedPercent, Mode=OneWay}" VerticalAlignment="Center"
+                                                 AutomationProperties.Name="{loc:Localized CapacityText, BinarySizes=True}" />
+                                </DockPanel>
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel VerticalAlignment="Center">
+                            <Path Data="{StaticResource Icon.Chart}" Style="{StaticResource LineIcon}" Width="30" Height="30" Margin="4,0,14,0"
+                                  TextElement.Foreground="{DynamicResource CyanBrush}" />
+                            <TextBlock Text="{loc:Localized EstimateText, BinarySizes=True}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentTextBrush}" VerticalAlignment="Center" />
+                        </DockPanel>
+                    </h:SplitPanel>
                     <ProgressBar Maximum="{Binding ProgressMaximum}" Value="{Binding ProgressValue, Mode=OneWay}"
-                                 IsIndeterminate="{Binding ProgressIndeterminate}" Height="8" Margin="0,6,0,0"
+                                 IsIndeterminate="{Binding ProgressIndeterminate}" Height="8" Margin="0,12,0,0"
                                  Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"
                                  AutomationProperties.Name="{loc:Loc UI.CleanupProgress}" />
-                    <TextBlock Text="{loc:Localized Status}" Style="{StaticResource OptionalText}"
-                               AutomationProperties.LiveSetting="Polite" Margin="0,6,0,0" />
                 </StackPanel>
             </Border>
 
-            <TextBlock Text="{loc:Loc Cleanup.DirectSection}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" Margin="0,16,0,8" />
-            <WrapPanel IsEnabled="{Binding CanInteract}" Margin="0,0,0,2">
-                <Button Content="{loc:Loc Cleanup.SelectAll}" Command="{Binding SetSelectionCommand}" CommandParameter="all" Margin="0,0,8,4" />
-                <Button Content="{loc:Loc Cleanup.DeselectAll}" Command="{Binding SetSelectionCommand}" CommandParameter="none" Margin="0,0,8,4" />
-                <Button x:Name="CleanFilesButton" Content="{loc:Loc Message.CleanupSelected}" Command="{Binding EmptyCommand}"
-                        Style="{StaticResource DangerOutlineButton}" Margin="0,0,0,4" />
-            </WrapPanel>
-            <TextBlock Text="{loc:Localized SelectionText, BinarySizes=True}" TextWrapping="Wrap" Margin="0,0,0,6"
-                       AutomationProperties.LiveSetting="Polite" />
-            <TextBlock Text="{loc:Localized Message, BinarySizes=True}" Style="{StaticResource OptionalText}" AutomationProperties.LiveSetting="Polite" />
-            <Expander Margin="0,6,0,8"
-                      Visibility="{Binding HasResultDetails, Converter={StaticResource BoolToVis}}">
-                <Expander.Header>
-                    <TextBlock Text="{loc:Loc Cleanup.ResultDetails}" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
-                </Expander.Header>
-                <TextBlock Text="{loc:Localized ResultDetails, BinarySizes=True}" TextWrapping="Wrap" Margin="0,6,0,0" />
-            </Expander>
-            <Border Style="{StaticResource CardBorder}" Padding="0">
-                <ItemsControl x:Name="CleanupCategories" ItemsSource="{Binding Source={StaticResource GroupedCategories}}" IsEnabled="{Binding CanInteract}">
-                    <ItemsControl.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{loc:Localized Name}" FontWeight="SemiBold" Margin="12,8,12,3"
-                                               Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </ItemsControl.GroupStyle>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Padding="10,3" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource GridLineBrush}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <CheckBox x:Name="CategorySelection" IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                              IsEnabled="{Binding Selectable}" AutomationProperties.Name="{loc:Localized Name}"
-                                              Margin="0,4,5,0" VerticalAlignment="Top" />
-                                    <Expander x:Name="DirectFilePreview" Grid.Column="1" Foreground="{DynamicResource TextPrimaryBrush}"
-                                              HorizontalContentAlignment="Stretch" AutomationProperties.Name="{loc:Localized Name}">
-                                        <Expander.Header>
-                                            <WrapPanel Margin="2,4">
-                                                <TextBlock Text="{loc:Localized Name}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,10,0" />
-                                                <TextBlock Text="{loc:Localized ItemCount}" Style="{StaticResource CaptionText}" Margin="0,0,10,0" />
-                                                <TextBlock Text="{loc:Localized Size, BinarySizes=True}" FontWeight="SemiBold"
-                                                           Typography.NumeralAlignment="Tabular" Margin="0,0,8,0" />
-                                                <TextBlock Text="{loc:Loc Cleanup.Attention}" Foreground="{DynamicResource WarningBrush}"
-                                                           Visibility="{Binding NeedsAttention, Converter={StaticResource BoolToVis}}" />
-                                            </WrapPanel>
-                                        </Expander.Header>
-                                        <StackPanel Margin="26,3,6,8">
-                                            <TextBlock Text="{loc:Localized Description}" TextWrapping="Wrap" Style="{StaticResource CaptionText}" />
-                                            <TextBlock Text="{loc:Localized Category.Attention}" TextWrapping="Wrap" Style="{StaticResource OptionalText}" />
-                                            <TextBlock Text="{loc:Localized Category.Availability}" TextWrapping="Wrap" Style="{StaticResource OptionalText}" />
-                                            <TextBlock Text="{loc:Localized PreviewCaption}" Margin="0,4,0,2" TextWrapping="Wrap"
-                                                       Visibility="{Binding HasFilePreview, Converter={StaticResource BoolToVis}}" />
-                                            <ListBox ItemsSource="{Binding PreviewPaths}" MaxHeight="130"
-                                                     Visibility="{Binding HasFilePreview, Converter={StaticResource BoolToVis}}"
-                                                     Background="{DynamicResource InsetBgBrush}" BorderBrush="{DynamicResource GridLineBrush}"
-                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                     AutomationProperties.Name="{loc:Loc Message.CleanupPreview}">
-                                                <ListBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding}" ToolTip="{Binding}" TextWrapping="Wrap"
-                                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                    </DataTemplate>
-                                                </ListBox.ItemTemplate>
-                                            </ListBox>
-                                        </StackPanel>
-                                    </Expander>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Border>
-
-            <TextBlock Text="{loc:Loc Cleanup.NativeSection}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" Margin="0,16,0,8" />
-            <Border Style="{StaticResource CardBorder}">
+            <h:SplitPanel Breakpoint="880" SecondWidth="310">
+                <!-- Categorias de limpeza direta -->
                 <StackPanel>
-                    <TextBlock Text="{loc:Loc Cleanup.NativeDescription}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
-                    <Button x:Name="OpenDiskCleanup" Content="{loc:Loc UI.OpenWindowsDiskCleanup}"
-                            Command="{Binding OpenNativeCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
-                    <Expander x:Name="NativeDelegated" Margin="0,10,0,0">
-                        <Expander.Header>
-                            <TextBlock Text="{loc:Loc UI.DiskCleanupCategories}" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
-                        </Expander.Header>
-                        <ItemsControl x:Name="NativeCleanupCategories" ItemsSource="{Binding NativeCategories}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="8,6,0,4">
-                                        <TextBlock Text="{loc:Localized Name}" TextWrapping="Wrap" FontWeight="SemiBold" />
-                                        <TextBlock Text="{loc:Localized Description}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
-                                        <TextBlock Text="{loc:Localized Category.Availability}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Expander>
-                    <StackPanel Margin="0,12,0,0" Visibility="{Binding HasRecycle, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="{loc:Loc Message.RecycleBin}" FontWeight="SemiBold" />
-                        <TextBlock Text="{loc:Loc Cleanup.RecycleDescription}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
-                        <TextBlock Text="{loc:Localized Recycle.Category.Availability}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
-                        <WrapPanel Margin="0,4,0,4">
-                            <TextBlock Text="{loc:Localized Recycle.Size, BinarySizes=True}" Margin="0,0,12,0" />
-                            <TextBlock Text="{loc:Localized Recycle.ItemCount}" Style="{StaticResource CaptionText}" />
-                        </WrapPanel>
-                        <WrapPanel Margin="0,4,0,0">
-                            <Button Content="{loc:Loc Message.CleanupRecyclePreview}" Command="{Binding PreviewRecycleBinCommand}" Margin="0,0,8,4" />
-                            <Button x:Name="EmptyNativeRecycleButton" Content="{loc:Loc UI.EmptySelectedRecycleBin}" Command="{Binding EmptyNativeCommand}"
-                                    Style="{StaticResource DangerOutlineButton}" Margin="0,0,0,4" />
-                        </WrapPanel>
-                        <CheckBox Content="{loc:Loc Cleanup.SelectRecycle}" IsChecked="{Binding Recycle.IsSelected, Mode=TwoWay}"
-                                  IsEnabled="{Binding Recycle.Selectable}" Margin="0,3,0,0" />
-                    </StackPanel>
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Cleanup.DirectSection}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" />
+                            <WrapPanel IsEnabled="{Binding CanInteract}" Margin="0,10,0,2">
+                                <Button Content="{loc:Loc Cleanup.SelectAll}" Command="{Binding SetSelectionCommand}" CommandParameter="all" Margin="0,0,8,4" />
+                                <Button Content="{loc:Loc Cleanup.DeselectAll}" Command="{Binding SetSelectionCommand}" CommandParameter="none" Margin="0,0,8,4" />
+                            </WrapPanel>
+                            <TextBlock Text="{loc:Localized Message, BinarySizes=True}" Style="{StaticResource OptionalText}" AutomationProperties.LiveSetting="Polite" />
+                            <Expander Margin="0,6,0,0" Visibility="{Binding HasResultDetails, Converter={StaticResource BoolToVis}}">
+                                <Expander.Header>
+                                    <TextBlock Text="{loc:Loc Cleanup.ResultDetails}" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                                </Expander.Header>
+                                <TextBlock Text="{loc:Localized ResultDetails, BinarySizes=True}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                            </Expander>
+
+                            <ItemsControl x:Name="CleanupCategories" ItemsSource="{Binding Source={StaticResource GroupedCategories}}" IsEnabled="{Binding CanInteract}"
+                                          Margin="0,6,0,0" Focusable="False">
+                                <ItemsControl.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.ContainerStyle>
+                                            <Style TargetType="GroupItem">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="GroupItem">
+                                                            <Border BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,10"
+                                                                    CornerRadius="{StaticResource RadiusMd}" Background="{DynamicResource SubtleBgBrush}">
+                                                                <StackPanel>
+                                                                    <Border Background="{DynamicResource TableHeaderBrush}" CornerRadius="9,9,0,0" Padding="12,9">
+                                                                        <DockPanel>
+                                                                            <Path Data="{Binding Items[0].GroupIcon, Converter={StaticResource IconByKey}}" Style="{StaticResource LineIcon}"
+                                                                                  Margin="0,0,10,0" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                                                                            <TextBlock DockPanel.Dock="Right" FontWeight="SemiBold" Margin="10,0,0,0"
+                                                                                       Text="{Binding Items, Converter={StaticResource GroupSize}}"
+                                                                                       Typography.NumeralAlignment="Tabular" />
+                                                                            <ContentPresenter />
+                                                                        </DockPanel>
+                                                                    </Border>
+                                                                    <ItemsPresenter />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </GroupStyle.ContainerStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{loc:Localized Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                    </GroupStyle>
+                                </ItemsControl.GroupStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="12,3" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource GridLineBrush}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox x:Name="CategorySelection" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                          IsEnabled="{Binding Selectable}" AutomationProperties.Name="{loc:Localized Name}"
+                                                          Margin="0,7,5,0" VerticalAlignment="Top" />
+                                                <Expander x:Name="DirectFilePreview" Grid.Column="1" Foreground="{DynamicResource TextPrimaryBrush}"
+                                                          HorizontalContentAlignment="Stretch" AutomationProperties.Name="{loc:Localized Name}">
+                                                    <Expander.Header>
+                                                        <WrapPanel Margin="2,6">
+                                                            <TextBlock Text="{loc:Localized Name}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,10,0" />
+                                                            <TextBlock Text="{loc:Localized ItemCount}" Style="{StaticResource CaptionText}" Margin="0,0,10,0" VerticalAlignment="Center" />
+                                                            <TextBlock Text="{loc:Localized Size, BinarySizes=True}" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextBrush}"
+                                                                       Typography.NumeralAlignment="Tabular" Margin="0,0,8,0" />
+                                                            <Border Style="{StaticResource WarningBadge}" Visibility="{Binding NeedsAttention, Converter={StaticResource BoolToVis}}">
+                                                                <TextBlock Text="{loc:Loc Cleanup.Attention}" Style="{StaticResource CaptionText}" Foreground="{DynamicResource WarningBrush}" />
+                                                            </Border>
+                                                        </WrapPanel>
+                                                    </Expander.Header>
+                                                    <StackPanel Margin="2,3,6,8">
+                                                        <TextBlock Text="{loc:Localized Description}" TextWrapping="Wrap" Style="{StaticResource CaptionText}" />
+                                                        <TextBlock Text="{loc:Localized Category.Attention}" TextWrapping="Wrap" Style="{StaticResource OptionalText}" />
+                                                        <TextBlock Text="{loc:Localized Category.Availability}" TextWrapping="Wrap" Style="{StaticResource OptionalText}" />
+                                                        <TextBlock Text="{loc:Localized PreviewCaption}" Margin="0,4,0,2" TextWrapping="Wrap"
+                                                                   Visibility="{Binding HasFilePreview, Converter={StaticResource BoolToVis}}" />
+                                                        <ListBox ItemsSource="{Binding PreviewPaths}" MaxHeight="130"
+                                                                 Visibility="{Binding HasFilePreview, Converter={StaticResource BoolToVis}}"
+                                                                 Background="{DynamicResource InsetBgBrush}" BorderBrush="{DynamicResource GridLineBrush}"
+                                                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                                 AutomationProperties.Name="{loc:Loc Message.CleanupPreview}">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding}" ToolTip="{Binding}" TextWrapping="Wrap"
+                                                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                    </StackPanel>
+                                                </Expander>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Limpeza executada pelo próprio Windows -->
+                    <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,6">
+                                <Path Data="{StaticResource Icon.Windows}" Style="{StaticResource LineIcon}" Margin="0,0,10,0" TextElement.Foreground="{DynamicResource CyanBrush}" />
+                                <TextBlock Text="{loc:Loc Cleanup.NativeSection}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" />
+                            </DockPanel>
+                            <TextBlock Text="{loc:Loc Cleanup.NativeDescription}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                            <Button x:Name="OpenDiskCleanup" Content="{loc:Loc UI.OpenWindowsDiskCleanup}"
+                                    Command="{Binding OpenNativeCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+                            <Expander x:Name="NativeDelegated" Margin="0,10,0,0">
+                                <Expander.Header>
+                                    <TextBlock Text="{loc:Loc UI.DiskCleanupCategories}" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                                </Expander.Header>
+                                <ItemsControl x:Name="NativeCleanupCategories" ItemsSource="{Binding NativeCategories}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="8,6,0,4">
+                                                <TextBlock Text="{loc:Localized Name}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                                <TextBlock Text="{loc:Localized Description}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                                <TextBlock Text="{loc:Localized Category.Availability}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Expander>
+                            <StackPanel Margin="0,12,0,0" Visibility="{Binding HasRecycle, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{loc:Loc Message.RecycleBin}" FontWeight="SemiBold" />
+                                <TextBlock Text="{loc:Loc Cleanup.RecycleDescription}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Localized Recycle.Category.Availability}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                <WrapPanel Margin="0,4,0,4">
+                                    <TextBlock Text="{loc:Localized Recycle.Size, BinarySizes=True}" Margin="0,0,12,0" />
+                                    <TextBlock Text="{loc:Localized Recycle.ItemCount}" Style="{StaticResource CaptionText}" />
+                                </WrapPanel>
+                                <WrapPanel Margin="0,4,0,0">
+                                    <Button Content="{loc:Loc Message.CleanupRecyclePreview}" Command="{Binding PreviewRecycleBinCommand}" Margin="0,0,8,4" />
+                                    <Button x:Name="EmptyNativeRecycleButton" Content="{loc:Loc UI.EmptySelectedRecycleBin}" Command="{Binding EmptyNativeCommand}"
+                                            Style="{StaticResource DangerOutlineButton}" Margin="0,0,0,4" />
+                                </WrapPanel>
+                                <CheckBox Content="{loc:Loc Cleanup.SelectRecycle}" IsChecked="{Binding Recycle.IsSelected, Mode=TwoWay}"
+                                          IsEnabled="{Binding Recycle.Selectable}" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
-            </Border>
+
+                <!-- Estimativa da seleção: o único botão que limpa abre a revisão antes de excluir. -->
+                <StackPanel>
+                    <Border Style="{StaticResource HeroCard}" Padding="18">
+                        <StackPanel>
+                            <Image Source="pack://application:,,,/WinCoreManager;component/Assets/Nebula/reciclagem-3d.png" Height="170" Stretch="Uniform"
+                                   IsHitTestVisible="False">
+                                <Image.OpacityMask>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="Black" Offset="0.62" />
+                                        <GradientStop Color="Transparent" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Image.OpacityMask>
+                            </Image>
+                            <TextBlock Text="{loc:Loc Cleanup.EstimatedSelection}" Foreground="{DynamicResource OnHeroMutedBrush}"
+                                       TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock Text="{loc:Localized SelectedSizeText, BinarySizes=True}" FontFamily="{StaticResource FontDisplay}" FontSize="32"
+                                       FontWeight="Bold" Foreground="{DynamicResource OnHeroAccentBrush}" TextAlignment="Center" />
+                            <TextBlock Text="{loc:Localized SelectionText, BinarySizes=True}" TextWrapping="Wrap" TextAlignment="Center"
+                                       Foreground="{DynamicResource OnHeroMutedBrush}" Margin="0,4,0,14" AutomationProperties.LiveSetting="Polite" />
+                            <Button x:Name="CleanFilesButton" Content="{loc:Loc Message.CleanupSelected}" Command="{Binding EmptyCommand}"
+                                    Style="{StaticResource PrimaryButton}" MinHeight="48" FontSize="15" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Text="{loc:Localized Status}" Style="{StaticResource OptionalText}" AutomationProperties.LiveSetting="Polite" Margin="0,0,0,8" />
+                            <Button Content="{loc:Loc Message.CleanupAnalyze}" Command="{Binding RefreshCommand}" />
+                            <Button Content="{loc:Loc UI.Cancel}" Command="{Binding CancelCommand}" Margin="0,8,0,0"
+                                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </h:SplitPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

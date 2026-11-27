@@ -55,8 +55,6 @@ internal sealed unsafe class NvidiaSensors(IGraphicsAdapters graphics) : ISensor
     private void Initialize(IReadOnlyList<DxgiAdapter> adapters, CancellationToken token)
     {
         var nvidia = adapters.Where(adapter => adapter.Pci.Vendor == 0x10DE).ToArray();
-        foreach (var adapter in adapters.Where(a => a.Pci.Vendor != 0x10DE))
-            _notices.Add(new(adapter.Name ?? Category, ReadingState.Unsupported, LocalizationService.Source("Message.TheNVMLProviderSupportsNVIDIAAdaptersOnly")));
         if (nvidia.Length == 0) return;
         _module = LoadLibraryEx("nvml.dll", 0, 0x800); // LOAD_LIBRARY_SEARCH_SYSTEM32
         if (_module == 0 && Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) is { Length: > 0 } programFiles)

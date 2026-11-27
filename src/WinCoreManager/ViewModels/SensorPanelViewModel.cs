@@ -5,15 +5,38 @@ using WinCoreManager.Services.Hardware;
 
 namespace WinCoreManager.ViewModels;
 
-public sealed partial class SensorPanelViewModel(ISensorScheduler scheduler) : ViewModelBase
+public sealed partial class SensorPanelViewModel : ViewModelBase
 {
+    private readonly ISensorScheduler scheduler;
+
+    public SensorPanelViewModel(ISensorScheduler scheduler)
+    {
+        this.scheduler = scheduler;
+        Title = LocalizationService.Source("UI.Sensors");
+    }
+
+    internal Action? OpenDriveHealth { get; set; }
+    public bool CanOpenDriveHealth => OpenDriveHealth is not null;
+    [ObservableProperty] private bool _showDetails;
+    [ObservableProperty] private bool _showCpuCores;
+    public int AvailableComponentCount => Groups.Count(group => group.HasCpuCoreReadings ||
+        group.Readings.Any(reading => reading.State == ReadingState.Available));
+
+    [RelayCommand]
+    private void ToggleDetails() => ShowDetails = !ShowDetails;
+
+    [RelayCommand]
+    private void ToggleCpuCores() => ShowCpuCores = !ShowCpuCores;
+
+    [RelayCommand]
+    private void ShowDriveHealth() => OpenDriveHealth?.Invoke();
     private bool _active;
     private bool _closed;
     private bool _pausedByUser;
     private CancellationTokenSource? _monitor;
     private Task _running = Task.CompletedTask;
 
-    [ObservableProperty] private IReadOnlyList<SensorGroup> _groups = [];
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(AvailableComponentCount))] private IReadOnlyList<SensorGroup> _groups = [];
     [ObservableProperty] private IReadOnlyList<SensorNotice> _notices = [];
     [ObservableProperty] private string _status = LocalizationService.Source("Message.WaitingForTheFirstReading");
     [ObservableProperty] private string _lastUpdate = LocalizationService.Source("Message.LastUpdated");

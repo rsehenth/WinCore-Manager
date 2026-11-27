@@ -528,7 +528,19 @@ public class MachineUninstallTests
                 using var database = new SqliteConnection(connectionString.ToString());
                 SqliteConnection.ClearPool(database);
             }
-            Directory.Delete(_directory, recursive: true);
+            // A file monitor can briefly keep the just-written receipt open after the test completes.
+            for (var retry = 0; ; retry++)
+            {
+                try
+                {
+                    Directory.Delete(_directory, recursive: true);
+                    return;
+                }
+                catch (IOException error) when (retry < 16 && (error.HResult & 0xFFFF) is 32 or 33)
+                {
+                    Thread.Sleep(50);
+                }
+            }
         }
     }
 

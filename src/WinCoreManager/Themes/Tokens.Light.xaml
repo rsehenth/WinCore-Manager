@@ -1,64 +1,123 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime">
-    <!-- WinCore Manager — skin Light (cinza neutro e azul contido). Mesmas chaves em Tokens.Dark.xaml e Tokens.Light.xaml (teste garante a paridade). -->
+    <!-- WinCore Manager — skin Nebula Light. Gerado por tools/New-ThemeTokens.py; edite a tabela, não este arquivo. -->
 
-    <!-- surfaces -->
-    <SolidColorBrush x:Key="SidebarBgBrush" Color="#EEEFF1" />   <!-- barra lateral e barra de título -->
-    <SolidColorBrush x:Key="WindowBgBrush" Color="#F6F7F8" />   <!-- canvas das páginas (BackgroundPrimary) -->
-    <SolidColorBrush x:Key="CardBgBrush" Color="#FFFFFF" />   <!-- cartões, tabelas, campos (SurfacePrimary) -->
-    <SolidColorBrush x:Key="CardHoverBrush" Color="#F8F9FA" />   <!-- cartão clicável em hover -->
-    <SolidColorBrush x:Key="SubtleBgBrush" Color="#F1F2F4" />   <!-- faixas internas (BackgroundSecondary) -->
-    <SolidColorBrush x:Key="InsetBgBrush" Color="#EFF0F2" />   <!-- áreas rebaixadas: log, bloco de comando, caixa do checkbox -->
-    <SolidColorBrush x:Key="PopupBgBrush" Color="#FFFFFF" />   <!-- popups, tooltips, menus (SurfaceElevated) -->
-    <SolidColorBrush x:Key="ButtonBgBrush" Color="#F3F4F6" />   <!-- botão secundário -->
-    <SolidColorBrush x:Key="RowHoverBrush" Color="#F2F4F7" />   <!-- linha de tabela em hover -->
-    <SolidColorBrush x:Key="RowAltBrush" Color="#06000000" />   <!-- zebra -->
-    <SolidColorBrush x:Key="HoverLayerBrush" Color="#0D000000" />   <!-- camada de hover (nav, checkbox) -->
+    <!-- superfícies -->
+    <SolidColorBrush x:Key="SidebarBgBrush" Color="#E3EBF7" />
+    <SolidColorBrush x:Key="WindowBgBrush" Color="#EEF3FA" />
+    <SolidColorBrush x:Key="CardBgBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CardHoverBrush" Color="#F6F9FD" />
+    <SolidColorBrush x:Key="SubtleBgBrush" Color="#F3F7FC" />
+    <SolidColorBrush x:Key="InsetBgBrush" Color="#E9F0FA" />
+    <SolidColorBrush x:Key="PopupBgBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ButtonBgBrush" Color="#EEF3FB" />
+    <SolidColorBrush x:Key="RowHoverBrush" Color="#EAF2FD" />
+    <SolidColorBrush x:Key="RowAltBrush" Color="#05000000" />
+    <SolidColorBrush x:Key="HoverLayerBrush" Color="#120A66CC" />
 
-    <!-- borders -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#E0E2E6" />   <!-- 1px padrão de cartão/divisor (BorderDefault) -->
-    <SolidColorBrush x:Key="BorderStrongBrush" Color="#CBCED4" />   <!-- bordas de botão -->
-    <SolidColorBrush x:Key="BorderControlBrush" Color="#6E727A" />   <!-- contorno de campos e caixas (3:1) -->
-    <SolidColorBrush x:Key="GridLineBrush" Color="#E8EAED" />   <!-- divisores internos -->
-    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#7F838B" />   <!-- barra de rolagem -->
-    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#6A6E76" />   <!-- barra de rolagem em hover -->
-    <SolidColorBrush x:Key="ScrollThumbDragBrush" Color="#565A62" />   <!-- barra de rolagem arrastada -->
-    <SolidColorBrush x:Key="ToggleOffBrush" Color="#D3D6DB" />   <!-- trilho do interruptor desligado -->
+    <!-- contornos -->
+    <SolidColorBrush x:Key="BorderBrush" Color="#D3DFEF" />
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="#B3C4DD" />
+    <SolidColorBrush x:Key="BorderControlBrush" Color="#5F7392" />
+    <SolidColorBrush x:Key="GridLineBrush" Color="#E2E9F4" />
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#6E819F" />
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#5F7392" />
+    <SolidColorBrush x:Key="ScrollThumbDragBrush" Color="#4B5E7C" />
+    <SolidColorBrush x:Key="ToggleOffBrush" Color="#CBD6E6" />
 
-    <!-- text -->
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1B1D21" />
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#565A62" />
-    <SolidColorBrush x:Key="TextMutedBrush" Color="#5E626A" />   <!-- placeholder e legendas terciárias (>=4.5:1) -->
-    <SolidColorBrush x:Key="TextDisabledBrush" Color="#9B9EA6" />   <!-- somente desabilitado -->
+    <!-- texto -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F1F36" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#44577A" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#4F6283" />
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="#8E9DB5" />
 
-    <!-- accent -->
-    <SolidColorBrush x:Key="AccentBrush" Color="#2B67BF" />
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#2359A8" />
-    <SolidColorBrush x:Key="AccentPressedBrush" Color="#1D4C91" />
-    <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFF" />   <!-- texto sobre acento -->
-    <SolidColorBrush x:Key="AccentTextBrush" Color="#22569F" />   <!-- acento como texto/ícone/foco (FocusBorder) -->
-    <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E6ECF6" />   <!-- fundo de seleção (SelectionBackground) -->
-    <SolidColorBrush x:Key="AccentSubtleHoverBrush" Color="#DAE3F2" />
-    <SolidColorBrush x:Key="AccentBorderBrush" Color="#B0C3E2" />
-    <SolidColorBrush x:Key="RowSelectedBrush" Color="#E6ECF6" />
+    <!-- acento -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#0A66CC" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#0857AE" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="#064A93" />
+    <SolidColorBrush x:Key="OnAccentBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AccentTextBrush" Color="#0857AE" />
+    <SolidColorBrush x:Key="AccentSubtleBrush" Color="#DDEBFD" />
+    <SolidColorBrush x:Key="AccentSubtleHoverBrush" Color="#CFE1FB" />
+    <SolidColorBrush x:Key="AccentBorderBrush" Color="#9EC2EF" />
+    <SolidColorBrush x:Key="RowSelectedBrush" Color="#DDEBFD" />
 
-    <!-- semantic -->
-    <SolidColorBrush x:Key="SuccessBrush" Color="#1D7440" />
-    <SolidColorBrush x:Key="SuccessSubtleBrush" Color="#E4F2E9" />
-    <SolidColorBrush x:Key="WarningBrush" Color="#93590A" />
-    <SolidColorBrush x:Key="WarningSubtleBrush" Color="#FBF1DE" />
+    <!-- estados -->
+    <SolidColorBrush x:Key="SuccessBrush" Color="#14703A" />
+    <SolidColorBrush x:Key="SuccessSubtleBrush" Color="#E2F4E9" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#8A5200" />
+    <SolidColorBrush x:Key="WarningSubtleBrush" Color="#FCF0DC" />
     <SolidColorBrush x:Key="DangerBrush" Color="#C0392B" />
     <SolidColorBrush x:Key="DangerTextBrush" Color="#B3261E" />
-    <SolidColorBrush x:Key="DangerBorderBrush" Color="#E2A7A1" />
-    <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FBEBE9" />
+    <SolidColorBrush x:Key="DangerBorderBrush" Color="#E5AAA6" />
+    <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FBE9EC" />
     <SolidColorBrush x:Key="DangerHoverBrush" Color="#A22F23" />
-    <SolidColorBrush x:Key="InfoSubtleBrush" Color="#E6ECF6" />   <!-- aviso informativo -->
+    <SolidColorBrush x:Key="InfoSubtleBrush" Color="#E3EFFD" />
+    <SolidColorBrush x:Key="PurpleBrush" Color="#5B3FC4" />
+    <SolidColorBrush x:Key="CyanBrush" Color="#0A66CC" />
+    <SolidColorBrush x:Key="GlowBorderBrush" Color="#4C94E6" />
 
-    <!-- cores brutas (gradiente do progresso indeterminado e sombra de popups) -->
-    <Color x:Key="AccentColor">#2B67BF</Color>
-    <Color x:Key="AccentColorClear">#002B67BF</Color>
-    <Color x:Key="ShadowColor">#1B1D21</Color>
+    <!-- painéis de arte: azul-marinho nas duas skins para os recortes comporem sem moldura -->
+    <SolidColorBrush x:Key="OnHeroBrush" Color="#F1F6FF" />
+    <SolidColorBrush x:Key="OnHeroMutedBrush" Color="#C5D4EA" />
+    <SolidColorBrush x:Key="OnHeroAccentBrush" Color="#7CCFFF" />
+    <SolidColorBrush x:Key="OnPrimaryBrush" Color="#FFFFFF" />
+
+    <!-- gradientes prontos: Controls.xaml e as páginas não declaram cor -->
+    <LinearGradientBrush x:Key="PageGradientBrush" StartPoint="0.6,0" EndPoint="0.4,1">
+        <GradientStop Color="#F8FBFF" Offset="0" />
+        <GradientStop Color="#EEF3FA" Offset="0.3" />
+        <GradientStop Color="#EEF3FA" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SidebarGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#E9F0FA" Offset="0" />
+        <GradientStop Color="#E3EBF7" Offset="0.6" />
+        <GradientStop Color="#DCE6F5" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CardGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFFFFF" Offset="0" />
+        <GradientStop Color="#FAFCFF" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TableHeaderBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#EBF2FC" Offset="0" />
+        <GradientStop Color="#E3ECF9" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="PrimaryGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0A6BD6" Offset="0" />
+        <GradientStop Color="#0750AD" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="NavSelectedBrush" StartPoint="0,0" EndPoint="1,0.4">
+        <GradientStop Color="#0A6BD6" Offset="0" />
+        <GradientStop Color="#0857AE" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="HeroBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#14365F" Offset="0" />
+        <GradientStop Color="#0D2443" Offset="0.55" />
+        <GradientStop Color="#0A1B33" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TileBlueBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#E3EFFD" Offset="0" />
+        <GradientStop Color="#F5F9FF" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TilePurpleBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#ECE7FB" Offset="0" />
+        <GradientStop Color="#F8F6FE" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TileAmberBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FCF0DC" Offset="0" />
+        <GradientStop Color="#FEF9F0" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TileCyanBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#DFF3FE" Offset="0" />
+        <GradientStop Color="#F4FBFF" Offset="1" />
+    </LinearGradientBrush>
+
+    <!-- cores brutas, sombra de popup e opacidade da arte decorativa -->
+    <Color x:Key="AccentColor">#0A66CC</Color>
+    <Color x:Key="AccentColorClear">#000A66CC</Color>
+    <Color x:Key="ShadowColor">#0F1F36</Color>
     <sys:Double x:Key="PopupShadowOpacity">0.16</sys:Double>
+    <sys:Double x:Key="ArtOpacity">0.3</sys:Double>
     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
 </ResourceDictionary>

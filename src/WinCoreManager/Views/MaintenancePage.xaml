@@ -11,7 +11,7 @@
         <h:NullToCollapsedConverter x:Key="NullToCollapsed" />
 
         <DataTemplate x:Key="ToolCardTemplate">
-            <Border Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,0,0,8">
+            <Border Style="{StaticResource CardBorder}" Padding="16,14" Margin="0,0,12,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -41,13 +41,17 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="{StaticResource PagePadding}">
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1320">
 
-            <StackPanel Margin="0,0,0,20">
-                <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-                <TextBlock Text="{loc:Localized StatusText}"
-                           Style="{StaticResource PageSubtitleText}"
-                           Margin="0,4,0,0" />
+            <StackPanel Margin="0,0,0,18">
+                <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Wrench}" Margin="0">
+                    <HeaderedContentControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+                            <TextBlock Text="{loc:Localized StatusText}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </HeaderedContentControl.Header>
+                </HeaderedContentControl>
                 <Border Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,8,0,0"
                         Visibility="{Binding PendingRecoveryNotice, Converter={StaticResource NullToCollapsed}}">
                     <StackPanel>
@@ -60,8 +64,8 @@
 
             <!-- Reparo Completo -->
             <Border Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource CardBgBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource TileBlueBrush}"
+                    BorderBrush="{DynamicResource GlowBorderBrush}"
                     Margin="0,0,0,16"
                     IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBool}}">
                 <Grid>
@@ -153,7 +157,13 @@
             </Border>
 
             <!-- Ferramentas individuais -->
-            <ItemsControl ItemsSource="{Binding Tools}" ItemTemplate="{StaticResource ToolCardTemplate}" />
+            <ItemsControl ItemsSource="{Binding Tools}" ItemTemplate="{StaticResource ToolCardTemplate}" Margin="0,0,-12,0" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <h:TileGrid MinItemWidth="360" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
             <views:DiskHealthCard Detailed="True" Margin="0,24,0,0" />
         </StackPanel>
     </ScrollViewer>

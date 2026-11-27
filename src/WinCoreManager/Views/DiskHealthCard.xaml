@@ -5,6 +5,29 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
+        <!-- Ilustração conforme o tipo informado pelo próprio disco; tipo desconhecido usa o ícone neutro. -->
+        <Style x:Key="DiskArt" TargetType="Image">
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TypeLabel}" Value="HDD">
+                    <Setter Property="Source" Value="pack://application:,,,/WinCoreManager;component/Assets/Nebula/hdd.png" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeLabel}" Value="SSD">
+                    <Setter Property="Source" Value="pack://application:,,,/WinCoreManager;component/Assets/Nebula/ssd.png" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeLabel}" Value="SSD SATA">
+                    <Setter Property="Source" Value="pack://application:,,,/WinCoreManager;component/Assets/Nebula/ssd.png" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeLabel}" Value="NVMe">
+                    <Setter Property="Source" Value="pack://application:,,,/WinCoreManager;component/Assets/Nebula/nvme.png" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeLabel}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="DiskCard" TargetType="Border" BasedOn="{StaticResource CardBorder}">
             <Setter Property="Padding" Value="20,16,20,8" />
             <Setter Property="Margin" Value="0,0,12,12" />
@@ -120,7 +143,9 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="48" Height="40" Margin="0,0,12,0" VerticalAlignment="Top"
+                        <StackPanel Margin="0,0,12,0" VerticalAlignment="Top">
+                        <Image Style="{StaticResource DiskArt}" Width="52" Height="34" />
+                        <Border Width="52" MinHeight="24" Margin="0,2,0,0"
                                 Background="{DynamicResource SubtleBgBrush}" BorderThickness="1"
                                 BorderBrush="{DynamicResource BorderStrongBrush}" CornerRadius="{StaticResource RadiusMd}">
                             <Grid>
@@ -131,6 +156,7 @@
                                            Visibility="{Binding HasUnknownType, Converter={StaticResource BoolToVis}}" />
                             </Grid>
                         </Border>
+                        </StackPanel>
                         <StackPanel Grid.Column="1">
                             <!-- Até duas linhas; o restante fica no ToolTip. -->
                             <TextBlock Text="{loc:Localized Model}" FontWeight="SemiBold" TextWrapping="Wrap"
@@ -156,7 +182,8 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel>
+                            <StackPanel Visibility="{Binding ShowsWear, Converter={StaticResource BoolToVis}}"
+                                        ToolTip="{loc:Localized WearTooltip}">
                                 <TextBlock Text="{loc:Loc DiskHealth.LifeLabel}" Style="{StaticResource FieldLabelText}" TextWrapping="Wrap" />
                                 <TextBlock Text="{Binding Remaining}" Style="{StaticResource ReadingValue}"
                                            Visibility="{Binding HasRemaining, Converter={StaticResource BoolToVis}}" />
@@ -183,7 +210,12 @@
                                           Visibility="{Binding HasNoRemaining, Converter={StaticResource BoolToVis}}" />
                                 </Grid>
                             </StackPanel>
+                            <StackPanel Visibility="{Binding IsMechanical, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{loc:Loc DiskHealth.SmartLabel}" Style="{StaticResource FieldLabelText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Localized Health}" Style="{StaticResource ReadingValue}" TextWrapping="Wrap" />
+                            </StackPanel>
                             <Border Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="{DynamicResource GridLineBrush}"
+                                    ToolTip="{loc:Localized TemperatureTooltip}"
                                     Margin="16,0,0,0" Padding="16,0,0,0" MinWidth="112">
                                 <StackPanel>
                                     <TextBlock Text="{loc:Loc DiskHealth.Metric.Temperature}" Style="{StaticResource FieldLabelText}" />
@@ -220,9 +252,73 @@
                 </DockPanel>
             </Border>
         </DataTemplate>
+
+        <!-- Linha compacta (Painel): mesmos dados do cartão, sem ocultar estados desconhecidos. -->
+        <DataTemplate x:Key="DiskRowTemplate">
+            <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource GridLineBrush}" Padding="0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" MinWidth="120" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" MinWidth="74" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Width="48" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <Image Style="{StaticResource DiskArt}" Width="44" Height="28" />
+                        <TextBlock Text="{Binding TypeLabel}" Style="{StaticResource CaptionText}" FontSize="10" TextAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{loc:Localized Model}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding Model}" />
+                        <WrapPanel>
+                            <TextBlock Text="{loc:Localized Capacity}" Style="{StaticResource CaptionText}" Margin="0,0,10,0" />
+                            <TextBlock Text="{loc:Localized Volumes}" Style="{StaticResource CaptionText}" Margin="0,0,10,0" />
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowsWear, Converter={StaticResource BoolToVis}}"
+                                        ToolTip="{loc:Localized WearTooltip}">
+                                <TextBlock Text="{loc:Loc DiskHealth.LifeLabel}" Style="{StaticResource CaptionText}" Margin="0,0,4,0" />
+                                <TextBlock Text="{loc:Localized Remaining}" Style="{StaticResource CaptionText}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </WrapPanel>
+                    </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource HealthBadge}" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource BadgeGlyph}" />
+                            <TextBlock Text="{loc:Localized BadgeText}" Style="{StaticResource BadgeText}" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Grid.Column="3" Text="{loc:Localized Temperature}" FontWeight="SemiBold" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="10,0,0,0" TextWrapping="Wrap" MaxWidth="90" TextAlignment="Right"
+                               ToolTip="{loc:Localized TemperatureTooltip}" />
+                    <Button Grid.Column="4" Style="{StaticResource GhostButton}" Click="OnDetails" Padding="8,0" Margin="4,0,-6,0"
+                            VerticalAlignment="Center" AutomationProperties.Name="{loc:Loc DiskHealth.Details}"
+                            AutomationProperties.HelpText="{Binding Model}" ToolTip="{loc:Loc DiskHealth.Details}">
+                        <Path Data="{StaticResource Icon.Chevron}" Style="{StaticResource LineIcon}" Width="9" Height="12" />
+                    </Button>
+                </Grid>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
-    <StackPanel>
+    <Grid>
+    <Border x:Name="CompactCard" Style="{StaticResource CardBorder}" Visibility="Collapsed">
+        <StackPanel>
+            <DockPanel Margin="0,0,0,8">
+                <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Command="{Binding RefreshCommand}"
+                        Content="{loc:Loc DiskHealth.Refresh}" Margin="8,-6,-8,0" />
+                <Path Data="{StaticResource Icon.Disk}" Style="{StaticResource LineIcon}" Margin="0,0,10,0"
+                      TextElement.Foreground="{DynamicResource CyanBrush}" />
+                <TextBlock Text="{loc:Loc DiskHealth.Title}" Style="{StaticResource SectionText}" TextWrapping="Wrap"
+                           VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level2" />
+            </DockPanel>
+            <TextBlock Text="{loc:Localized Status}" Style="{StaticResource OptionalCaptionText}" Margin="0,0,0,6"
+                       AutomationProperties.LiveSetting="Polite" />
+            <ItemsControl ItemsSource="{Binding Disks}" ItemTemplate="{StaticResource DiskRowTemplate}" Focusable="False" />
+            <TextBlock Text="{loc:Localized Captured}" Style="{StaticResource OptionalCaptionText}"
+                       Foreground="{DynamicResource TextMutedBrush}" Margin="0,6,0,0" />
+        </StackPanel>
+    </Border>
+
+    <StackPanel x:Name="FullView">
         <!-- Cabeçalho da seção, direto no canvas: os cards são dos discos. -->
         <!-- Recuo igual ao dos cartões, para alinhar bloco de ícone, título e botão com o resto da página. -->
         <Grid Margin="21,0,21,12">
@@ -272,4 +368,5 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
     </StackPanel>
+    </Grid>
 </UserControl>

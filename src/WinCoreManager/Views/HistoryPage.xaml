@@ -18,11 +18,15 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-            <TextBlock Text="{loc:Localized StatusText}"
-                       Style="{StaticResource PageSubtitleText}"
-                       Margin="0,4,0,0" />
+        <StackPanel Grid.Row="0">
+            <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.History}">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+                        <TextBlock Text="{loc:Localized StatusText}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </HeaderedContentControl>
         </StackPanel>
 
         <!-- Filtros -->
@@ -209,13 +213,7 @@
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <Border Style="{StaticResource IconTile}" Width="56" Height="56" CornerRadius="8">
-                    <TextBlock Text="&#xE81C;"
-                               Style="{StaticResource IconText}"
-                               FontSize="24"
-                               Foreground="{DynamicResource AccentTextBrush}"
-                               HorizontalAlignment="Center" />
-                </Border>
+                <Image Source="pack://application:,,,/WinCoreManager;component/Assets/Nebula/empty-history.png" Width="150" Stretch="Uniform" />
                 <TextBlock Text="{loc:Loc UI.NoRecordsFound}"
                            FontSize="16"
                            FontWeight="SemiBold"

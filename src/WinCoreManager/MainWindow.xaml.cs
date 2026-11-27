@@ -38,9 +38,36 @@ public partial class MainWindow : Window
         Width = Math.Min(Width, workArea.Width);
         Height = Math.Min(Height, workArea.Height);
 
+        // Painel e Sensores compartilham a mesma sessão de monitoramento; nas demais telas ela é liberada.
+        void UpdateSensors() => viewModel.Sensors.SetActive(IsActive && WindowState != WindowState.Minimized
+            && (viewModel.CurrentViewModel == viewModel.Sensors || viewModel.CurrentViewModel == viewModel.Dashboard));
+        void OnNavigationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.CurrentViewModel))
+                UpdateSensors();
+        }
+
+        viewModel.PropertyChanged += OnNavigationChanged;
+        Deactivated += (_, _) => viewModel.Sensors.SetActive(false);
+        StateChanged += (_, _) => UpdateSensors();
+        Closed += async (_, _) =>
+        {
+            viewModel.PropertyChanged -= OnNavigationChanged;
+            await viewModel.Sensors.CloseAsync();
+        };
+
+        // Sidebar acompanha a largura; a arte só aparece quando sobra altura para a navegação inteira.
+        SizeChanged += (_, e) =>
+        {
+            SidebarColumn.Width = new GridLength(e.NewSize.Width < 1000 ? 212 : e.NewSize.Width < 1440 ? 248 : 280);
+            SidebarArt.Visibility = e.NewSize.Height < 940 ? Visibility.Collapsed : Visibility.Visible;
+            BrandTagline.Visibility = e.NewSize.Height < 640 ? Visibility.Collapsed : Visibility.Visible;
+        };
+
         SourceInitialized += (_, _) => WindowEffects.Apply(this);
         Activated += (_, _) =>
         {
+            UpdateSensors();
             viewModel.Dashboard.Activation.RefreshOnReturn();
             viewModel.Updates.RefreshInterruptionState();
         };

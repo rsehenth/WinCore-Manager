@@ -1,7 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime">
-    <!-- Usa as cores do esquema de contraste selecionado no Windows. -->
+    <!-- Cores do esquema de contraste do Windows. Gerado por tools/New-ThemeTokens.py; edite a tabela, não este arquivo. -->
+
+    <!-- superfícies -->
     <SolidColorBrush x:Key="SidebarBgBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="WindowBgBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="CardBgBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
@@ -13,6 +15,8 @@
     <SolidColorBrush x:Key="RowHoverBrush" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}" />
     <SolidColorBrush x:Key="RowAltBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="HoverLayerBrush" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}" />
+
+    <!-- contornos -->
     <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
     <SolidColorBrush x:Key="BorderStrongBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
     <SolidColorBrush x:Key="BorderControlBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
@@ -21,10 +25,14 @@
     <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
     <SolidColorBrush x:Key="ScrollThumbDragBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
     <SolidColorBrush x:Key="ToggleOffBrush" Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />
+
+    <!-- texto -->
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
     <SolidColorBrush x:Key="TextMutedBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />
+
+    <!-- acento -->
     <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
     <SolidColorBrush x:Key="AccentPressedBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
@@ -34,6 +42,8 @@
     <SolidColorBrush x:Key="AccentSubtleHoverBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="AccentBorderBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
     <SolidColorBrush x:Key="RowSelectedBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+
+    <!-- estados -->
     <SolidColorBrush x:Key="SuccessBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
     <SolidColorBrush x:Key="SuccessSubtleBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="WarningBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
@@ -44,8 +54,33 @@
     <SolidColorBrush x:Key="DangerSubtleBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="DangerHoverBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
     <SolidColorBrush x:Key="InfoSubtleBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="PurpleBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="CyanBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="GlowBorderBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+
+    <!-- painéis de arte: azul-marinho nas duas skins para os recortes comporem sem moldura -->
+    <SolidColorBrush x:Key="OnHeroBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="OnHeroMutedBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="OnHeroAccentBrush" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="OnPrimaryBrush" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+
+    <!-- gradientes prontos: Controls.xaml e as páginas não declaram cor -->
+    <SolidColorBrush x:Key="PageGradientBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="SidebarGradientBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="CardGradientBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="TableHeaderBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="PrimaryGradientBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="NavSelectedBrush" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="HeroBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="TileBlueBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="TilePurpleBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="TileAmberBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="TileCyanBrush" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+
+    <!-- cores brutas, sombra de popup e opacidade da arte decorativa -->
     <Color x:Key="AccentColor">#FFFFFFFF</Color>
     <Color x:Key="AccentColorClear">#00000000</Color>
     <Color x:Key="ShadowColor">#00000000</Color>
     <sys:Double x:Key="PopupShadowOpacity">0</sys:Double>
+    <sys:Double x:Key="ArtOpacity">0</sys:Double>
 </ResourceDictionary>

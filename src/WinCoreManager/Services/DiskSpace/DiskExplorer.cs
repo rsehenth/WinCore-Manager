@@ -17,11 +17,10 @@ internal static class DiskExplorer
         if (!DiskVolumeCatalog.Matches(volume))
             return false;
 
-        var names = new Stack<string>();
-        for (; directory.Parent is not null; directory = directory.Parent)
-            names.Push(directory.Name);
-        if (directory.Name != volume.Root || names.Any(name => !IsShellSegment(name))
-            || (file is not null && !IsShellSegment(file.Name)))
+        string[] names;
+        try { names = DiskScanPaths.RelativeParts(volume, directory).ToArray(); }
+        catch (IOException) { return false; }
+        if (names.Any(name => !IsShellSegment(name)) || (file is not null && !IsShellSegment(file.Name)))
             return false;
 
         var handles = new Stack<SafeFileHandle>();
@@ -29,7 +28,7 @@ internal static class DiskExplorer
         {
             handles.Push(NativeDiskDirectory.OpenAbsolute(volume.VolumePath, guard: true));
             var path = volume.Root;
-            while (names.TryPop(out var name))
+            foreach (var name in names)
             {
                 handles.Push(NativeDiskDirectory.OpenChild(handles.Peek(), name, directory: true, guard: true));
                 path = Path.Join(path, name);

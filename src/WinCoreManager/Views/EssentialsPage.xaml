@@ -23,9 +23,14 @@
         </TextBlock>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="1120">
-                <TextBlock Text="{loc:Loc Essentials.Title}" Style="{StaticResource PageTitleText}" TextWrapping="Wrap" />
-                <TextBlock Text="{loc:Loc Essentials.Subtitle}" Style="{StaticResource PageSubtitleText}"
-                           TextWrapping="Wrap" Margin="0,4,0,8" />
+                <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Box}" Margin="0,0,0,12">
+                    <HeaderedContentControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="{loc:Loc Essentials.Title}" Style="{StaticResource PageTitleText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc Essentials.Subtitle}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </HeaderedContentControl.Header>
+                </HeaderedContentControl>
                 <TextBlock Text="{loc:Loc Essentials.Intro}" Style="{StaticResource CaptionText}"
                            TextWrapping="Wrap" Margin="0,0,0,16" />
 

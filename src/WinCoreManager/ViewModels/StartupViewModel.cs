@@ -92,6 +92,9 @@ public partial class StartupViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelection))]
     private StartupRow? _selectedRow;
+    [ObservableProperty] private int _totalCount;
+    [ObservableProperty] private int _enabledCount;
+    [ObservableProperty] private int _disabledCount;
     [ObservableProperty] private string _countText = LocalizationService.Source("Message.NoEntriesChecked");
     [ObservableProperty] private string _message = "";
     [ObservableProperty] private string _warning = "";
@@ -219,6 +222,9 @@ public partial class StartupViewModel : ViewModelBase
             .Select(entry => new StartupRow(entry)).ToArray();
         SelectedRow = Rows.FirstOrDefault(row => row.Entry.Id == selectedId);
         var total = _current.Entries.Count;
+        TotalCount = total;
+        EnabledCount = _current.Entries.Count(entry => entry.Status == StartupStatus.Enabled);
+        DisabledCount = _current.Entries.Count(entry => entry.Status == StartupStatus.Disabled);
         CountText = total == 1 ? LocalizationService.Source("Message.1EntryFound") : LocalizationService.Source("Message.0EntriesFound", total);
         if (Rows.Count != total) CountText += LocalizationService.Source("Message.0Shown", Rows.Count);
 

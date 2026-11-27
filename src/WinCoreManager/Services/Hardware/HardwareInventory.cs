@@ -3,13 +3,14 @@ using WinCoreManager.Localization;
 
 namespace WinCoreManager.Services.Hardware;
 
-public enum ReadingState { Available, NoReading, Unsupported, Restricted, Error }
+public enum ReadingState { Available, NoReading, Unsupported, Restricted, Error, TimedOut }
 public enum HardwareKind { Windows, Board, Cpu, Gpu, Ram, Disk, Network, Audio, Display, Battery }
 
 public sealed record HardwareReading(string ComponentId, string Label, object? Value, string Source,
     ReadingState State, string Unit, DateTimeOffset Timestamp)
 {
     public string? DisplayOverride { get; init; }
+    public string? Reason { get; init; }
     internal bool LocalizeValue { get; init; }
     public string Display => Render(LocalizationService.Current.Culture);
 
@@ -18,6 +19,7 @@ public sealed record HardwareReading(string ComponentId, string Label, object? V
         : State switch
     {
         ReadingState.Available when Unit == "B" && Value is ulong bytes => FormatBytes(bytes, culture),
+        ReadingState.Available when Unit == "B/s" && Value is ulong rate => $"{FormatBytes(rate, culture)}/s",
         ReadingState.Available when Value is DateTime date => date.ToString("d", culture),
         ReadingState.Available when Value is TimeSpan time => string.Create(culture, $"{(int)time.TotalDays} d {time.Hours:D2} h {time.Minutes:D2} min"),
         ReadingState.Available when Value is double number => string.Create(culture, $"{number:0.##} {Unit}").TrimEnd(),
@@ -32,6 +34,7 @@ public sealed record HardwareReading(string ComponentId, string Label, object? V
         ReadingState.NoReading => LocalizationService.Source("Message.NoReading"),
         ReadingState.Unsupported => LocalizationService.Source("Message.Unsupported"),
         ReadingState.Restricted => LocalizationService.Source("Message.RestrictedAccess"),
+        ReadingState.TimedOut => LocalizationService.Source("Sensors.ReadingTimedOut"),
         _ => LocalizationService.Source("Message.ReadingError"),
     };
 

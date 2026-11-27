@@ -5,10 +5,19 @@ namespace WinCoreManager.Services.Hardware;
 internal enum DiskHealthState { Unknown, Healthy, Attention, Critical }
 
 internal sealed record SmartMetric(string Label, string Raw, string? Normalized = null,
-    DiskHealthState Condition = DiskHealthState.Unknown);
+    DiskHealthState Condition = DiskHealthState.Unknown, ulong? Count = null, string? Source = null);
 
 internal sealed record DiskHealthSample(ReadingState State, DiskHealthState Health, string Source,
-    IReadOnlyList<SmartMetric> Metrics, int? Celsius = null, int? RemainingLife = null);
+    IReadOnlyList<SmartMetric> Metrics, int? Celsius = null, int? RemainingLife = null)
+{
+    public DateTimeOffset? CollectedAt { get; init; }
+    public DiskTemperatureResult? NativeTemperature { get; init; }
+    public string? TemperatureSource { get; init; }
+    public string? WearSource { get; init; }
+    public string? UnavailableReason { get; init; }
+    public ReadingState TemperatureState { get; init; } = ReadingState.NoReading;
+    public ReadingState WearState { get; init; } = ReadingState.NoReading;
+}
 
 internal sealed record PhysicalDiskHealth(HardwareDevice Device, DiskHealthSample Sample);
 
@@ -111,7 +120,7 @@ internal sealed class DiskHealthService
             var mechanical = device.Fields.Any(field => Equals(field.Value, "HDD"));
             var sample = token.IsCancellationRequested
                 ? new DiskHealthSample(ReadingState.Error, DiskHealthState.Unknown, "", [])
-                : probe.Read(number, row?.Text("SerialNumber"), bus, mechanical);
+                : probe.Read(number, WindowsStorageProvider.UniqueSerial(row, modern.Rows), bus, mechanical);
             result.Add(new(device, sample));
         }
 

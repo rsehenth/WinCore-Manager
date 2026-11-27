@@ -51,7 +51,7 @@ try {
     }
 
     $helperDirectory = Join-Path $scratch 'helper'
-    Publish-Project $helper $helperDirectory @('-p:PublishSingleFile=true', '-p:IncludeNativeLibrariesForSelfExtract=true')
+    Publish-Project $helper $helperDirectory @('-p:PublishSingleFile=true', '-p:IncludeNativeLibrariesForSelfExtract=true', '-p:PublishTrimmed=true')
     $updateExe = Join-Path $helperDirectory 'WinCoreManager.Update.exe'
     if ([Diagnostics.FileVersionInfo]::GetVersionInfo($updateExe).ProductVersion -cne $version) {
         throw 'Update helper version differs from the application.'
@@ -73,6 +73,7 @@ try {
 
     $draftZip = Join-Path $scratch $zipName
     [IO.Compression.ZipFile]::CreateFromDirectory($draft, $draftZip, [IO.Compression.CompressionLevel]::Optimal, $true)
+    & (Join-Path $PSScriptRoot 'Test-PortableReleaseFootprint.ps1') -Package $draftZip | Out-Host
     $draftSums = Join-Path $scratch 'SHA256SUMS.txt'
     [IO.File]::WriteAllLines($draftSums, @(
         "$(Get-Sha256 $draftZip)  $zipName"

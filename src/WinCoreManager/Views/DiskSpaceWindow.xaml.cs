@@ -23,6 +23,13 @@ public partial class DiskSpaceWindow : Window
     private readonly Func<DiskVolume, DiskDirectory, DiskFile?, bool> reveal;
     private readonly Action<string> copy;
     private CancellationTokenSource? scanCancellation;
+    private DiskAnalysisOptions? options;
+    private DiskAnalysisResult? analysis;
+    private Func<DiskAnalysisOptions, Action<DiskAnalysisProgress>, CancellationToken, DiskAnalysisResult>? analyze;
+    private DiskVolume? duplicateVolume;
+    private int duplicateLimit = FilePageSize;
+    private string folderSort = "Bytes";
+    private ListSortDirection folderDirection = ListSortDirection.Descending;
     private DiskScanResult? result;
     private DiskDirectory? currentFolder;
     private FolderBranch? treeRoot;
@@ -59,6 +66,19 @@ public partial class DiskSpaceWindow : Window
         UpdateActions();
     }
 
+    internal DiskSpaceWindow(DiskAnalysisOptions options,
+        Func<DiskAnalysisOptions, Action<DiskAnalysisProgress>, CancellationToken, DiskAnalysisResult>? analyze = null)
+        : this(new DiskVolumeCatalog().List, new DiskSpaceScanner().Scan)
+    {
+        this.options = options;
+        this.analyze = analyze ?? new DiskAnalysis().Scan;
+        StartButton.Content = T("ConfigureAgain");
+        RefreshButton.Content = T("Rerun");
+        FolderRankingControls.Visibility = Visibility.Visible;
+        AnalysisSummary.Visibility = Visibility.Visible;
+        UpdateActions();
+    }
+
     private static LocalizationService Text => LocalizationService.Current;
     private static string T(string key) => Text["DiskSpace." + key];
     private static string F(string key, params object?[] values) => Text.Format("DiskSpace." + key, values);
@@ -72,6 +92,11 @@ public partial class DiskSpaceWindow : Window
         Width = Math.Max(MinWidth, Math.Min(Width, work.Width - 24));
         Height = Math.Max(MinHeight, Math.Min(Height, work.Height - 32));
         PositionWithin(work);
+        if (options is not null)
+        {
+            await RunConfiguredAsync();
+            return;
+        }
         await LoadVolumesAsync(null);
         if (!closed)
             VolumePicker.Focus();
@@ -129,6 +154,12 @@ public partial class DiskSpaceWindow : Window
             return;
 
         var volume = SelectedVolume;
+        if (options is not null)
+        {
+            if (!loading && scanCancellation is null && analysis?.Volumes.FirstOrDefault(item => item.Volume == volume) is { } item)
+                Present(item);
+            return;
+        }
         DriveCapacityText.Text = volume is null ? "" :
             $"{T("Capacity")} {Size(volume.TotalBytes)}  ·  {T("Used")} {Size(volume.UsedBytes)}  ·  {T("Free")} {Size(volume.FreeBytes)}";
         if (!loading)
@@ -140,12 +171,32 @@ public partial class DiskSpaceWindow : Window
         UpdateActions();
     }
 
-    private async void OnStart(object sender, RoutedEventArgs e) => await StartAsync();
+    private async void OnStart(object sender, RoutedEventArgs e)
+    {
+        if (options is null)
+        {
+            await StartAsync();
+            return;
+        }
+
+        var dialog = new DiskAnalysisDialog(listVolumes, options) { Owner = this };
+        if (dialog.ShowDialog() == true && dialog.Options is { } selected)
+        {
+            options = selected;
+            await RunConfiguredAsync();
+        }
+    }
 
     private async void OnRefresh(object sender, RoutedEventArgs e)
     {
         if (scanCancellation is not null || loading)
             return;
+
+        if (options is not null)
+        {
+            await RunConfiguredAsync();
+            return;
+        }
 
         var previous = SelectedVolume;
         var restart = hasStarted;
@@ -212,6 +263,95 @@ public partial class DiskSpaceWindow : Window
         }
     }
 
+    private async Task RunConfiguredAsync()
+    {
+        if (options is not { } request || analyze is null || scanCancellation is not null)
+            return;
+
+        analysis = null;
+        VolumePicker.ItemsSource = null;
+        ClearResult();
+        DuplicatesTab.Visibility = Visibility.Collapsed;
+        DuplicatesGrid.ItemsSource = null;
+        PreviewFiles.ItemsSource = PreviewFolders.ItemsSource = null;
+        PreviewFilesEmpty.Visibility = PreviewFoldersEmpty.Visibility = Visibility.Visible;
+        AnalysisSummary.Text = T(request.Accelerated ? "Fast" : "Full");
+        using var cancel = new CancellationTokenSource();
+        scanCancellation = cancel;
+        StatusText.Text = T("Loading");
+        UpdateActions();
+        CancelButton.Focus();
+        var progress = new Progress<DiskAnalysisProgress>(state =>
+        {
+            if (scanCancellation != cancel || cancel.IsCancellationRequested || closed)
+                return;
+            var speed = (long)(state.Bytes / Math.Max(1, state.Elapsed.TotalSeconds));
+            var duration = Time(state.Elapsed);
+            StatusText.Text = state.HashTotal is { } total
+                ? F("HashProgress", state.HashChecked, total, duration)
+                : F("RichProgress", state.Target.Folder ?? state.Target.Volume.Root, state.TargetNumber, state.TargetCount,
+                    state.Files, state.Folders, Size(state.Bytes), duration, Size(speed));
+            SetPreview(PreviewFiles, PreviewFilesEmpty, state.PreviewFiles);
+            SetPreview(PreviewFolders, PreviewFoldersEmpty, state.PreviewFolders);
+        });
+
+        try
+        {
+            analysis = await Task.Run(() => analyze(request, ((IProgress<DiskAnalysisProgress>)progress).Report, cancel.Token));
+            cancel.Token.ThrowIfCancellationRequested();
+            if (closed)
+                return;
+
+            if (analysis.Volumes.Count == 0)
+            {
+                StatusText.Text = EmptyText.Text = T("Unavailable");
+                return;
+            }
+
+            VolumePicker.ItemsSource = analysis.Volumes.Select(item => item.Volume).ToArray();
+            VolumePicker.SelectedIndex = 0;
+            duplicateLimit = FilePageSize;
+            if (analysis.Duplicates is not null)
+            {
+                DuplicatesTab.Visibility = Visibility.Visible;
+                PresentDuplicates();
+            }
+            Present(analysis.Volumes[0]);
+        }
+        catch (OperationCanceledException) when (cancel.IsCancellationRequested)
+        {
+            if (!closed)
+                StatusText.Text = EmptyText.Text = T("Cancelled");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            if (!closed)
+                StatusText.Text = EmptyText.Text = T("Unavailable");
+        }
+        finally
+        {
+            scanCancellation = null;
+            if (!closed)
+            {
+                UpdateActions();
+                if (closeRequested)
+                    Close();
+                else if (result is null)
+                    StartButton.Focus();
+                else
+                    ((TabItem)ResultTabs.Items[0]).Focus();
+            }
+        }
+    }
+
+    private static void SetPreview(ItemsControl control, TextBlock empty, IReadOnlyList<DiskPreviewEntry> entries)
+    {
+        control.ItemsSource = entries.Select(entry => new PreviewRow(entry.Path, Size(entry.Bytes))).ToArray();
+        empty.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private sealed record PreviewRow(string Path, string Size);
+
     private void ClearResult()
     {
         result = null;
@@ -232,6 +372,19 @@ public partial class DiskSpaceWindow : Window
         result = completed;
         var p = completed.Progress;
         var volume = completed.Volume;
+        if (analysis is { } batch)
+        {
+            var scope = batch.Volumes.Count == 1 ? volume.Display : F("AnalyzedVolumes", batch.Volumes.Count);
+            AnalysisSummary.Text = F("AnalysisSummary", T(batch.Accelerated ? "Fast" : "Full"), scope,
+                Size(batch.Volumes.Sum(item => item.Progress.LogicalBytes)), Time(batch.Duration));
+            if (batch.Unavailable.Count > 0)
+                AnalysisSummary.Text += " " + F("SkippedDrives", string.Join(", ", batch.Unavailable.Select(item => item.Folder ?? item.Volume.Root)));
+            VolumeCoverageText.Text = string.Equals(completed.Root.Path, volume.Root, StringComparison.OrdinalIgnoreCase)
+                && volume.UsedBytes > 0 && p.Files > p.MissingAllocation
+                ? F("EstimatedCoverage", Math.Min(1, (double)p.AllocatedBytes / volume.UsedBytes.Value)) : "";
+            if (p.OmittedFolders > 0)
+                VolumeCoverageText.Text += " " + F("FastCoverage", p.OmittedFolders);
+        }
         TotalText.Text = Size(volume.TotalBytes);
         UsedText.Text = Size(volume.UsedBytes);
         FreeText.Text = Size(volume.FreeBytes);
@@ -245,7 +398,10 @@ public partial class DiskSpaceWindow : Window
         MeasurementText.Text = F("Measurement", p.DuplicateLinks);
         StatusText.Text = F(p.Partial ? "FinishedPartial" : "Finished", Time(p.Elapsed));
 
-        NameFilter.Text = ExtensionFilter.Text = "";
+        NameFilter.Text = ExtensionFilter.Text = FolderFilter.Text = "";
+        AllRankedFolders.IsChecked = options is not null;
+        folderSort = "Bytes";
+        folderDirection = ListSortDirection.Descending;
         fileLimit = FilePageSize;
         fileSort = "LogicalBytes";
         fileDirection = ListSortDirection.Descending;
@@ -260,13 +416,16 @@ public partial class DiskSpaceWindow : Window
     private void UpdateActions()
     {
         var busy = scanCancellation is not null;
-        StartButton.IsEnabled = !busy && !loading && SelectedVolume is not null;
+        StartButton.IsEnabled = !busy && !loading && (options is not null || SelectedVolume is not null);
+        AnalysisPreview.Visibility = busy && options is not null && result is null ? Visibility.Visible : Visibility.Collapsed;
         RefreshButton.IsEnabled = !busy && !loading;
-        VolumePicker.IsEnabled = !busy && !loading;
+        VolumePicker.IsEnabled = !busy && !loading && (options is null || analysis?.Volumes.Count > 1);
+        var showPicker = options is null || (result is not null && analysis?.Volumes.Count > 1);
+        VolumeLabel.Visibility = VolumePicker.Visibility = showPicker ? Visibility.Visible : Visibility.Collapsed;
         CancelButton.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
         CancelButton.IsEnabled = scanCancellation is { IsCancellationRequested: false };
         ScanProgress.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
-        DriveCapacityText.Visibility = result is null && SelectedVolume is not null ? Visibility.Visible : Visibility.Collapsed;
+        DriveCapacityText.Visibility = options is null && result is null && SelectedVolume is not null ? Visibility.Visible : Visibility.Collapsed;
         ResultArea.Visibility = result is not null ? Visibility.Visible : Visibility.Collapsed;
         EmptyText.Visibility = result is null && !busy ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -339,11 +498,58 @@ public partial class DiskSpaceWindow : Window
         if (currentFolder is not { } folder || result is not { } completed)
             return;
 
-        FolderGrid.ItemsSource = folder.Children.Take(folderLimit)
-            .Select(child => new FolderRow(child, completed.Root.LogicalBytes)).ToArray();
-        EmptyFolders.Text = T(folder.Inaccessible ? "Denied" : "NoFolders");
-        EmptyFolders.Visibility = folder.Children.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        MoreFoldersButton.Visibility = folder.Children.Count > folderLimit ? Visibility.Visible : Visibility.Collapsed;
+        var global = AllRankedFolders.IsChecked == true;
+        var query = FolderFilter.Text.Trim();
+        var matches = (global ? completed.LargestFolders : folder.Children)
+            .Where(node => query.Length == 0 || node.Path.Contains(query, StringComparison.CurrentCultureIgnoreCase));
+        var sign = folderDirection == ListSortDirection.Ascending ? 1 : -1;
+        var sorted = matches.ToArray();
+        if (folderSort != "Bytes" || folderDirection != ListSortDirection.Descending)
+        {
+            Array.Sort(sorted, (left, right) =>
+            {
+                var compared = folderSort switch
+                {
+                    "Name" => StringComparer.CurrentCultureIgnoreCase.Compare(global ? left.Path : left.Name, global ? right.Path : right.Name),
+                    "Count" => left.FileCount.CompareTo(right.FileCount),
+                    _ => left.LogicalBytes.CompareTo(right.LogicalBytes)
+                };
+                return compared == 0 ? StringComparer.OrdinalIgnoreCase.Compare(left.Name, right.Name) : sign * Math.Sign(compared);
+            });
+        }
+        var rows = sorted.Take(folderLimit).Select(child => new FolderRow(child, completed.Root.LogicalBytes, global)).ToArray();
+        updatingSelection = true;
+        FolderGrid.ItemsSource = rows;
+        FolderGrid.SelectedItem = rows.FirstOrDefault(row => row.Node == selection as DiskDirectory);
+        updatingSelection = false;
+        EmptyFolders.Text = T(folder.Omitted ? "FolderOmitted" : folder.Inaccessible ? "Denied" : "NoFolders");
+        EmptyFolders.Visibility = sorted.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        MoreFoldersButton.Visibility = sorted.Length > folderLimit ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var column in FolderGrid.Columns)
+            column.SortDirection = column.SortMemberPath == folderSort && column.DisplayIndex != 2 ? folderDirection : null;
+    }
+
+    private void OnFolderFilter(object sender, RoutedEventArgs e)
+    {
+        if (!ready)
+            return;
+        folderLimit = FolderPageSize;
+        UpdateFolderRows();
+    }
+
+    private void OnFolderSorting(object sender, DataGridSortingEventArgs e)
+    {
+        e.Handled = true;
+        var key = e.Column.SortMemberPath;
+        folderDirection = key == folderSort && folderDirection == ListSortDirection.Descending
+            ? ListSortDirection.Ascending : ListSortDirection.Descending;
+        folderSort = key;
+        UpdateFolderRows();
+        if (key == "Bytes")
+        {
+            foreach (var column in FolderGrid.Columns.Where(column => column.SortMemberPath == key))
+                column.SortDirection = ReferenceEquals(column, e.Column) ? folderDirection : null;
+        }
     }
 
     private void OnMoreFolders(object sender, RoutedEventArgs e)
@@ -391,7 +597,7 @@ public partial class DiskSpaceWindow : Window
     {
         if (ItemsControl.ContainerFromElement(FolderGrid, e.OriginalSource as DependencyObject) is DataGridRow
             && FolderGrid.SelectedItem is FolderRow row)
-            Navigate(row.Node);
+            ExploreFolder(row.Node);
     }
 
     private void OnFolderKeyDown(object sender, KeyEventArgs e)
@@ -399,14 +605,21 @@ public partial class DiskSpaceWindow : Window
         if (e.Key == Key.Enter && FolderGrid.SelectedItem is FolderRow row)
         {
             e.Handled = true;
-            Navigate(row.Node);
+            ExploreFolder(row.Node);
         }
     }
 
     private void OnExplore(object sender, RoutedEventArgs e)
     {
         if (selection is DiskDirectory folder)
-            Navigate(folder);
+            ExploreFolder(folder);
+    }
+
+    private void ExploreFolder(DiskDirectory folder)
+    {
+        AllRankedFolders.IsChecked = false;
+        FolderFilter.Text = "";
+        Navigate(folder);
     }
 
     private void OnFilterChanged(object sender, TextChangedEventArgs e)
@@ -447,6 +660,8 @@ public partial class DiskSpaceWindow : Window
             var compare = fileSort switch
             {
                 "Name" => StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name),
+                "Path" => StringComparer.CurrentCultureIgnoreCase.Compare(left.Path, right.Path),
+                "Extension" => StringComparer.CurrentCultureIgnoreCase.Compare(left.Extension, right.Extension),
                 "ModifiedFileTime" => left.ModifiedFileTime.CompareTo(right.ModifiedFileTime),
                 _ => left.LogicalBytes.CompareTo(right.LogicalBytes),
             };
@@ -522,7 +737,8 @@ public partial class DiskSpaceWindow : Window
             label.Children.Add(new TextBlock { Text = Size(item.Bytes), FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis });
             var tooltip = new TextBlock
             {
-                Text = F("MapTip", title, Size(item.Bytes), item.Path ?? T("OtherDetails")),
+                Text = F("SelectedSpaceShare", title, Size(item.Bytes),
+                    folder.LogicalBytes > 0 ? (double)item.Bytes / folder.LogicalBytes : 0, item.Path ?? T("OtherDetails")),
                 MaxWidth = 460,
                 TextWrapping = TextWrapping.Wrap,
             };
@@ -586,6 +802,7 @@ public partial class DiskSpaceWindow : Window
     private void Select(object target)
     {
         selection = target;
+        duplicateVolume = null;
         updatingSelection = true;
         FileGrid.SelectedItem = target is DiskFile fileTarget
             ? FileGrid.Items.OfType<FileRow>().FirstOrDefault(row => row.File == fileTarget) : null;
@@ -604,7 +821,10 @@ public partial class DiskSpaceWindow : Window
         foreach (Button button in SpaceMap.Children)
         {
             var item = (DiskMapItem)button.Tag;
-            button.BorderThickness = ReferenceEquals(item.Target ?? item, target) ? new(3) : new(1);
+            var selected = ReferenceEquals(item.Target ?? item, target);
+            button.BorderThickness = selected ? new(3) : new(1);
+            button.SetResourceReference(BorderBrushProperty, selected ? "AccentTextBrush"
+                : item.Folder is not null ? "AccentBorderBrush" : item.File is not null ? "SuccessBrush" : "BorderStrongBrush");
         }
     }
 
@@ -628,13 +848,47 @@ public partial class DiskSpaceWindow : Window
 
         var file = selection as DiskFile;
         var folder = file?.Directory ?? selection as DiskDirectory;
-        if (folder is not null && !reveal(completed.Volume, folder, file))
+        if (folder is not null && !reveal(duplicateVolume ?? completed.Volume, folder, file))
             StatusText.Text = T("ExplorerFailed");
     }
 
-    private sealed record FolderRow(DiskDirectory Node, long RootBytes)
+    private void PresentDuplicates()
+    {
+        if (analysis?.Duplicates is not { } duplicates)
+            return;
+        DuplicatesSummary.Text = F("DuplicatesSummary", duplicates.Groups.Count, duplicates.Candidates, duplicates.Inaccessible, duplicates.Omitted);
+        var rows = duplicates.Groups.SelectMany((group, index) => group.Files.Select(file => new DuplicateRow(index + 1, file)))
+            .Take(duplicateLimit + 1).ToArray();
+        DuplicatesGrid.ItemsSource = rows.Take(duplicateLimit).ToArray();
+        MoreDuplicatesButton.Visibility = rows.Length > duplicateLimit ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnMoreDuplicates(object sender, RoutedEventArgs e)
+    {
+        duplicateLimit += FilePageSize;
+        PresentDuplicates();
+    }
+
+    private void OnDuplicateSelected(object sender, SelectionChangedEventArgs e)
+    {
+        if (DuplicatesGrid.SelectedItem is not DuplicateRow row)
+            return;
+        Select(row.Entry.File);
+        duplicateVolume = row.Entry.Volume;
+    }
+
+    private sealed record DuplicateRow(int Group, DuplicateFile Entry)
+    {
+        public string Name => Entry.File.Name;
+        public string Path => Entry.File.Path;
+        public long Bytes => Entry.File.LogicalBytes;
+        public string Size => DiskSpaceWindow.Size(Bytes);
+    }
+
+    private sealed record FolderRow(DiskDirectory Node, long RootBytes, bool ShowPath)
     {
         public string Name => Node.Name;
+        public string DisplayPath => ShowPath ? Node.Path : Node.Name;
         public string Size => DiskSpaceWindow.Size(Node.LogicalBytes);
         public string Share => (RootBytes > 0 ? (double)Node.LogicalBytes / RootBytes : 0).ToString("P1", Text.Culture);
         public string FileCount => Node.FileCount.ToString("N0", Text.Culture);

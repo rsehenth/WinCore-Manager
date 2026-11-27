@@ -243,6 +243,7 @@ public sealed class DiskSpaceTests
         }));
         Assert.False(DiskExplorer.WithVerifiedLocation(drive, directory, file with { Name = @"..\file.exe" }, (_, _) => true));
         Assert.False(DiskExplorer.WithVerifiedLocation(drive, directory, file with { Name = "NUL.txt" }, (_, _) => true));
+        Assert.False(DiskExplorer.WithVerifiedLocation(drive, directory.Add(".."), null, (_, _) => true));
         var link = Path.Combine(fixture.Root, "indirect");
         CreateJunction(link, Path.GetDirectoryName(fixture.Root)!);
         try

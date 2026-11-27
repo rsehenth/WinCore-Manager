@@ -20,6 +20,8 @@ public partial class UninstallersPage : UserControl
         DataContextChanged += (_, _) => UpdateSubscription();
         Loaded += (_, _) => UpdateSubscription();
         Unloaded += (_, _) => Detach();
+        SizeChanged += (_, _) => SummaryCards.Visibility = ActualHeight < 800 || ActualWidth < 720
+            ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void UpdateSubscription()

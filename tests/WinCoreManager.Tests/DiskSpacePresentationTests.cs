@@ -72,7 +72,7 @@ public sealed class DiskSpacePresentationTests
                 await Until(() => Control<Button>(window, "StartButton").IsEnabled);
                 Assert.Equal(0, Volatile.Read(ref scans));
                 Assert.Equal(drive, Control<ComboBox>(window, "VolumePicker").SelectedItem);
-                Assert.Equal(language == "en-US" ? "Disk space analysis" : "Análise de espaço em disco", window.Title);
+                Assert.Equal(language == "en-US" ? "Advanced Space Analysis" : "Análise Avançada de Espaço", window.Title);
                 Click(window, "StartButton");
                 await Until(() => Control<Grid>(window, "ResultArea").IsVisible);
 
@@ -165,22 +165,29 @@ public sealed class DiskSpacePresentationTests
     });
 
     [Fact]
-    public Task Cleanup_button_opens_one_owned_window_without_starting_a_scan() => WpfTestThread.Run(async () =>
+    public Task Cleanup_button_opens_configuration_without_starting_a_scan() => WpfTestThread.Run(() =>
     {
+        LocalizationService.Current.Apply("pt-BR");
         var page = new CleanupPage();
         var owner = new Window { Content = page, Width = 780, Height = 600, ShowInTaskbar = false };
         owner.Show();
         try
         {
             var button = Assert.IsType<Button>(page.FindName("AnalyzeSpaceButton"));
-            Assert.Equal("Analisar espaço", AutomationProperties.GetName(button));
+            Assert.Equal("Análise Avançada de Espaço", AutomationProperties.GetName(button));
+            DiskAnalysisDialog? shown = null;
+            owner.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                shown = owner.OwnedWindows.OfType<DiskAnalysisDialog>().SingleOrDefault();
+                shown?.Close();
+            }));
             button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            var window = Assert.Single(owner.OwnedWindows.OfType<DiskSpaceWindow>());
-            await Until(() => Control<ComboBox>(window, "VolumePicker").IsEnabled);
-            Assert.False(Control<ProgressBar>(window, "ScanProgress").IsVisible);
+            Assert.NotNull(shown);
+            Assert.Null(shown.Options);
+            Assert.Empty(owner.OwnedWindows.OfType<DiskSpaceWindow>());
         }
         finally { owner.Close(); }
+        return Task.CompletedTask;
     });
 
     private static DiskScanResult Result(DiskVolume drive)

@@ -22,6 +22,7 @@ public partial class NavItem : ObservableObject
 
     public string Title { get; }
 
+    /// <summary>Chave da geometria em Themes/Icons.xaml.</summary>
     public string Glyph { get; }
 
     public ViewModelBase ViewModel { get; }

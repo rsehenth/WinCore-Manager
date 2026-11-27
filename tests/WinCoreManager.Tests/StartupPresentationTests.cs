@@ -146,7 +146,7 @@ public sealed partial class StartupPresentationTests
         {
             var state = new ScreenFixture();
             var vm = state.CreateMain();
-            Assert.Equal(new[] { "Painel", "Atualizações", "Manutenção", "Desinstalador", "Inicializar", "Limpeza", "Tweaks", "Meu Computador", "Essenciais", "Histórico", "Configurações" },
+            Assert.Equal(new[] { "Painel", "Atualizações", "Manutenção", "Desinstalador", "Inicializar", "Limpeza", "Tweaks", "Meu Computador", "Sensores", "Central de Apps", "Histórico", "Configurações" },
                 vm.NavItems.Select(item => item.Title));
             var window = new MainWindow(vm) { ShowActivated = false, ShowInTaskbar = false, Opacity = 0 };
             window.Show();
@@ -241,7 +241,7 @@ public sealed partial class StartupPresentationTests
     [InlineData("pt-BR", AppTheme.Light)]
     [InlineData("en-US", AppTheme.Dark)]
     [InlineData("en-US", AppTheme.Light)]
-    public Task Etapa12e_navigates_all_twelve_pages_in_each_language_and_theme(string language, AppTheme theme) =>
+    public Task Navigation_reaches_all_pages_in_each_language_and_theme(string language, AppTheme theme) =>
         WpfTestThread.Run(async () =>
         {
             var locale = LocalizationService.Current;
@@ -254,7 +254,7 @@ public sealed partial class StartupPresentationTests
             {
                 window.Show();
                 var layout = new[] { typeof(DashboardPage), typeof(UpdatesPage), typeof(MaintenancePage), typeof(UninstallersPage),
-                    typeof(StartupPage), typeof(CleanupPage), typeof(TweaksPage), typeof(HardwarePage), typeof(EssentialsPage),
+                    typeof(StartupPage), typeof(CleanupPage), typeof(TweaksPage), typeof(HardwarePage), typeof(SensorPanel), typeof(EssentialsPage),
                     typeof(HistoryPage), typeof(SettingsPage), typeof(AboutPage) };
                 var items = vm.NavItems.Append(vm.AboutNavItem).ToArray();
                 Assert.Equal(layout.Length, items.Length);
@@ -275,7 +275,7 @@ public sealed partial class StartupPresentationTests
                 Assert.True(settings.IsTabStop);
                 Assert.True(Assert.IsType<RadioButton>(window.FindName("AboutNav")).IsVisible);
 
-                items[8].IsSelected = true;
+                items.Single(item => item.ViewModel == vm.Essentials).IsSelected = true;
                 await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
                 var page = Assert.Single(Descendants<EssentialsPage>(window));
                 var cards = Assert.IsType<ItemsControl>(page.FindName("AppCards"));
@@ -350,9 +350,9 @@ public sealed partial class StartupPresentationTests
 
             foreach (var (item, pageType) in new (NavItem, Type)[]
             {
-                (vm.NavItems[0], typeof(DashboardPage)), (vm.NavItems[8], typeof(EssentialsPage)),
+                (vm.NavItems[0], typeof(DashboardPage)), (vm.NavItems[9], typeof(EssentialsPage)),
                 (vm.NavItems[3], typeof(UninstallersPage)), (vm.NavItems[7], typeof(HardwarePage)),
-                (vm.NavItems[9], typeof(HistoryPage)), (vm.NavItems[10], typeof(SettingsPage)),
+                (vm.NavItems[10], typeof(HistoryPage)), (vm.NavItems[11], typeof(SettingsPage)),
                 (vm.AboutNavItem, typeof(AboutPage)),
             })
             {
@@ -384,9 +384,9 @@ public sealed partial class StartupPresentationTests
                 {
                     var button = Assert.IsType<Button>(hardware.FindName("SensorsButton"));
                     button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    var sensors = Assert.Single(window.OwnedWindows.OfType<SensorWindow>());
-                    Assert.True(sensors.IsVisible);
-                    sensors.Close();
+                    Assert.Same(vm.Sensors, vm.CurrentViewModel);
+                    window.UpdateLayout();
+                    Assert.Single(Descendants<SensorPanel>(window));
                 }
             }
 

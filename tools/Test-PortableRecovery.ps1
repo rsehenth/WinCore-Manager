@@ -133,7 +133,7 @@ try {
     $project = Join-Path $PSScriptRoot '../src/WinCoreManager.Update/WinCoreManager.Update.csproj'
     $buildArgs = @('publish', $project, '-c', 'Release', '-r', 'win-x64', '--self-contained',
         '--artifacts-path', (Join-Path $scratch 'build'), '-p:PublishSingleFile=true',
-        '-p:IncludeNativeLibrariesForSelfExtract=true', '-p:RuntimeFrameworkVersion=10.0.15',
+        '-p:IncludeNativeLibrariesForSelfExtract=true', '-p:PublishTrimmed=true', '-p:RuntimeFrameworkVersion=10.0.15',
         '-p:DebugType=None', "-p:PortableRecoveryTestKeyFile=$keyFile", '-warnaserror', '--nologo', '-o', $published)
     & $sdk @buildArgs | Out-Host
     Assert-Fixture ($LASTEXITCODE -eq 0) 'The isolated test helper build failed.'

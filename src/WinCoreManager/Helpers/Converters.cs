@@ -66,6 +66,18 @@ public sealed class DurationConverter : IValueConverter
     }
 }
 
+/// <summary>Chave de recurso → recurso da aplicação (ícones da navegação).</summary>
+public sealed class ResourceKeyConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
+        value is string key ? Application.Current?.TryFindResource(key) : null;
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
 /// <summary>String nula/vazia → Collapsed; caso contrário Visible (blocos opcionais de diálogo).</summary>
 public sealed class NullToCollapsedConverter : IValueConverter
 {

@@ -7,6 +7,12 @@
         Background="{DynamicResource WindowBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
         FontFamily="Segoe UI" FontSize="13" UseLayoutRounding="True" Loaded="OnLoaded" SizeChanged="OnWindowResized">
     <Window.Resources>
+        <DataTemplate x:Key="DiskPreviewRow">
+            <DockPanel Margin="0,4">
+                <TextBlock DockPanel.Dock="Right" Text="{Binding Size}" Margin="8,0,0,0" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Path}" />
+            </DockPanel>
+        </DataTemplate>
         <Style x:Key="DiskCell" TargetType="TextBlock">
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -91,7 +97,7 @@
         <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="12,8" Margin="0,0,0,8">
             <StackPanel>
                 <WrapPanel>
-                    <Label Content="{loc:Loc DiskSpace.Drive}" Target="{Binding ElementName=VolumePicker}" Padding="0"
+                    <Label x:Name="VolumeLabel" Content="{loc:Loc DiskSpace.Drive}" Target="{Binding ElementName=VolumePicker}" Padding="0"
                            Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,4" />
                     <ComboBox x:Name="VolumePicker" Width="206" MaxDropDownHeight="230" DisplayMemberPath="Display"
                               AutomationProperties.Name="{loc:Loc DiskSpace.Drive}" SelectionChanged="OnVolumeChanged"
@@ -100,6 +106,7 @@
                             Click="OnStart" Margin="0,0,8,4" />
                     <Button x:Name="RefreshButton" Content="{loc:Loc DiskSpace.Refresh}" Click="OnRefresh" Margin="0,0,8,4" />
                 </WrapPanel>
+                <TextBlock x:Name="AnalysisSummary" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Visibility="Collapsed" />
                 <TextBlock x:Name="DriveCapacityText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
             </StackPanel>
         </Border>
@@ -107,6 +114,27 @@
         <Grid Grid.Row="2">
             <TextBlock x:Name="EmptyText" Text="{loc:Loc DiskSpace.Ready}" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="12" />
+            <ScrollViewer x:Name="AnalysisPreview" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,4,0">
+                    <TextBlock Text="{loc:Loc DiskSpace.PreviewNotice}" Style="{StaticResource PageSubtitleText}" TextWrapping="Wrap" Margin="0,4,0,10" />
+                    <UniformGrid Columns="2">
+                        <Border Style="{StaticResource CardBorder}" Padding="10" Margin="0,0,5,0">
+                            <StackPanel>
+                                <TextBlock Text="{loc:Loc DiskSpace.Files}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="PreviewFilesEmpty" Text="{loc:Loc DiskSpace.AwaitingPreview}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,5,0,0" />
+                                <ItemsControl x:Name="PreviewFiles" ItemTemplate="{StaticResource DiskPreviewRow}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource CardBorder}" Padding="10" Margin="5,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="{loc:Loc DiskSpace.LargestFolders}" Style="{StaticResource CardTitleText}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="PreviewFoldersEmpty" Text="{loc:Loc DiskSpace.AwaitingPreview}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,5,0,0" />
+                                <ItemsControl x:Name="PreviewFolders" ItemTemplate="{StaticResource DiskPreviewRow}" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </ScrollViewer>
             <Grid x:Name="ResultArea" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -161,6 +189,7 @@
                                         <TextBlock x:Name="CountsText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
                                         <TextBlock x:Name="CoverageText" TextWrapping="Wrap" Margin="0,4,0,0"
                                                    Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock x:Name="VolumeCoverageText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,3,0,0" />
                                         <TextBlock x:Name="MeasurementText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,3,0,0" />
                                     </StackPanel>
                                 </Border>
@@ -269,27 +298,34 @@
                             <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="0">
                                 <Grid>
                                     <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <DataGrid x:Name="FolderGrid" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" MinRowHeight="27"
+                                    <WrapPanel x:Name="FolderRankingControls" Margin="6,4" Visibility="Collapsed">
+                                        <CheckBox x:Name="AllRankedFolders" Content="{loc:Loc DiskSpace.LargestFolders}" Margin="0,0,8,0"
+                                                  Checked="OnFolderFilter" Unchecked="OnFolderFilter" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBox x:Name="FolderFilter" Width="123" TextChanged="OnFolderFilter"
+                                                 AutomationProperties.Name="{loc:Loc DiskSpace.FilterPath}" ToolTip="{loc:Loc DiskSpace.FilterPath}" />
+                                    </WrapPanel>
+                                    <DataGrid x:Name="FolderGrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" MinRowHeight="27"
                                               SelectionChanged="OnFolderSelectionChanged" MouseDoubleClick="OnFolderDoubleClick"
-                                              PreviewKeyDown="OnFolderKeyDown" CanUserSortColumns="False"
+                                              PreviewKeyDown="OnFolderKeyDown" Sorting="OnFolderSorting"
                                               AutomationProperties.Name="{loc:Loc DiskSpace.Folders}">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Width="2*" MinWidth="85" Header="{loc:Loc DiskSpace.Folder}"
-                                                                Binding="{Binding Name}" ElementStyle="{StaticResource DiskCell}" />
-                                            <DataGridTextColumn Width="95" Header="{loc:Loc DiskSpace.SizeColumn}"
+                                            <DataGridTextColumn Width="2*" MinWidth="85" Header="{loc:Loc DiskSpace.Folder}" SortMemberPath="Name"
+                                                                Binding="{Binding DisplayPath}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="95" Header="{loc:Loc DiskSpace.SizeColumn}" SortMemberPath="Bytes"
                                                                 Binding="{Binding Size}" ElementStyle="{StaticResource DiskCell}" />
-                                            <DataGridTextColumn Width="98" Header="{loc:Loc DiskSpace.Share}"
+                                            <DataGridTextColumn Width="98" Header="{loc:Loc DiskSpace.Share}" SortMemberPath="Bytes"
                                                                 Binding="{Binding Share}" ElementStyle="{StaticResource DiskCell}" />
-                                            <DataGridTextColumn Width="73" Header="{loc:Loc DiskSpace.FileCount}"
+                                            <DataGridTextColumn Width="73" Header="{loc:Loc DiskSpace.FileCount}" SortMemberPath="Count"
                                                                 Binding="{Binding FileCount}" ElementStyle="{StaticResource DiskCell}" />
                                         </DataGrid.Columns>
                                     </DataGrid>
-                                    <TextBlock x:Name="EmptyFolders" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    <TextBlock x:Name="EmptyFolders" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="12" />
-                                    <Button x:Name="MoreFoldersButton" Grid.Row="1" HorizontalAlignment="Left" Margin="5"
+                                    <Button x:Name="MoreFoldersButton" Grid.Row="2" HorizontalAlignment="Left" Margin="5"
                                             Content="{loc:Loc DiskSpace.MoreFolders}" Click="OnMoreFolders" />
                                 </Grid>
                             </Border>
@@ -324,13 +360,13 @@
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Width="2*" MinWidth="108" Header="{loc:Loc DiskSpace.Name}"
                                                                 SortMemberPath="Name" Binding="{Binding Name}" ElementStyle="{StaticResource DiskCell}" />
-                                            <DataGridTextColumn Width="3*" MinWidth="125" Header="{loc:Loc DiskSpace.Path}" CanUserSort="False"
+                                            <DataGridTextColumn Width="3*" MinWidth="125" Header="{loc:Loc DiskSpace.Path}" SortMemberPath="Path"
                                                                 Binding="{Binding Path}" ElementStyle="{StaticResource DiskCell}" />
                                             <DataGridTextColumn Width="94" Header="{loc:Loc DiskSpace.SizeColumn}" SortMemberPath="LogicalBytes"
                                                                 Binding="{Binding Size}" ElementStyle="{StaticResource DiskCell}" />
                                             <DataGridTextColumn Width="94" Header="{loc:Loc DiskSpace.AllocationColumn}" CanUserSort="False"
                                                                 Binding="{Binding Allocation}" ElementStyle="{StaticResource DiskCell}" />
-                                            <DataGridTextColumn Width="80" Header="{loc:Loc DiskSpace.Type}" CanUserSort="False"
+                                            <DataGridTextColumn Width="80" Header="{loc:Loc DiskSpace.Type}" SortMemberPath="Extension"
                                                                 Binding="{Binding Extension}" ElementStyle="{StaticResource DiskCell}" />
                                             <DataGridTextColumn Width="132" Header="{loc:Loc DiskSpace.Date}" SortMemberPath="ModifiedFileTime"
                                                                 Binding="{Binding Modified}" ElementStyle="{StaticResource DiskCell}" />
@@ -344,6 +380,27 @@
                                 <Button x:Name="MoreFilesButton" Content="{loc:Loc DiskSpace.MoreFiles}" Click="OnMoreFiles" Margin="0,0,8,0" />
                                 <TextBlock x:Name="RankingText" Style="{StaticResource CaptionText}" VerticalAlignment="Center" TextWrapping="Wrap" />
                             </WrapPanel>
+                        </Grid>
+                    </TabItem>
+                    <TabItem x:Name="DuplicatesTab" Header="{loc:Loc DiskSpace.Duplicates}" Visibility="Collapsed">
+                        <Grid Margin="0,6,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="DuplicatesSummary" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,0,0,6" />
+                            <DataGrid x:Name="DuplicatesGrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow"
+                                      SelectionChanged="OnDuplicateSelected" AutomationProperties.Name="{loc:Loc DiskSpace.Duplicates}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Width="54" Header="{loc:Loc DiskSpace.DuplicateGroup}" Binding="{Binding Group}" />
+                                    <DataGridTextColumn Width="2*" MinWidth="110" Header="{loc:Loc DiskSpace.Name}" Binding="{Binding Name}" ElementStyle="{StaticResource DiskCell}" />
+                                    <DataGridTextColumn Width="3*" MinWidth="130" Header="{loc:Loc DiskSpace.Path}" Binding="{Binding Path}" ElementStyle="{StaticResource DiskCell}" />
+                                    <DataGridTextColumn Width="90" Header="{loc:Loc DiskSpace.SizeColumn}" Binding="{Binding Size}" SortMemberPath="Bytes" ElementStyle="{StaticResource DiskCell}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Button x:Name="MoreDuplicatesButton" Grid.Row="2" Margin="0,5,0,0" HorizontalAlignment="Left"
+                                    Content="{loc:Loc DiskSpace.MoreFiles}" Click="OnMoreDuplicates" />
                         </Grid>
                     </TabItem>
                 </TabControl>

@@ -49,7 +49,7 @@ internal sealed record DiskFact(string Label, string Value, bool Flagged);
 internal sealed class DiskHealthRow(PhysicalDiskHealth disk)
 {
     // Contadores mostrados em Manutenção. A lista completa continua em "Mais detalhes".
-    private static readonly string[] FactMetrics = ["PowerHours", "DataWritten", "MediaErrors", "Reallocated", "Pending"];
+    private static readonly string[] FactMetrics = ["Wear", "PowerHours", "DataWritten", "MediaErrors", "Reallocated", "Pending", "Uncorrectable"];
 
     internal HardwareDevice Device => disk.Device;
     internal DiskHealthSample Sample => disk.Sample;
@@ -59,7 +59,12 @@ internal sealed class DiskHealthRow(PhysicalDiskHealth disk)
     public string BadgeText => !ReadingAvailable && HealthState == DiskHealthState.Unknown
         ? LocalizationService.Source("DiskHealth.Badge.NoData") : Health;
     public string Temperature => Sample.Celsius is { } value ? $"{value} °C" : LocalizationService.Source("DiskHealth.Unavailable");
+    public string? TemperatureTooltip => Sample.Celsius.HasValue ? Sample.TemperatureSource
+        : UnavailableReason(Sample.TemperatureState, "Message.TheDeviceDidNotReturnATemperature");
+    public string? WearTooltip => HasRemaining ? Sample.WearSource : UnavailableReason(Sample.WearState, "DiskHealth.Note.NoWear");
     public string Remaining => Sample.RemainingLife is { } value ? $"{value}%" : LocalizationService.Source("DiskHealth.Unavailable");
+    public bool IsMechanical => TypeLabel == "HDD";
+    public bool ShowsWear => !IsMechanical;
     public bool HasTemperature => Sample.Celsius.HasValue;
     public bool HasNoTemperature => !HasTemperature;
     public bool HasRemaining => Sample.RemainingLife.HasValue;
@@ -86,9 +91,10 @@ internal sealed class DiskHealthRow(PhysicalDiskHealth disk)
         }
     }
 
-    public string? Note => !ReadingAvailable ? ReadState
+    public string? Note => Sample.UnavailableReason is { } reason ? LocalizationService.Source(reason)
+        : !ReadingAvailable ? ReadState
         : HealthState is DiskHealthState.Attention or DiskHealthState.Critical ? LocalizationService.Source("DiskHealth.Note.Backup")
-        : HasNoRemaining ? LocalizationService.Source("DiskHealth.Note.NoWear")
+        : ShowsWear && HasNoRemaining ? WearTooltip
         : null;
     public bool HasNote => Note is not null;
 
@@ -100,7 +106,7 @@ internal sealed class DiskHealthRow(PhysicalDiskHealth disk)
             // Só quando acrescenta algo à plaqueta de tipo (ex.: HDD em USB; não "NVMe" duas vezes).
             if (Find("Interface") is { State: ReadingState.Available } bus && TypeLabel?.Contains(bus.Display, StringComparison.Ordinal) != true)
                 facts.Add(new(LocalizationService.Source("DiskHealth.Interface"), bus.Display, false));
-            foreach (var key in FactMetrics)
+            foreach (var key in FactMetrics.Where(key => key != "Wear" || Sample.WearSource == WindowsSmart.AtaEnduranceSource))
             {
                 // Valores ausentes ("—") e contadores ATA sem interpretação confirmada (hexadecimal) ficam só nos detalhes.
                 if (Sample.Metrics.FirstOrDefault(metric => metric.Label == key) is { } metric &&
@@ -118,4 +124,10 @@ internal sealed class DiskHealthRow(PhysicalDiskHealth disk)
         .FirstOrDefault(field => field.Label == LocalizationService.Source(key));
 
     internal static string StateLabel(DiskHealthState state) => LocalizationService.Source($"DiskHealth.State.{state}");
+
+    private static string UnavailableReason(ReadingState state, string noValueKey) => state switch
+    {
+        ReadingState.Restricted or ReadingState.Error or ReadingState.TimedOut => HardwareReading.StateLabel(state),
+        _ => LocalizationService.Source(noValueKey)
+    };
 }

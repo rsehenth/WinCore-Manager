@@ -8,12 +8,16 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="780" HorizontalAlignment="Left">
+        <StackPanel Margin="{StaticResource PagePadding}" MaxWidth="920" HorizontalAlignment="Stretch">
 
-            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
-            <TextBlock Text="{loc:Loc UI.AppPreferencesAppearanceAndDataStorage}"
-                       Style="{StaticResource PageSubtitleText}"
-                       Margin="0,4,0,0" />
+            <HeaderedContentControl Style="{StaticResource PageHeader}" Tag="{StaticResource Icon.Settings}" Margin="0">
+                <HeaderedContentControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+                        <TextBlock Text="{loc:Loc UI.AppPreferencesAppearanceAndDataStorage}" Style="{StaticResource PageSubtitleText}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </HeaderedContentControl.Header>
+            </HeaderedContentControl>
             <TextBlock Text="{loc:Localized StatusNote}"
                        Style="{StaticResource PageSubtitleText}"
                        Foreground="{DynamicResource AccentTextBrush}"

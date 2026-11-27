@@ -34,7 +34,7 @@ internal sealed unsafe partial class WindowsPerformanceSensors(IMemoryFacts memo
         var groups = new List<SensorGroup> { new(cpu, LocalizationService.Source("Message.ProcessorSystemUtilization"), cpuValues) };
         var notices = new List<SensorNotice>
         {
-            new(LocalizationService.Source("Message.ProcessorAndMotherboard"), ReadingState.Unsupported, LocalizationService.Source("Message.TemperaturesVoltagesPowerAndMotherboardFanSpeedsRequire")),
+            new(LocalizationService.Source("Message.ProcessorAndMotherboard"), ReadingState.Unsupported, LocalizationService.Source("Sensors.OtherBoardReadings")),
             new(LocalizationService.Source("Message.MemoryModules"), ReadingState.Unsupported, LocalizationService.Source("Message.WindowsReportsMemoryUsageAndAvailabilityModuleTemperature"))
         };
         if (memory.Read() is { } sample)

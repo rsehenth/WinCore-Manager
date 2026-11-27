@@ -303,8 +303,13 @@ public partial class UninstallersViewModel : ViewModelBase
         }
     }
 
+    public int AppCount => Rows.Count(row => !row.IsTechnical);
+    public int TechnicalCount => Rows.Count(row => row.IsTechnical);
+
     private void NotifySummaryChanged()
     {
+        OnPropertyChanged(nameof(AppCount));
+        OnPropertyChanged(nameof(TechnicalCount));
         OnPropertyChanged(nameof(HasRows));
         OnPropertyChanged(nameof(AllSelected));
         OnPropertyChanged(nameof(CanSelectAll));
