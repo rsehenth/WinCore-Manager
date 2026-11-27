@@ -33,7 +33,7 @@ public class UpdatesUx12PTests
             var settings = lab.Open();
             Assert.Equal(portable, settings.Settings.PortableMode);
             var battle = BattleNet();
-            var sameId = BattleNet(source: "msstore");
+            var sameId = BattleNet(source: "msstore", installed: "1.0");
             var other = App(1, name: battle.Name);
             var source = new FixtureWinGet { Packages = [battle, other, sameId] };
             var vm = lab.Create(source, settings);
@@ -249,6 +249,51 @@ public class UpdatesUx12PTests
             finally { window.Close(); }
         });
 
+    // Owner report: with a tall operation card the log shrank to a fixed strip and could not be resized.
+    [Fact]
+    public Task Log_splitter_keeps_room_for_the_log_and_resizes_in_both_directions() =>
+        WpfTestThread.Run(async () =>
+        {
+            using var lab = new SettingsFixture();
+            var fixture = new FixtureWinGet
+            {
+                Packages = Enumerable.Range(1, 12).Select(index => App(index)).ToArray(),
+                RawLog = string.Join(Environment.NewLine, Enumerable.Range(1, 200).Select(index => $"Fixture WinGet · {index:0000}")),
+            };
+            var vm = lab.Create(fixture);
+            var page = new UpdatesPage { DataContext = vm };
+            var window = new Window { Content = page, Width = 920, Height = 740, ShowInTaskbar = false, Opacity = 0 };
+            try
+            {
+                window.Show();
+                await vm.LoadCommand.ExecutionTask!;
+                vm.HasOperation = true;
+                await Settle();
+                var area = Assert.IsType<Grid>(page.FindName("DetailsArea"));
+                var card = Assert.IsType<ScrollViewer>(page.FindName("UpdateControlsScroll"));
+                var splitter = Assert.IsType<GridSplitter>(page.FindName("LogSplitter"));
+                var log = Assert.IsType<ScrollViewer>(page.FindName("LogScroll"));
+                Assert.True(splitter.IsVisible && splitter.Focusable && splitter.IsTabStop);
+                Assert.NotEmpty(AutomationProperties.GetName(splitter));
+                Assert.True(card.MaxHeight <= area.ActualHeight * 0.5 + 1, $"Card {card.MaxHeight} of {area.ActualHeight}");
+                Assert.True(log.ViewportHeight > 40, $"Log viewport {log.ViewportHeight}");
+
+                var initial = card.MaxHeight;
+                Drag(splitter, -60);
+                await Settle();
+                Assert.True(card.MaxHeight < initial - 30, $"After shrink {card.MaxHeight}, before {initial}");
+                var shrunk = card.MaxHeight;
+                Drag(splitter, 120);
+                await Settle();
+                Assert.True(card.MaxHeight > shrunk + 40, $"After grow {card.MaxHeight}, before {shrunk}");
+                // Growing stops where the log would drop below its minimum.
+                Assert.True(card.MaxHeight <= area.ActualHeight - 96 - splitter.Height + 0.5);
+                Assert.True(log.ViewportHeight > 40);
+                AssertWithinPage(page, log);
+            }
+            finally { window.Close(); }
+        });
+
     [Theory]
     [InlineData("pt-BR", AppTheme.Light, 1.00)]
     [InlineData("en-US", AppTheme.Light, 1.25)]
@@ -289,14 +334,14 @@ public class UpdatesUx12PTests
                 var show = Assert.IsType<Button>(page.FindName("ShowHiddenButton"));
                 var splitter = Assert.IsType<GridSplitter>(page.FindName("UpdatesSplitter"));
                 var summary = Assert.IsType<TextBlock>(page.FindName("UpdatesListSummaryText"));
-                var controls = Assert.IsType<ScrollViewer>(page.FindName("UpdateControlsScroll"));
+                var recovery = Assert.IsType<Border>(page.FindName("UpdateInterruptionPanel"));
                 var log = Assert.IsType<ScrollViewer>(page.FindName("LogScroll"));
                 Assert.Equal(600, vm.LogLines.Count);
                 Assert.Equal(33, table.Items.Count);
                 Assert.True(log.ScrollableHeight > 100 && log.ViewportHeight > 0);
-                Assert.True(controls.ViewportHeight > 0);
+                Assert.True(recovery.IsVisible);
                 AssertWithinPage(page, log);
-                AssertWithinPage(page, controls);
+                AssertWithinPage(page, recovery);
                 AssertWithinPage(page, manage);
                 Assert.Contains(english ? "Available: 33" : "Disponíveis: 33", summary.Text);
                 Assert.Equal(english ? "Manage hidden updates" : "Gerenciar ocultos", manage.Content);
@@ -410,8 +455,8 @@ public class UpdatesUx12PTests
         png.Save(file);
     }
 
-    private static WinGetPackage BattleNet(string available = "2.0.0.4232", string source = "winget") =>
-        new() { Id = "Blizzard.BattleNet", Name = "Battle.net", Source = source, InstalledVersion = "Unknown", AvailableVersion = available };
+    private static WinGetPackage BattleNet(string available = "2.0.0.4232", string source = "winget", string installed = "Unknown") =>
+        new() { Id = "Blizzard.BattleNet", Name = "Battle.net", Source = source, InstalledVersion = installed, AvailableVersion = available };
 
     private static WinGetPackage App(int index, string? name = null) =>
         new() { Id = $"Fixture.{index}", Name = name ?? $"Fixture App {index}", Source = "winget", InstalledVersion = "1.0", AvailableVersion = "2.0" };

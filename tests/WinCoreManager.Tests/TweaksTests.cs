@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using WinCoreManager.Models;
 using WinCoreManager.Services.WindowsFeatures;
 
@@ -153,26 +153,16 @@ public sealed class TweaksTests
     }
 
     [Fact]
-    public async Task Efeitos_individuais_preservam_outros_e_perfis_abrem_no_Windows()
+    public async Task Desempenho_visual_abre_a_ferramenta_nativa_sem_gravar_tweaks()
     {
         var state = new WindowsFeaturesFixture();
         state.System.Unavailable.Add(TweakSetting.Thumbnails);
         await state.TweaksPage.RefreshCommand.ExecuteAsync(null);
-        Assert.Equal(4, state.TweaksPage.VisualProfiles.Count);
-        Assert.Equal(7, state.TweaksPage.Effects.Count);
-        Assert.False(state.TweaksPage.Effects.Single(row => row.Reading.Address.Setting == TweakSetting.Thumbnails).CanEdit);
-        var pointer = state.TweaksPage.Effects.Single(row => row.Reading.Address.Setting == TweakSetting.PointerShadow);
-        pointer.Choice = pointer.Choices[1];
-        Assert.True(state.TweaksPage.ApplyCommand.CanExecute(pointer));
-        await state.TweaksPage.ApplyCommand.ExecuteAsync(pointer);
-        Assert.Equal(pointer.Reading.Address, Assert.Single(state.System.Writes));
-        Assert.Equal(new TweakValue(0), (await Read(state, TweakSetting.FontSmoothing)).Current);
-        Assert.Contains("confirmado", state.TweaksPage.Message);
-
+        Assert.True(state.TweaksPage.OpenPerformanceCommand.CanExecute(null));
         state.TweaksPage.OpenPerformanceCommand.Execute(null);
         Assert.Equal((WindowsTool.Performance, null), Assert.Single(state.Tools.Calls));
-        await state.TweaksPage.UndoCommand.ExecuteAsync(null);
-        Assert.Equal(new TweakValue(0), (await Read(state, TweakSetting.PointerShadow)).Current);
+        Assert.Empty(state.System.Writes);
+        Assert.Empty(state.Confirmation.Requests);
     }
 
     [Fact]

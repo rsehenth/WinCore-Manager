@@ -149,19 +149,29 @@ public sealed class StartupInventoryTests
     }
 
     [Fact]
-    public async Task Assinatura_invalida_ou_finalidade_desconhecida_protege_mesmo_nome_popular()
+    public async Task Assinatura_nao_e_pre_requisito_para_atalho_comum_mas_antivirus_continua_protegido()
     {
         using var env = new StartupFixture();
         env.PersonalShortcut();
         env.Products.Signer = null;
         var unverified = Assert.Single((await env.Inventory.LoadAsync(default)).Entries);
         Assert.True(unverified.Recognized);
-        Assert.False(unverified.CanChange);
+        Assert.True(unverified.CanChange);
 
         env.Products.Signer = "Valve Corp.";
         env.Products.Product = new("Antivírus", "Valve Corp.", "steam.exe");
         var security = Assert.Single((await env.Inventory.LoadAsync(default)).Entries);
         Assert.False(security.CanChange);
+    }
+
+    [Fact]
+    public async Task Auditoria_aplicativo_assinado_fora_de_lista_de_editores_pode_ser_desativado()
+    {
+        using var env = new StartupFixture();
+        env.PersonalShortcut();
+        env.Products.Signer = "Contoso Tools Ltd.";
+        env.Products.Product = new("Contoso Tray", "Contoso Tools Ltd.", "contoso-tray.exe");
+        Assert.True(Assert.Single((await env.Inventory.LoadAsync(default)).Entries).CanChange);
     }
 
     [Fact]
@@ -502,7 +512,21 @@ internal sealed class StartupFixture : IDisposable
     public StartupChanges CreateChanges(IStartupFileMove? mover = null) =>
         new(Folders, Backups, mover ?? new WindowsStartupFileMove(), History);
 
-    public void Dispose() => Directory.Delete(Root, recursive: true);
+    public void Dispose()
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                Directory.Delete(Root, recursive: true);
+                return;
+            }
+            catch (IOException ex) when (attempt < 5 && (ex.HResult & 0xFFFF) is 32 or 33)
+            {
+                Thread.Sleep(120);
+            }
+        }
+    }
 
     private sealed class FakeShortcuts : IStartupShortcutReader
     {

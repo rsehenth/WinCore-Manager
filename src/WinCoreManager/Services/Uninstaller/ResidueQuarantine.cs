@@ -36,6 +36,7 @@ public interface IResidueQuarantineService
     /// <summary>Problema atual do manifesto; enquanto houver, nenhuma operação altera a quarentena.</summary>
     string? ManifestProblem => null;
     bool CanRestoreRegistry => true;
+    bool CanRestoreRegistryEntry(QuarantineEntry entry) => CanRestoreRegistry;
     string? DescribeUnsupportedItem(ResidueItem item) => null;
     string? AlternateStorage(ResidueItem item) => null;
 }
@@ -82,6 +83,10 @@ public sealed class ResidueQuarantineService(
     public string? ManifestProblem => _manifestProblem ?? _sourceVolume?.ManifestProblem;
     public bool CanRestoreRegistry => registryWriter.SupportsMutation && !isElevatedProcess;
 
+    public bool CanRestoreRegistryEntry(QuarantineEntry entry) =>
+        CanRestoreRegistry && ResiduePathRules.TryParseRegistryPath(entry.OriginalPath, out var hive, out var path)
+        && registryWriter.CanWriteKey(hive, path);
+
     public string? AlternateStorage(ResidueItem item) =>
         _sourceVolume is not null && (item.Category == ResidueCategory.File ||
             (item.Category == ResidueCategory.Folder && item.IsEligibleForCleanup && item.Fingerprint is not null))
@@ -93,8 +98,11 @@ public sealed class ResidueQuarantineService(
     public string? DescribeUnsupportedItem(ResidueItem item)
     {
         if (isElevatedProcess) return ElevatedMessage;
+        if (item.Category == ResidueCategory.RegistryValue)
+            return LocalizationService.Source("ResidueAdvanced.EvidenceOnly");
         if (item.Category == ResidueCategory.RegistryKey)
-            return CanRestoreRegistry ? null : LocalizationService.Source("Message.Safety.RegistryMutationUnavailable");
+            return CanRestoreRegistry && ResiduePathRules.TryParseRegistryPath(item.Location, out var hive, out var registryPath)
+                && registryWriter.CanWriteKey(hive, registryPath) ? null : LocalizationService.Source("ResidueAdvanced.RegistryReadOnly");
         if (ResiduePathRules.TryNormalize(item.Location, out var path)
             && RequiresCrossVolume(path, quarantineRoot) && AlternateStorage(item) is null)
             return CrossVolumeMessage;
@@ -109,7 +117,7 @@ public sealed class ResidueQuarantineService(
     {
         ct.ThrowIfCancellationRequested();
         ThrowIfElevated();
-        if (category == ResidueCategory.RegistryKey)
+        if (category is ResidueCategory.RegistryKey or ResidueCategory.RegistryValue)
         {
             throw new InvalidOperationException(LocalizationService.Source("Message.ThisCategoryDoesNotSupportFileMoves"));
         }
@@ -152,8 +160,9 @@ public sealed class ResidueQuarantineService(
 
         var inspection = ResidueFileGuard.Inspect(original, MaxTreeEntries, ct)
                          ?? throw new InvalidOperationException(LocalizationService.Source("Message.CouldNotInspectTheItem"));
-        if (!inspection.Complete || inspection.HasReparsePoint || inspection.HasHardLinks ||
-            (sourceDirectory && inspection.HasExecutable))
+        // Executables are no longer refused here: only per-user items reach this store (machine cleanup is blocked),
+        // detection decides eligibility, and the recovery fingerprint checks content and ACLs before any restore.
+        if (!inspection.Complete || inspection.HasReparsePoint || inspection.HasHardLinks)
         {
             throw new InvalidOperationException(LocalizationService.Source("Message.SomeContentCouldNotBeVerifiedOrContains2"));
         }
@@ -588,7 +597,28 @@ public sealed class ResidueQuarantineService(
                 LocalizationService.Source("Message.TheRegistryKeyAlreadyExistsAndWasLeft", entry.RegistryBackupFile), entry);
         }
 
+        if (!CanRestoreRegistryEntry(entry))
+            return Failed(entry, LocalizationService.Source("ResidueAdvanced.RegistryReadOnly"));
         if (entry.Fingerprint is not null) MarkRestoring(entry);
+        if (registryWriter is IAtomicResidueRegistryWriter atomic)
+        {
+            if (entry.Fingerprint is null)
+                return Failed(entry, LocalizationService.Source("ResidueAdvanced.TransactionUnavailable"));
+            var outcome = atomic.RestoreVerifiedOutcome(hive, subKeyPath, entry.Is64BitView, snapshot);
+            if (!outcome.Succeeded)
+            {
+                return Failed(entry, outcome.Partial
+                    ? LocalizationService.Source("Message.PartialRestore") + outcome.Error + " "
+                        + LocalizationService.Source("Message.RegistryBackupSavedAt0", entry.RegistryBackupFile)
+                    : outcome.Error);
+            }
+            AfterRestoreForTest?.Invoke();
+            RemoveEntry(entry);
+            return new(QuarantineRestoreStatus.Restored,
+                LocalizationService.Source(outcome.Mode == RegistryMutationMode.SupervisedNonTransactional
+                    ? "ResidueAdvanced.NonTransactionalRestored"
+                    : "Message.RegistryKeyRecreatedFromTheSnapshotReviewPermissions"), entry);
+        }
         var errors = new List<string>();
         RecreateKey(hive, subKeyPath, snapshot, entry.Is64BitView, errors);
 

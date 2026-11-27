@@ -13,8 +13,7 @@ public sealed class FakeProgramInventory(params InstalledProgram[] programs) : I
 
 public class UninstallersViewModelTests
 {
-    private static InstalledProgram Usuario(string name) => ClassifierProgramFactory.Create(
-        name: name, publisher: "Fabricante SA");
+    private static InstalledProgram Usuario(string name) => UninstallerSelectionTests.SyntheticMsi(name);
 
     private static InstalledProgram Tecnico(string name, bool msi = false) => ClassifierProgramFactory.Create(
         name: name,

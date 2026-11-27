@@ -1,10 +1,122 @@
-﻿using WinCoreManager.Models;
+using WinCoreManager.Models;
 using WinCoreManager.Services.WindowsFeatures;
+using WinCoreManager.Views;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace WinCoreManager.Tests;
 
 public sealed class CleanupTests
 {
+    [Fact]
+    public void Scan_counts_more_than_the_preview_and_does_not_count_overlapping_rules_twice()
+    {
+        using var lab = new TempCleanupLab();
+        for (var i = 0; i < 275; i++)
+            File.WriteAllBytes(Path.Combine(lab.Root, $"{i}.dmp"), new byte[8192]);
+
+        var cleaner = new CleanupFiles([
+            new(CleanupFiles.UserDumps, lab.Root, ".dmp", TimeSpan.Zero, false),
+            new(CleanupFiles.UserReports, lab.Root, ".dmp", TimeSpan.Zero, false),
+        ], previewLimit: 7);
+        var rows = cleaner.Scan(CancellationToken.None).ToArray();
+        Assert.Equal(275, rows.Sum(row => row.Items.GetValueOrDefault()));
+        Assert.Equal(275 * 8192, rows.Sum(row => row.Bytes.GetValueOrDefault()));
+        Assert.Equal(7, rows.Single(row => row.Selectable).FileScan!.Preview.Count);
+        Assert.Null(rows.Single(row => row.Id == CleanupFiles.UserReports).Bytes);
+    }
+
+    private sealed class TempCleanupLab : IDisposable
+    {
+        private readonly DirectoryInfo _directory = Directory.CreateTempSubdirectory("WinCoreCleanupTest-");
+        public string Root => _directory.FullName;
+        public void Dispose() => _directory.Delete(recursive: true);
+    }
+
+    [Fact]
+    public Task Direct_cleanup_previews_and_only_deletes_authorized_unchanged_files() => WpfTestThread.Run(async () =>
+    {
+        var scratch = Directory.CreateTempSubdirectory("WinCoreCleanupTest-");
+        try
+        {
+            var temporary = scratch.CreateSubdirectory("temporary");
+            var dumps = scratch.CreateSubdirectory("dumps");
+            var history = new FakeHistoryService();
+            var state = new WindowsFeaturesFixture();
+            var service = new CleanupService(state.Disk, state.Tools, history)
+            {
+                DirectFiles = new([
+                    new(CleanupFiles.UserTemp, temporary.FullName, ".tmp", TimeSpan.FromDays(7), false),
+                    new(CleanupFiles.UserDumps, dumps.FullName, ".dmp", TimeSpan.Zero, false),
+                ]),
+            };
+            var page = new WinCoreManager.ViewModels.CleanupViewModel(service, state.Confirmation);
+            var disposable = Put(temporary, "disposable.tmp");
+            var changed = Put(temporary, "changed.tmp");
+            var busy = Put(temporary, "busy.tmp");
+            var untouched = Put(temporary, "personal.txt");
+            var unselected = Put(dumps, "unselected.dmp");
+            var recent = Path.Combine(temporary.FullName, "recent.tmp");
+            File.WriteAllText(recent, "recent");
+
+            await page.RefreshCommand.ExecuteAsync(null);
+            var category = Assert.Single(page.Categories, row => row.Category.Id == CleanupFiles.UserTemp);
+            Assert.Equal(3, category.Category.Items);
+            Assert.True(category.Category.Bytes >= 8192 * 3);
+            Assert.Equal(new[] { busy, changed, disposable }, category.PreviewPaths.Order(StringComparer.Ordinal));
+            var view = new CleanupPage { DataContext = page };
+            var size = new Size(840, 720);
+            view.Measure(size);
+            view.Arrange(new Rect(size));
+            view.UpdateLayout();
+            var categories = Assert.IsType<ItemsControl>(view.FindName("CleanupCategories"));
+            var row = Assert.IsType<ContentPresenter>(categories.ItemContainerGenerator.ContainerFromItem(category));
+            var preview = Assert.IsType<Expander>(row.ContentTemplate.FindName("DirectFilePreview", row));
+            Assert.Equal(Visibility.Visible, preview.Visibility);
+            Assert.False(preview.IsExpanded);
+            preview.IsExpanded = true;
+            view.UpdateLayout();
+            var targets = Assert.Single(Assert.IsType<StackPanel>(preview.Content).Children.OfType<ListBox>());
+            Assert.Equal(3, targets.Items.Count);
+            Assert.Contains(disposable, targets.Items.Cast<string>());
+            var checkbox = Assert.IsType<CheckBox>(row.ContentTemplate.FindName("CategorySelection", row));
+            checkbox.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, true);
+            Assert.True(category.IsSelected);
+            var clean = Assert.IsType<Button>(view.FindName("CleanFilesButton"));
+            Assert.True(clean.IsEnabled);
+            state.Confirmation.Accepted = false;
+            clean.Command.Execute(null);
+            await page.EmptyCommand.ExecutionTask!;
+            Assert.True(File.Exists(disposable));
+            Assert.Empty(history.Records);
+
+            state.Confirmation.Accepted = true;
+            await File.AppendAllTextAsync(changed, "changed after scan");
+            using (File.OpenRead(busy))
+            {
+                clean.Command.Execute(null);
+                await page.EmptyCommand.ExecutionTask!;
+            }
+            Assert.False(File.Exists(disposable));
+            Assert.All(new[] { changed, busy, untouched, unselected, recent }, path => Assert.True(File.Exists(path), path));
+            Assert.Contains("1", page.Message);
+            Assert.Contains("2", page.Message);
+            Assert.Contains("8 KB", page.Message);
+            Assert.Equal(HistoryStatus.Failure, Assert.Single(history.Records).Status);
+            Assert.Empty(state.Tools.Calls);
+        }
+        finally { scratch.Delete(recursive: true); }
+
+        static string Put(DirectoryInfo folder, string name)
+        {
+            var path = Path.Combine(folder.FullName, name);
+            File.WriteAllBytes(path, new byte[8192]);
+            File.SetCreationTimeUtc(path, DateTime.UtcNow.AddDays(-8));
+            File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddDays(-8));
+            return path;
+        }
+    });
+
     [Fact]
     public async Task Catalogo_dinamico_volume_D_e_estimativa_parcial()
     {
@@ -21,12 +133,15 @@ public sealed class CleanupTests
 
         await state.CleanupPage.RefreshCommand.ExecuteAsync(null);
         Assert.Contains("D:", state.CleanupPage.VolumeText);
-        Assert.Contains("1 de 2", state.CleanupPage.EstimateText);
+        Assert.Empty(state.CleanupPage.DirectCategories);
+        Assert.Single(state.CleanupPage.NativeCategories);
+        Assert.Contains("indisponível", state.CleanupPage.EstimateText);
         Assert.All(state.CleanupPage.Categories, row => Assert.False(row.IsSelected));
         Assert.False(state.CleanupPage.EmptyCommand.CanExecute(null));
         state.CleanupPage.Categories[0].IsSelected = true;
-        Assert.Contains("2 MB", state.CleanupPage.SelectionText);
-        Assert.True(state.CleanupPage.EmptyCommand.CanExecute(null));
+        Assert.Equal("2 MB", state.CleanupPage.Recycle!.Size);
+        Assert.True(state.CleanupPage.EmptyNativeCommand.CanExecute(null));
+        Assert.False(state.CleanupPage.EmptyCommand.CanExecute(null));
     }
 
     [Theory]
@@ -128,7 +243,7 @@ public sealed class CleanupTests
         await state.CleanupPage.RefreshCommand.ExecuteAsync(null);
         state.CleanupPage.Categories[0].IsSelected = true;
         state.Confirmation.Accepted = false;
-        await state.CleanupPage.EmptyCommand.ExecuteAsync(null);
+        await state.CleanupPage.EmptyNativeCommand.ExecuteAsync(null);
         Assert.Single(state.Confirmation.Requests);
         Assert.Empty(state.Disk.Requested);
     }

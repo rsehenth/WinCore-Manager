@@ -12,9 +12,12 @@ internal sealed class WinGetMsixUpgrade(string family, string architecture, Vers
     private static readonly Version MinimumXaml = new(8, 2306, 22001, 0);
     private static readonly Version MinimumVcLibraries = new(14, 0, 0, 0);
 
+    internal static bool IsExactTarget(WinGetPackage package) => package is
+        { Source: "winget", Id: "Microsoft.WindowsTerminal" or "Microsoft.WindowsTerminal.Preview" };
+
     internal static WinGetMsixUpgrade? TryCreate(WinGetPackage package, Func<string, IReadOnlyList<string>> readPackages)
     {
-        if (package.Source != "winget") return null;
+        if (!IsExactTarget(package)) return null;
         var family = package.Id switch
         {
             "Microsoft.WindowsTerminal" => "Microsoft.WindowsTerminal_8wekyb3d8bbwe",

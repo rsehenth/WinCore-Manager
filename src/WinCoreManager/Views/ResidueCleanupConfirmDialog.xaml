@@ -76,10 +76,10 @@
                                     <TextBlock FontFamily="{StaticResource FontMono}"
                                                FontSize="11.5"
                                                TextTrimming="CharacterEllipsis"
-                                               ToolTip="{Binding Location}"
+                                               ToolTip="{Binding ReviewedLocation}"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
                                                Margin="0,2,0,2">
-                                        <Run Text="{loc:Localized CategoryLabel}" Foreground="{DynamicResource AccentTextBrush}" /><Run Text="  " /><Run Text="{Binding Location, Mode=OneWay}" />
+                                        <Run Text="{loc:Localized CategoryLabel}" Foreground="{DynamicResource AccentTextBrush}" /><Run Text="  " /><Run Text="{Binding ReviewedLocation, Mode=OneWay}" />
                                     </TextBlock>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

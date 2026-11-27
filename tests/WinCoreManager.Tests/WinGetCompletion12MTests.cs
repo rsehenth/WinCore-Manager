@@ -36,29 +36,51 @@ public sealed class WinGetCompletion12MTests
     });
 
     [Theory]
-    [InlineData("no-registration", HistoryStatus.Interrupted)]
-    [InlineData("resource-only", HistoryStatus.Interrupted)]
     [InlineData("no-inventory", HistoryStatus.Interrupted)]
     [InlineData("no-identity", HistoryStatus.Interrupted)]
     [InlineData("identity-write-failure", HistoryStatus.Interrupted)]
     [InlineData("cancel-zero", HistoryStatus.Interrupted)]
     [InlineData("reboot", HistoryStatus.Interrupted)]
-    [InlineData("failure", HistoryStatus.Failure)]
     [InlineData("early-exit", HistoryStatus.Interrupted)]
-    [InlineData("old-client", HistoryStatus.Interrupted)]
-    [InlineData("missing-framework", HistoryStatus.Interrupted)]
-    [InlineData("already-registered", HistoryStatus.Interrupted)]
-    [InlineData("generic-zero", HistoryStatus.Interrupted)]
     public Task MissingOrConflictingEvidenceRetainsTheGuard(string scenario, HistoryStatus expected) => WpfTestThread.Run(async () =>
     {
-        var lab = new Lab(scenario == "generic-zero" ? "Fixture.Generic" : Terminal) { Mode = scenario };
+        var lab = new Lab(Terminal) { Mode = scenario };
         await lab.RunAsync();
         lab.AssertGuard(expected);
         using var receipt = lab.Store.Open();
         if (scenario is "no-identity" or "identity-write-failure") Assert.Null(receipt.Identity);
         if (scenario == "early-exit") Assert.Equal(ControlledProcessState.NotObserved, lab.RunResult!.Observation.ControlledProcesses);
-        if (scenario == "no-inventory") Assert.True(lab.RunResult!.Observation.IsConclusive);
-        else Assert.False(lab.RunResult!.Observation.IsConclusive);
+        if (scenario == "reboot") Assert.True(receipt.Outcome?.RestartRequired);
+    });
+
+    // Opus structural review: the per-package MSIX proof is no longer a gate. Exit 0, every observed
+    // process ended and the fresh inventory showing the target is the generic completion contract.
+    [Theory]
+    [InlineData("no-registration")]
+    [InlineData("resource-only")]
+    [InlineData("old-client")]
+    [InlineData("missing-framework")]
+    [InlineData("already-registered")]
+    [InlineData("generic-zero")]
+    public Task GenericCompletionAdvancesWithoutAPackageSpecificContract(string scenario) => WpfTestThread.Run(async () =>
+    {
+        var lab = new Lab(scenario == "generic-zero" ? "Fixture.Generic" : Terminal) { Mode = scenario };
+        await lab.RunAsync();
+        Assert.Equal(2, lab.Launches.Count);
+        Assert.All(lab.ViewModel.Rows, row => Assert.Equal(UpdateRowStatus.Success, row.Status));
+        Assert.All(lab.History.Records, record => Assert.Equal(HistoryStatus.Success, record.Status));
+        Assert.False(lab.Store.HasReceipt || lab.ViewModel.HasInterruptedUpdate);
+        Assert.All(lab.Observations, observation => Assert.Equal(ControlledProcessState.Exited, observation.ControlledProcesses));
+    });
+
+    [Fact]
+    public Task ProvenFailureWithEndedProcessesReleasesTheQueue() => WpfTestThread.Run(async () =>
+    {
+        var lab = new Lab(Terminal) { Mode = "failure" };
+        await lab.RunAsync();
+        Assert.Equal(2, lab.Launches.Count);
+        Assert.Equal(2, lab.History.Records.Count(record => record.Status == HistoryStatus.Failure));
+        Assert.False(lab.Store.HasReceipt || lab.ViewModel.HasInterruptedUpdate);
     });
 
     [Fact]
@@ -239,6 +261,7 @@ public sealed class WinGetCompletion12MTests
                 }),
                 _ => null,
             };
+            if (Mode == "quiet-delegate") control.DelegateSettleWindow = TimeSpan.FromMilliseconds(500);
             var run = ProcessRunner.RunWinGetAsync(fixture, line =>
             {
                 if (Mode != "no-registration") _registeredTargets.Add(item);

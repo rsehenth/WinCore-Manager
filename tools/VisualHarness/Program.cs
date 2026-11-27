@@ -15,7 +15,7 @@ using WinCoreManager.ViewModels;
 namespace VisualHarness;
 
 // Uso: VisualHarness --out <pasta> [--size 1160x760] [--scale 1.0] [--tag nome] [--theme Dark|Light] [--pages 0,1,..] [--wait 2500]
-internal static class Program
+internal static partial class Program
 {
     private static readonly Dictionary<string, string> Args = new();
 
@@ -23,16 +23,27 @@ internal static class Program
     private static int Main(string[] argv)
     {
         for (var i = 0; i < argv.Length - 1; i += 2) Args[argv[i].TrimStart('-')] = argv[i + 1];
+        if (Args.TryGetValue("disk-benchmark", out var count))
+            return MeasureDiskScan(int.Parse(count), Args["out"]);
         var app = new App(services =>
         {
             services.AddSingleton<IWinGetService, FixtureWinGet>();
-            services.AddSingleton<IStartupInventory, FixtureStartup>();
+            if (Args.ContainsKey("rc3"))
+            {
+                services.AddSingleton(_ => new DiskHealthService(_ => Args.ContainsKey("disks-empty")
+                    ? new DiskHealthReport(ReadingState.NoReading, []) : Rc3Disks(), TimeProvider.System));
+                services.AddSingleton<IResidueQuarantineService>(sp => new ResidueQuarantineService(
+                    Path.Combine(Args["out"], "isolated-quarantine"), sp.GetRequiredService<IResidueRegistryReader>(),
+                    sp.GetRequiredService<IResidueRegistryWriter>(), sp.GetRequiredService<ResiduePathRules>()));
+            }
+            if (!Args.ContainsKey("startup-readonly")) services.AddSingleton<IStartupInventory, FixtureStartup>();
+            services.AddSingleton(_ => new WinGetInterruptionStore(Path.Combine(Args["out"], "isolated-receipts"), () => null));
+            services.AddSingleton<ISettingsService>(_ => new SettingsService(Path.Combine(Args["out"], "isolated-settings"),
+                Path.Combine(Args["out"], "isolated-local")));
             services.AddSingleton<IProgramInventoryService, FixturePrograms>();
             if (Args.ContainsKey("activation-fixture"))
             {
                 services.AddSingleton<IWindowsActivationService, FixtureActivation>();
-                services.AddSingleton<ISettingsService>(_ => new SettingsService(Path.Combine(Args["out"], "isolated-settings"),
-                    Path.Combine(Path.GetTempPath(), $"wincore-visual-{Guid.NewGuid():N}")));
             }
         });
         app.InitializeComponent();
@@ -70,6 +81,17 @@ internal static class Program
         await Settle(300);
 
         var items = vm.NavItems.Append(vm.AboutNavItem).ToList();
+        if (Args.ContainsKey("rc3"))
+        {
+            await CaptureRc3(window, vm, outDir, tag, scale);
+            return;
+        }
+        if (Args.ContainsKey("disk-space"))
+        {
+            items.Single(item => item.ViewModel is CleanupViewModel).IsSelected = true;
+            await CaptureDiskSpace(window, outDir, tag, scale);
+            return;
+        }
         var only = Args.TryGetValue("pages", out var p) ? p.Split(',').Select(int.Parse).ToHashSet() : null;
         for (var i = 0; i < items.Count; i++)
         {
@@ -78,8 +100,29 @@ internal static class Program
             await Settle(i == 7 ? Math.Max(wait, 6000) : wait);
             if (items[i].ViewModel is SettingsViewModel)
             {
-                await vm.Settings.SelfUpdate.CheckCommand.ExecuteAsync(null);
+                if (vm.Settings.SelfUpdate.CheckCommand.ExecutionTask is { } check) await check;
                 await Settle(200);
+            }
+            if (items[i].ViewModel is EssentialsViewModel && vm.Essentials.RefreshCommand.ExecutionTask is { } detection)
+            {
+                await detection;
+                await Settle(100);
+                File.WriteAllLines(Path.Combine(outDir, "essentials-readonly.tsv"), vm.Essentials.Results
+                    .Select(card => $"{card.App.Id}\t{card.Detection.State}\t{card.Detection.Version}"));
+            }
+            if (items[i].ViewModel is StartupViewModel && Args.ContainsKey("startup-readonly"))
+            {
+                if (vm.Startup.RefreshCommand.ExecutionTask is { } scan) await scan;
+                await Settle(100);
+                var names = new[] { "Discord", "Steam", "Docker Desktop", "Lightshot", "IDMan", "SecurityHealth" };
+                File.WriteAllLines(Path.Combine(outDir, "startup-readonly.tsv"), vm.Startup.Rows
+                    .Where(row => names.Contains(row.Name, StringComparer.OrdinalIgnoreCase))
+                    .Select(row => $"{row.Name}\t{row.Entry.Source}\t{row.Entry.Status}\t{row.Entry.CanChange}\t{row.Entry.FilePath is not null}"));
+            }
+            if (items[i].ViewModel is CleanupViewModel && vm.Cleanup.RefreshCommand.ExecutionTask is { } cleanup)
+            {
+                await cleanup;
+                await Settle(100);
             }
             Shot((FrameworkElement)window.Content, Path.Combine(outDir, $"{tag}-{i:00}-{Slug(items[i].Title)}.png"), scale);
         }

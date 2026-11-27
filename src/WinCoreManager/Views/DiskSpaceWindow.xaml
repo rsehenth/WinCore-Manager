@@ -1,0 +1,387 @@
+<Window x:Class="WinCoreManager.Views.DiskSpaceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:WinCoreManager.Localization"
+        Title="{loc:Loc DiskSpace.Title}" Icon="/WinCoreManager;component/Assets/app.ico" Width="1040" Height="738" MinWidth="480" MinHeight="400"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+        FontFamily="Segoe UI" FontSize="13" UseLayoutRounding="True" Loaded="OnLoaded" SizeChanged="OnWindowResized">
+    <Window.Resources>
+        <Style x:Key="DiskCell" TargetType="TextBlock">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}" />
+        </Style>
+        <Style x:Key="MetricLabel" TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+            <Setter Property="Margin" Value="0,0,0,3" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="MetricValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        </Style>
+        <Style x:Key="DiskTab" TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder" Background="Transparent" Padding="12,8" BorderThickness="0,0,0,2">
+                            <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource RowHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource AccentSubtleHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="MapTile" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TileBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TileBorder" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                                <Setter TargetName="TileBorder" Property="BorderThickness" Value="2" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="TileBorder" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                                <Setter TargetName="TileBorder" Property="BorderThickness" Value="2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{DynamicResource WindowBgBrush}">
+    <Grid Margin="20,16,20,12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="{loc:Loc DiskSpace.Title}" Style="{StaticResource PageTitleText}" TextWrapping="Wrap" />
+            <TextBlock Text="{loc:Loc DiskSpace.Intro}" Style="{StaticResource PageSubtitleText}" Margin="0,3,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="12,8" Margin="0,0,0,8">
+            <StackPanel>
+                <WrapPanel>
+                    <Label Content="{loc:Loc DiskSpace.Drive}" Target="{Binding ElementName=VolumePicker}" Padding="0"
+                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,4" />
+                    <ComboBox x:Name="VolumePicker" Width="206" MaxDropDownHeight="230" DisplayMemberPath="Display"
+                              AutomationProperties.Name="{loc:Loc DiskSpace.Drive}" SelectionChanged="OnVolumeChanged"
+                              Margin="0,0,8,4" />
+                    <Button x:Name="StartButton" Content="{loc:Loc DiskSpace.Start}" Style="{StaticResource PrimaryButton}"
+                            Click="OnStart" Margin="0,0,8,4" />
+                    <Button x:Name="RefreshButton" Content="{loc:Loc DiskSpace.Refresh}" Click="OnRefresh" Margin="0,0,8,4" />
+                </WrapPanel>
+                <TextBlock x:Name="DriveCapacityText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <TextBlock x:Name="EmptyText" Text="{loc:Loc DiskSpace.Ready}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="12" />
+            <Grid x:Name="ResultArea" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="UpButton" Click="OnUp" Content="↑" Width="30" Height="28" MinWidth="0" MinHeight="0" Padding="0" Margin="0,0,8,0"
+                            ToolTip="{loc:Loc DiskSpace.Up}" AutomationProperties.Name="{loc:Loc DiskSpace.Up}" />
+                    <TextBlock x:Name="CurrentPath" Grid.Column="1" Style="{StaticResource DiskCell}" FontWeight="SemiBold" />
+                </Grid>
+                <TabControl x:Name="ResultTabs" Grid.Row="1" Background="Transparent" BorderThickness="0" Padding="0"
+                            ItemContainerStyle="{StaticResource DiskTab}">
+                    <TabItem Header="{loc:Loc DiskSpace.Overview}">
+                        <ScrollViewer x:Name="OverviewScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                      SizeChanged="OnOverviewResized">
+                            <Grid Margin="0,6,4,1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="SummaryColumn" Width="334" />
+                                    <ColumnDefinition x:Name="MapColumn" Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border x:Name="SummaryCard" Style="{StaticResource CardBorder}" Padding="12,9" VerticalAlignment="Top">
+                                    <StackPanel>
+                                        <UniformGrid Columns="3">
+                                            <StackPanel Margin="0,0,6,0">
+                                                <TextBlock Text="{loc:Loc DiskSpace.Capacity}" Style="{StaticResource MetricLabel}" />
+                                                <TextBlock x:Name="TotalText" Style="{StaticResource MetricValue}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,6,0">
+                                                <TextBlock Text="{loc:Loc DiskSpace.UsedShort}" ToolTip="{loc:Loc DiskSpace.Used}" Style="{StaticResource MetricLabel}" />
+                                                <TextBlock x:Name="UsedText" Style="{StaticResource MetricValue}" />
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="{loc:Loc DiskSpace.Free}" Style="{StaticResource MetricLabel}" />
+                                                <TextBlock x:Name="FreeText" Style="{StaticResource MetricValue}" />
+                                            </StackPanel>
+                                        </UniformGrid>
+                                        <ProgressBar x:Name="VolumeBar" Height="6" Maximum="100" Margin="0,7,0,9"
+                                                     AutomationProperties.Name="{loc:Loc DiskSpace.Used}" />
+                                        <WrapPanel>
+                                            <TextBlock x:Name="LogicalText" FontWeight="SemiBold" Margin="0,0,14,3" />
+                                            <TextBlock x:Name="AllocatedText" FontWeight="SemiBold" Margin="0,0,0,3" />
+                                        </WrapPanel>
+                                        <TextBlock x:Name="CountsText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="CoverageText" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock x:Name="MeasurementText" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                </Border>
+                                <StackPanel x:Name="MapPanel" Grid.Column="1" Margin="12,0,0,0">
+                                <TextBlock Text="{loc:Loc DiskSpace.Map}" Style="{StaticResource CardTitleText}" Margin="0,0,0,5" />
+                                <WrapPanel Margin="0,0,0,5">
+                                    <Border Width="9" Height="9" CornerRadius="2" Background="{DynamicResource AccentSubtleBrush}"
+                                            BorderBrush="{DynamicResource AccentBorderBrush}" BorderThickness="1" Margin="0,0,5,0" />
+                                    <TextBlock Text="{loc:Loc DiskSpace.FoldersKey}" Style="{StaticResource CaptionText}" Margin="0,0,12,0" />
+                                    <Border Width="9" Height="9" CornerRadius="2" Background="{DynamicResource SuccessSubtleBrush}"
+                                            BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1" Margin="0,0,5,0" />
+                                    <TextBlock Text="{loc:Loc DiskSpace.FilesKey}" Style="{StaticResource CaptionText}" Margin="0,0,12,0" />
+                                    <Border Width="9" Height="9" CornerRadius="2" Background="{DynamicResource ButtonBgBrush}"
+                                            BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Margin="0,0,5,0" />
+                                    <TextBlock Text="{loc:Loc DiskSpace.Other}" Style="{StaticResource CaptionText}" />
+                                </WrapPanel>
+                                <Border Background="{DynamicResource InsetBgBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="5" Padding="3">
+                                    <Grid x:Name="MapViewport" Height="235" ClipToBounds="True">
+                                        <TextBlock x:Name="MapEmptyText" Text="{loc:Loc DiskSpace.MapEmpty}" Style="{StaticResource CaptionText}"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        <Canvas x:Name="SpaceMap" SizeChanged="OnMapResized"
+                                                AutomationProperties.Name="{loc:Loc DiskSpace.Map}" />
+                                    </Grid>
+                                </Border>
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="{loc:Loc DiskSpace.Folders}">
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" MinWidth="124" MaxWidth="280" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="2*" MinWidth="240" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CardBorder}" Padding="5">
+                                <TreeView x:Name="FolderTree" Background="Transparent" BorderThickness="0" Padding="0"
+                                          Foreground="{DynamicResource TextPrimaryBrush}" SelectedItemChanged="OnTreeSelectionChanged"
+                                          VirtualizingPanel.IsVirtualizing="True"
+                                          VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                          ScrollViewer.CanContentScroll="True" AutomationProperties.Name="{loc:Loc DiskSpace.Tree}">
+                                    <TreeView.ItemContainerStyle>
+                                        <Style TargetType="TreeViewItem">
+                                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                            <Setter Property="Padding" Value="4,3" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TreeViewItem">
+                                                        <StackPanel>
+                                                            <DockPanel LastChildFill="True">
+                                                                <ToggleButton x:Name="BranchToggle" Focusable="False" Width="20"
+                                                                              IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                                                    <ToggleButton.Template>
+                                                                        <ControlTemplate TargetType="ToggleButton">
+                                                                            <Border Background="Transparent">
+                                                                                <Path x:Name="Chevron" Data="M1,1 L4,4 L1,7" StrokeThickness="1.4" Width="6" Height="9"
+                                                                                      Stroke="{DynamicResource TextSecondaryBrush}" Stretch="Uniform"
+                                                                                      HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin=".5,.5" />
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsChecked" Value="True">
+                                                                                    <Setter TargetName="Chevron" Property="RenderTransform">
+                                                                                        <Setter.Value><RotateTransform Angle="90" /></Setter.Value>
+                                                                                    </Setter>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </ToggleButton.Template>
+                                                                </ToggleButton>
+                                                                <Border x:Name="BranchHeader" Padding="{TemplateBinding Padding}" BorderThickness="1"
+                                                                        CornerRadius="4" BorderBrush="Transparent" Background="Transparent">
+                                                                    <ContentPresenter x:Name="PART_Header" ContentSource="Header" />
+                                                                </Border>
+                                                            </DockPanel>
+                                                            <ItemsPresenter x:Name="Children" Margin="17,0,0,0" />
+                                                        </StackPanel>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsExpanded" Value="False">
+                                                                <Setter TargetName="Children" Property="Visibility" Value="Collapsed" />
+                                                            </Trigger>
+                                                            <Trigger Property="HasItems" Value="False">
+                                                                <Setter TargetName="BranchToggle" Property="Visibility" Value="Hidden" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="BranchHeader" Property="Background" Value="{DynamicResource RowSelectedBrush}" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                                <Setter TargetName="BranchHeader" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TreeView.ItemContainerStyle>
+                                    <TreeView.ItemTemplate>
+                                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                            <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        </HierarchicalDataTemplate>
+                                    </TreeView.ItemTemplate>
+                                </TreeView>
+                            </Border>
+                            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="Transparent" />
+                            <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <DataGrid x:Name="FolderGrid" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" MinRowHeight="27"
+                                              SelectionChanged="OnFolderSelectionChanged" MouseDoubleClick="OnFolderDoubleClick"
+                                              PreviewKeyDown="OnFolderKeyDown" CanUserSortColumns="False"
+                                              AutomationProperties.Name="{loc:Loc DiskSpace.Folders}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Width="2*" MinWidth="85" Header="{loc:Loc DiskSpace.Folder}"
+                                                                Binding="{Binding Name}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="95" Header="{loc:Loc DiskSpace.SizeColumn}"
+                                                                Binding="{Binding Size}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="98" Header="{loc:Loc DiskSpace.Share}"
+                                                                Binding="{Binding Share}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="73" Header="{loc:Loc DiskSpace.FileCount}"
+                                                                Binding="{Binding FileCount}" ElementStyle="{StaticResource DiskCell}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <TextBlock x:Name="EmptyFolders" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="12" />
+                                    <Button x:Name="MoreFoldersButton" Grid.Row="1" HorizontalAlignment="Left" Margin="5"
+                                            Content="{loc:Loc DiskSpace.MoreFolders}" Click="OnMoreFolders" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="{loc:Loc DiskSpace.Files}">
+                        <Grid Margin="0,6,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <WrapPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,12,6">
+                                    <Label Content="{loc:Loc DiskSpace.FilterName}" Target="{Binding ElementName=NameFilter}"
+                                           Padding="0" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox x:Name="NameFilter" Width="146" TextChanged="OnFilterChanged"
+                                             AutomationProperties.Name="{loc:Loc DiskSpace.FilterName}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <Label Content="{loc:Loc DiskSpace.FilterExt}" Target="{Binding ElementName=ExtensionFilter}"
+                                           Padding="0" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox x:Name="ExtensionFilter" Width="93" TextChanged="OnFilterChanged"
+                                             AutomationProperties.Name="{loc:Loc DiskSpace.FilterExt}" />
+                                </StackPanel>
+                            </WrapPanel>
+                            <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="0">
+                                <Grid>
+                                    <DataGrid x:Name="FileGrid" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" MinRowHeight="27"
+                                              Sorting="OnFileSorting" SelectionChanged="OnFileSelectionChanged"
+                                              AutomationProperties.Name="{loc:Loc DiskSpace.Files}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Width="2*" MinWidth="108" Header="{loc:Loc DiskSpace.Name}"
+                                                                SortMemberPath="Name" Binding="{Binding Name}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="3*" MinWidth="125" Header="{loc:Loc DiskSpace.Path}" CanUserSort="False"
+                                                                Binding="{Binding Path}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="94" Header="{loc:Loc DiskSpace.SizeColumn}" SortMemberPath="LogicalBytes"
+                                                                Binding="{Binding Size}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="94" Header="{loc:Loc DiskSpace.AllocationColumn}" CanUserSort="False"
+                                                                Binding="{Binding Allocation}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="80" Header="{loc:Loc DiskSpace.Type}" CanUserSort="False"
+                                                                Binding="{Binding Extension}" ElementStyle="{StaticResource DiskCell}" />
+                                            <DataGridTextColumn Width="132" Header="{loc:Loc DiskSpace.Date}" SortMemberPath="ModifiedFileTime"
+                                                                Binding="{Binding Modified}" ElementStyle="{StaticResource DiskCell}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <TextBlock x:Name="EmptyFiles" Text="{loc:Loc DiskSpace.NoFiles}" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="12" />
+                                </Grid>
+                            </Border>
+                            <WrapPanel Grid.Row="2" Margin="0,5,0,0">
+                                <Button x:Name="MoreFilesButton" Content="{loc:Loc DiskSpace.MoreFiles}" Click="OnMoreFiles" Margin="0,0,8,0" />
+                                <TextBlock x:Name="RankingText" Style="{StaticResource CaptionText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            </WrapPanel>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+                <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource GridLineBrush}" Padding="0,5,0,0" Margin="0,6,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="SelectionText" Style="{StaticResource DiskCell}" Margin="0,0,8,0" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="ExploreButton" Content="{loc:Loc DiskSpace.Explore}" Click="OnExplore" Margin="0,0,5,0" />
+                            <Button x:Name="CopyButton" Content="{loc:Loc DiskSpace.Copy}" Click="OnCopy" Margin="0,0,5,0" />
+                            <Button x:Name="ExplorerButton" Content="{loc:Loc DiskSpace.Explorer}" Click="OnExplorer" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="3" Margin="0,6,0,0" Padding="0,6,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource GridLineBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                    <TextBlock x:Name="StatusText" Style="{StaticResource CaptionText}" TextWrapping="Wrap"
+                               AutomationProperties.LiveSetting="Polite" />
+                    <ProgressBar x:Name="ScanProgress" Height="5" Margin="0,4,0,0" IsIndeterminate="True" Visibility="Collapsed"
+                                 AutomationProperties.Name="{loc:Loc DiskSpace.Title}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="CancelButton" Content="{loc:Loc DiskSpace.Cancel}" Click="OnCancel" Margin="0,0,6,0" />
+                    <Button Content="{loc:Loc DiskSpace.Close}" Click="OnClose" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+    </Border>
+</Window>

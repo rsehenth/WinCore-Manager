@@ -2,153 +2,95 @@ English | [Português (Brasil)](docs/README.pt-BR.md)
 
 # WinCore Manager
 
-A Windows desktop utility for supervised system management and maintenance, built with C#, WPF and .NET 10.
-
-![Windows x64](https://img.shields.io/badge/Windows-x64-0078D4)
-![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)
-![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-informational)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-
-## Overview
-
-WinCore Manager brings common Windows maintenance tasks into one interface: application updates through WinGet, uninstalling, startup entries, cleanup, settings and hardware information. It favors clarity and control. You see what will happen, confirm changes and can review the results afterwards.
-
-It does not promise automatic optimization or guaranteed fixes.
-
-## Screenshots
-
-Both images are real renders of the application, filled with synthetic demonstration data. The application names, versions, history entries, and the WinGet and Windows activation details shown are fictitious, and no operation was performed.
-
-### Dashboard
-
-![WinCore Manager Dashboard](docs/assets/screenshots/wincore-manager-dashboard.png)
-
-### Updates
-
-![WinCore Manager Updates](docs/assets/screenshots/wincore-manager-updates.png)
+WinCore Manager is a Windows desktop utility for supervised maintenance and system management. **0.2.0-rc.3 Premium** is the consolidated release candidate, built with C#, WPF and .NET 10.
 
 ## Features
 
 | Area | What it does |
 | --- | --- |
-| Dashboard | Update and maintenance status, recent activity, Windows edition and activation status with a shortcut to Windows activation settings. |
-| Updates | Lists application updates through WinGet, updates selected packages under supervision, hides updates you do not want, and offers supervised recovery of interrupted operations. |
-| Maintenance | Runs a fixed set of Windows tools: SFC, DISM RestoreHealth, CHKDSK `/scan`, DNS flush, and a combined DISM + SFC repair. |
-| Uninstaller | Lists installed programs with search and categories, runs uninstallers one at a time, and scans for leftovers with backup before removal. |
-| Startup | Shows what starts with Windows and lets you enable or disable eligible personal entries. |
-| Cleanup | Shows space used on the Windows volume, opens Windows Disk Cleanup and empties the Recycle Bin after confirmation. |
-| Tweaks | Shows current power timeouts, visual effects and File Explorer options, applies changes on request, undoes the last change and links to System Protection. |
-| My Computer | Read-only hardware inventory and sensor readings, where the hardware and permissions allow it. |
-| Essentials | A curated list of components, drivers and tools. Each entry opens a web page in your browser; nothing is installed by WinCore Manager. |
-| History | A local, searchable record of operations and their results, with retention settings. |
-| Settings | Light and Dark themes, English (US) and Portuguese (Brazil), portable mode, history retention and WinGet options. |
-| About | Version, credits and licenses. |
+| Dashboard and Drive Health | Shows system and maintenance status, recent activity and drive health. **More details** shows available read-only NVMe and ATA SMART evidence. |
+| Updates | Finds WinGet updates, reviews the selected queue, shows progress and diagnostics per package, and offers supervised recovery of interrupted operations. Catalog diagnostics adapt code from UniGetUI. |
+| Maintenance | Runs selected Windows tools, including SFC, DISM RestoreHealth, CHKDSK `/scan` and DNS cache flush. The detailed drive health view shows the measurements available for each disk. |
+| Uninstaller | Lists and filters installed programs. Runs their uninstallers sequentially after confirmation. The **Windows apps** tab lists eligible optional apps, including supported current-user APPX packages. |
+| Leftovers | Looks for file and Registry evidence associated with an uninstalled program. Eligible files can be quarantined. Eligible Registry keys require a verified backup and confirmation. |
+| Startup | Lists Windows startup entries and allows changes to eligible Run values and shortcuts. |
+| Cleanup and disk space | BitBroom rules group temporary files and caches for preview and confirmed cleanup. The disk space analyzer shows which folders and files occupy the most space. |
+| Tweaks | Changes supported power and File Explorer settings, provides undo where available and opens relevant Windows controls. |
+| My Computer | Shows read-only hardware inventory and sensor readings where available. |
+| Essentials | Checks for selected applications and global runtimes and links to official sources. |
+| History | Keeps a searchable local record of operations and results, with configurable retention. |
+| Settings and About | Configure light or dark theme, English (US) or Portuguese (Brazil), portable mode and history retention. View version and credits. |
+| WinCore self-update | Checks for stable WinCore releases and can direct you to the official release page. The update and recovery tools are included in the portable package. |
 
-When Windows is reported as not activated, the Dashboard also offers, after a confirmation, to open the repository of Microsoft Activation Scripts (MAS), a third-party project that is not affiliated with Microsoft or WinCore Manager. WinCore Manager only opens that web page in your browser: it does not download, include or run any activation script. The project has its own license, the MIT license here does not cover it, and using it may breach Microsoft's license terms. Use only properly licensed copies of Windows.
+## Interface
 
-In-app self-update of WinCore Manager itself is present in the code but **not enabled**: no official release channel or publisher key is configured.
+The [Dashboard](docs/assets/screenshots/wincore-manager-dashboard.png) and [Updates](docs/assets/screenshots/wincore-manager-updates.png) screenshots show an earlier build with synthetic data.
 
-## Requirements
+## Requirements and use
 
-**To run the portable package**
+- **Run** on x64 Windows 10 or 11. The portable bundle includes the .NET 10 runtime. Install WinGet through Microsoft App Installer to use the Updates area.
+- **Build** on x64 Windows with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) version pinned in [global.json](global.json) and access to NuGet for restore.
+- **Run the portable copy** from `publish/portable/WinCoreManager.exe`, or check the ZIP against `artifacts/release/SHA256SUMS.txt`, extract `WinCoreManager-0.2.0-rc.3-win-x64-portable.zip` into a new writable local folder and open `WinCoreManager/WinCoreManager.exe`. Windows may show a SmartScreen prompt for this unsigned build.
 
-- 64-bit Windows 10 or Windows 11.
-- WinGet (Microsoft App Installer) for the Updates area.
-- No separate .NET installation: the portable package is self-contained.
-- Administrator approval for the operations that need it.
-
-**To build from source**
-
-- Windows x64.
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), which includes what is needed to build WPF projects.
-- Internet access to restore NuGet packages.
-
-## Running the portable package
-
-Download `WinCoreManager-0.1.0-win-x64-portable.zip` from the [Releases](https://github.com/rsehenth/WinCore-Manager/releases) page, extract it to a local folder you can write to and run `WinCoreManager.exe`. The binaries are not code-signed, so Windows SmartScreen may warn you. Compare the file's SHA-256 hash with the one published with the release.
-
-## Building from source
-
-Run these from the repository root.
+### Build from the repository root
 
 ```powershell
 dotnet restore WinCoreManager.sln
-```
-
-```powershell
 dotnet build WinCoreManager.sln -c Release --no-restore
-```
-
-```powershell
 dotnet test WinCoreManager.sln -c Release --no-build -- xUnit.ParallelizeTestCollections=false
+dotnet run --project src/WinCoreManager/WinCoreManager.csproj -c Release --no-build
 ```
 
-Run the tests serially, as shown: they share WPF and language state, and parallel runs fail. Three cross-volume tests are skipped unless `WINCORE_QUARANTINE_SECOND_VOLUME` points to a folder on a local NTFS volume other than the one holding `TEMP`.
+The Windows tests share WPF and language state. Run them in series. Three cross-volume cases require `WINCORE_QUARANTINE_SECOND_VOLUME` on a local NTFS volume different from `TEMP`.
 
-### Publishing a portable build
+To assemble the full Release package, including Update, Recovery, licenses, the ZIP and SHA-256 checksums, use Windows PowerShell from the root:
 
 ```powershell
-dotnet publish src/WinCoreManager/WinCoreManager.csproj -c Release -r win-x64 --self-contained -o artifacts/portable
+.\tools\New-PortableRelease.ps1
 ```
 
-```powershell
-Set-Content artifacts/portable/settings.json '{"PortableMode":true}'
-```
+Use `-PortableDirectory` and `-ReleaseDirectory` to build into new paths when outputs already exist. The script preserves existing installations and package files.
 
-The publish output already contains the license files. This produces a working portable application. It does not include the update helper, the independent Recovery assistant or the package manifest. Those are assembled by the maintainer script `tools/New-PortableCandidate.ps1`, which also needs a test selection file and a two-volume test host.
+## Repository layout
 
-## WinGet limitations
+| Path | Contents |
+| --- | --- |
+| `WinCoreManager.sln` | Root solution for the app, update helper and tests |
+| `src/` | WPF app and shared Update/Recovery helper source |
+| `tests/` | Automated tests |
+| `tools/` | Packaging scripts and test and visual tools |
+| `distribution/Licencas/` | Upstream license texts and notices |
+| `docs/` | Portuguese README and documentation assets |
+| `publish/portable/`, `artifacts/release/` | Local generated package and ZIP with checksums |
 
-- Only the official `winget` and `msstore` sources are used.
-- **Updating a package accepts its source and package agreements automatically** and runs without WinGet prompts. Review the terms of what you select.
-- Updates are refused while WinCore Manager itself is running elevated. Installers may still ask for administrator approval.
-- Packages whose installed version is unknown are not updated, except for a narrowly verified Battle.net case that asks for confirmation.
-- A package can be refused when its installer metadata cannot be verified.
-- Canceling may have to wait for the current step. An installer outside WinCore Manager's control can keep running.
-- Some updates require a Windows restart or a manual review before further package changes.
+## Permissions and validation limits
 
-## Safety and operation
+Run as a standard user. Protected Windows tools and machine-wide actions can require validation or elevation. The WinGet workflow requires WinCore to remain non-elevated, while individual installers may request elevation. Updating accepts the selected package and source agreements. An external installer may keep running after a cancellation. Review a pending result before starting another package operation.
 
-- Changes with real effect ask for confirmation where applicable.
-- Some operations require elevated privileges.
-- Third-party installers and uninstallers run their own code and are not fully under WinCore Manager's control.
-- An operation whose outcome cannot be determined may require supervised review before further changes.
-- Keep a backup before making changes to Windows. No tool can guarantee that a change is safe on every system.
+Drive health is read-only and depends on the drive, controller, driver, and access level. Missing SMART values remain unavailable. Optional APPX removal depends on the package identity, the current user and Windows policy. The supervised fallback for eligible whole Registry keys under `HKCU` is available when the kernel transaction manager returns `6801` in a non-elevated session. It requires a verified backup and can be interrupted after a partial removal. Hardware-specific SMART behavior, live APPX removal, and the non-atomic HKCU fallback across Windows configurations still need machine-level validation. The release checks used automated cases and a read-only startup.
 
-See also [recovery instructions](tasks/RECUPERACAO-RECOVERY.md) for interrupted application updates of a portable package.
+## Future updates and recovery
 
-## Privacy and local data
+This RC is a local, unsigned package for manual installation. Production self-update requires a compatible stable release, publisher signatures and the corresponding trust identity. Until such a release is available, obtain a trusted package, verify its published checksum, and extract it into a separate directory. Close WinCore and use the [portable recovery and data-transfer guide](tasks/RECUPERACAO-RECOVERY.md) to copy the preferences and complete `Data` tree from a single installation if needed. The manual ZIP has a top-level `WinCoreManager/` directory. The signed automatic-update payload follows the updater's separate package format.
 
-WinCore Manager has no account system, and no telemetry or analytics code was found in the source. Network access happens when WinGet contacts its sources and when the application reads WinGet package manifests from Microsoft's package services and the `winget-pkgs` repository. Links you open go to your default browser.
+## Personal data
 
-| Data | Purpose | Location |
-| --- | --- | --- |
-| `settings.json` | Preferences and hidden updates | Next to the executable in portable mode, otherwise `%LOCALAPPDATA%\WinCoreManager` |
-| `history.db` (SQLite) | Operation history | `Data\` next to the executable in portable mode, otherwise `%LOCALAPPDATA%\WinCoreManager` |
-| `winget-update.json` | Receipt of an update in progress, for recovery | `%LOCALAPPDATA%\WinCoreManager`, also in portable mode |
-| Quarantine | Backups of removed leftovers | Under the data folder or `%LOCALAPPDATA%\WinCoreManager\Quarantine` |
-| Startup backups | Restoring disabled startup entries | `%APPDATA%\WinCoreManager\StartupBackups` and `%LOCALAPPDATA%\WinCoreManager\StartupRunBackups` |
-| Tweak journal | Undoing the last tweak | `%LOCALAPPDATA%\WinCoreManager\Tweaks` |
+| Data | Location |
+| --- | --- |
+| Preferences | `settings.json` beside the executable in portable mode, or `%LOCALAPPDATA%\WinCoreManager` |
+| SQLite history | `Data\history.db` beside the executable in portable mode, or `%LOCALAPPDATA%\WinCoreManager\history.db` |
+| WinGet receipts and queue checkpoints | `%LOCALAPPDATA%\WinCoreManager`, including in portable mode |
+| Quarantine | `Quarantine` under the active data directory. Legacy backups can remain in `%LOCALAPPDATA%\WinCoreManager\Quarantine`. |
+| Startup backups and tweak journal | `%APPDATA%\WinCoreManager\StartupBackups`, `%LOCALAPPDATA%\WinCoreManager\StartupRunBackups` and `Tweaks`. Machine Run backups use `%ProgramFiles%\WinCoreManager.StartupBackups`. |
 
-Because some data stays in the user profile, deleting a portable folder does not remove everything.
+The portable package starts with an empty `Data/` and a generic portable-mode setting. Preserve any SQLite WAL and SHM sidecars with the database when backing up a closed copy.
 
-## Project status
+## Credits and licenses
 
-**WinCore Manager 0.1.0** is published as a pre-release for supervised personal use. It is not yet a stable release. Full validation of third-party installers and of native DPI behavior across multiple monitors still has documented limitations.
+- [Bulk Crap Uninstaller](https://github.com/BCUninstaller/Bulk-Crap-Uninstaller) by Marcin Szeniak, Apache-2.0. [License](LICENSE-BCUninstaller.txt) and [notice](NOTICE-BCUninstaller.md).
+- [BitBroom](https://github.com/pwnapplehat/BitBroom), MIT. [License](distribution/Licencas/BitBroom.LICENSE.txt).
+- [UniGetUI](https://github.com/Devolutions/UniGetUI), MIT. [License](distribution/Licencas/UniGetUI.LICENSE.txt).
+- [DiskScope](https://github.com/UnstableNT/diskscope), MIT. [License](distribution/Licencas/DiskScope.LICENSE.txt).
+- .NET, WPF, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Microsoft.Extensions.DependencyInjection, System.Management, System.CodeDom, SQLite, SQLitePCLRaw and YamlDotNet. Tests use xUnit and the .NET test SDK. [Third-party notices](THIRD-PARTY-NOTICES.md).
 
-## Contributing and security
-
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and the [changelog](CHANGELOG.md). Source comments, test names and internal messages are mostly written in Portuguese.
-
-## Credits
-
-- [Bulk Crap Uninstaller](https://github.com/BCUninstaller/Bulk-Crap-Uninstaller) by Marcin Szeniak (Klocman): parts of the uninstaller code are adapted from it (Apache-2.0).
-- .NET, WPF, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Microsoft.Extensions.DependencyInjection and System.Management.
-- SQLite, SQLitePCLRaw and YamlDotNet.
-- xUnit for tests.
-
-Created by [Lucas Sehnem](https://github.com/rsehenth).
-
-## License
-
-The original WinCore Manager code is released under the [MIT License](LICENSE) (SPDX: `MIT`). Third-party components and adapted code keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Created by [Lucas Sehnem](https://github.com/rsehenth). Original code is under the [MIT License](LICENSE). See the [contribution guide](CONTRIBUTING.md) and [security policy](SECURITY.md).

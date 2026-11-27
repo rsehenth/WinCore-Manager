@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using WinCoreManager.Services.Startup;
@@ -43,6 +43,16 @@ public sealed class NativeWindowsFeatureTests(ITestOutputHelper output)
                     return;
                 }
 
+                byte[] disabled = [3, 0, 0, 0, 11, 22, 33, 44, 55, 66, 77, 88];
+                approvals.SetValue(name, disabled, RegistryValueKind.Binary);
+                Assert.False(adapter.CompareApproval(original, enabled, disabled, default));
+                Assert.True(adapter.CompareApproval(original, disabled, enabled, default));
+                Assert.Equal(enabled, (byte[])approvals.GetValue(name)!);
+                Assert.True(adapter.CompareApproval(original, enabled, disabled, default));
+                Assert.Equal(disabled, (byte[])approvals.GetValue(name)!);
+                Assert.True(original.Matches(Assert.Single(adapter.Read())));
+                approvals.SetValue(name, enabled, RegistryValueKind.Binary);
+
                 Assert.False(adapter.CompareExchange(name, original, null, "-/-", default));
                 Assert.True(adapter.CompareExchange(name, original, null, approval, default));
                 Assert.Empty(adapter.Read());
@@ -75,6 +85,15 @@ public sealed class NativeWindowsFeatureTests(ITestOutputHelper output)
             new FakeHistoryService(), windows).ReadAsync();
         var startup = new WindowsStartupRunRegistry();
         var values = startup.Read();
+        var products = new WindowsStartupProductReader();
+        var policy = new StartupPolicy(products);
+        var eligible = new List<StartupEntry>();
+        var isolatedBackups = Path.Combine(Path.GetTempPath(), $"WinCoreStartupProbe-{Guid.NewGuid():N}");
+        new StartupRunSource(startup, new WindowsStartupRegistry(), products, policy,
+            new StartupRunBackups(isolatedBackups)).Read(eligible, [], default);
+        var firefox = eligible.FirstOrDefault(entry => entry.Arguments == "-os-autostart" && entry.FilePath is not null);
+        var firefoxTargetApproved = firefox is not null && policy.PersonalShortcutProtection(
+            new StartupTarget(firefox.FilePath, firefox.Arguments, firefox.Resolution), products.Read(firefox.FilePath), firefox.Name) is null;
         var restore = await new RestorePointService(new WindowsRestorePointReader()).ReadAsync();
 
         output.WriteLine($"Volume do Windows: {volume.Root}. Catálogo: {categories.Count}. Lixeira com estimativa: {recycle is not null}.");
@@ -83,6 +102,9 @@ public sealed class NativeWindowsFeatureTests(ITestOutputHelper output)
         output.WriteLine($"Planos listados: {plan.Choices.Count}. Plano ativo lido: {plan.Current?.Plan is not null}. Restrição: {plan.Restriction ?? "nenhuma"}.");
         output.WriteLine($"Configurações lidas: {string.Join("; ", tweaks.Settings.Select(setting => $"{setting.Address.Setting}={setting.Current is not null}/{setting.Choices.Count}/{setting.Restriction ?? "ok"}"))}.");
         output.WriteLine($"HKCU Run: {values.Count} valores lidos. Transação sem gravação: {startup.WriteRestriction() ?? "disponível"}. Restauração: {restore.State}.");
+        output.WriteLine($"HKCU Run: {eligible.Count(entry => entry.CanChange)} entradas elegíveis. Firefox -os-autostart: estado={firefox?.Status}, alvo aprovado pela política={firefoxTargetApproved}.");
+        foreach (var entry in eligible)
+            output.WriteLine($"HKCU Run · {entry.Name}: {(entry.CanChange ? "elegível" : entry.Protection ?? entry.Resolution ?? entry.Status.ToString())}");
         output.WriteLine($"Ferramentas presentes: {string.Join(", ", Enum.GetValues<WindowsTool>().Where(windows.IsAvailable))}.");
     }
 

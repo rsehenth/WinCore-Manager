@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.Win32;
 using WinCoreManager.Models;
 using WinCoreManager.Services.Startup;
@@ -7,6 +7,29 @@ namespace WinCoreManager.Tests;
 
 public sealed class StartupRunTests
 {
+    [Fact]
+    public async Task Firefox_os_autostart_round_trip_keeps_original_registry_bytes()
+    {
+        using var env = new RunFixture();
+        var executable = Path.Combine(env.Host.Root, "firefox.exe");
+        await File.WriteAllTextAsync(executable, "isolated fixture");
+        env.Host.Products.Product = new("Firefox", "Mozilla Corporation", "firefox.exe");
+        env.Host.Products.Signer = "Mozilla Corporation";
+        var original = Raw("Mozilla-Firefox-fixture", 2, $"  \"{executable}\" -os-autostart  ");
+        env.Registry.Value = original;
+
+        var active = await env.Entry();
+        Assert.Equal(StartupStatus.Enabled, active.Status);
+        Assert.True(active.CanChange);
+        Assert.Equal(StartupChangeStatus.Applied, (await env.Change(active, false)).Status);
+        Assert.Empty(env.Registry.Read());
+        var disabled = await env.Entry();
+        Assert.Equal(StartupStatus.Disabled, disabled.Status);
+        Assert.Equal(StartupChangeStatus.Applied, (await env.Change(disabled, true)).Status);
+        Assert.Equal(StartupStatus.Enabled, (await env.Entry()).Status);
+        Assert.True(original.Matches(Assert.Single(env.Registry.Read())));
+    }
+
     [Theory]
     [InlineData(1u)]
     [InlineData(2u)]
@@ -115,6 +138,54 @@ public sealed class StartupRunTests
     }
 
     [Theory]
+    [InlineData("Discord")]
+    [InlineData("Steam")]
+    [InlineData("Docker Desktop")]
+    public async Task EnablesKnownWindowsDisabledEntryAndRestoresExactBytes(string name)
+    {
+        using var env = new RunFixture();
+        env.Registry.CanEditApproval = true;
+        env.Registry.Value = Raw(name, 1, @"C:\unresolved local path\app.exe --background");
+        var original = env.Registry.Value;
+        env.Host.Registry.Approve(RegistryHive.CurrentUser, "Run", name, 3);
+        var disabled = await env.Entry();
+        Assert.True(disabled.CanChange);
+        Assert.Equal(StartupStatus.Disabled, disabled.Status);
+
+        Assert.Equal(StartupChangeStatus.Applied, (await env.Change(disabled, true)).Status);
+        var enabled = await env.Entry();
+        Assert.Equal(StartupStatus.Enabled, enabled.Status);
+        Assert.True(original.Matches(env.Registry.Value));
+        Assert.Equal(2, env.Registry.ApprovalToken(name)[0]);
+
+        Assert.Equal(StartupChangeStatus.Applied, (await env.Change(enabled, false)).Status);
+        Assert.Equal(StartupStatus.Disabled, (await env.Entry()).Status);
+        Assert.Equal(3, env.Registry.ApprovalToken(name)[0]);
+        Assert.True(original.Matches(env.Registry.Value));
+        Assert.Empty(Directory.EnumerateFiles(env.Journal, "*.json"));
+    }
+
+    [Theory]
+    [InlineData(StartupSource.MachineRun32)]
+    [InlineData(StartupSource.MachineRun64)]
+    public async Task ScopedMachineRunFixtureRestoresOriginalWithoutTouchingUserView(StartupSource scope)
+    {
+        using var env = new RunFixture(scope);
+        var original = env.Put(name: "Lightshot");
+        var entry = await env.Entry();
+        Assert.Equal(scope, entry.Source);
+        Assert.True(entry.CanChange);
+
+        Assert.Equal(StartupChangeStatus.Applied, (await env.Change(entry, false)).Status);
+        var disabled = await env.Entry();
+        Assert.True(disabled.Stored);
+        Assert.Null(env.Registry.Value);
+        Assert.Equal(StartupChangeStatus.Applied, (await env.Change(disabled, true)).Status);
+        Assert.True(original.Matches(env.Registry.Value));
+        Assert.Equal(2, env.Host.History.Records.Count);
+    }
+
+    [Theory]
     [InlineData(3, StartupStatus.Disabled)]
     [InlineData(7, StartupStatus.Disabled)]
     [InlineData(255, StartupStatus.Unknown)]
@@ -206,27 +277,47 @@ public sealed class StartupRunTests
         public FakeRunRegistry Registry { get; }
         public string Journal => Path.Combine(Host.Root, "run-backup");
 
-        public RunFixture() => Registry = new(Host.Registry);
+        private readonly StartupSource _scope;
+
+        public RunFixture(StartupSource scope = StartupSource.UserRun)
+        {
+            _scope = scope;
+            Registry = new(Host.Registry, scope);
+        }
 
         public StartupRunValue Put(uint type = 1, string name = "Steam") =>
             Registry.Value = Raw(name, type, $"  \"{Host.Executable}\" -silent  ");
 
-        private StartupRunSource Source() => new(Registry, Host.Registry, Host.Products, new(Host.Products), new(Journal));
+        private StartupRunSource Source() => new(Registry, Host.Registry, Host.Products, new(Host.Products), new(Journal), _scope);
         public Task<StartupInventoryResult> Load() => new StartupInventory([Source()]).LoadAsync(default);
         public async Task<StartupEntry> Entry() => Assert.Single((await Load()).Entries);
         public Task<StartupChangeResult> Change(StartupEntry entry, bool enabled) =>
-            new StartupChanges(Host.Folders, Host.Backups, new WindowsStartupFileMove(), Host.History, Source())
-                .SetEnabledAsync(entry, enabled, default);
+            new StartupChanges(Host.Folders, Host.Backups, new WindowsStartupFileMove(), Host.History,
+                Source(), new MachineStartupSources(Source(), Source())).SetEnabledAsync(entry, enabled, default);
         public void Dispose() => Host.Dispose();
     }
 
-    private sealed class FakeRunRegistry(FakeStartupRegistry approvals) : IStartupRunRegistry
+    private sealed class FakeRunRegistry(FakeStartupRegistry approvals, StartupSource scope) : IStartupRunRegistry
     {
         public StartupRunValue? Value { get; set; }
         public Exception? Error { get; set; }
         public bool FailAfterCommit { get; set; }
         public Action? BeforeCompare { get; set; }
         public int Writes { get; private set; }
+
+        public bool CanEditApproval { get; set; }
+        public bool SupportsApprovalChanges => CanEditApproval;
+
+        public byte[] ApprovalToken(string name) => Convert.FromHexString(StartupApproval.For(name,
+            StartupApproval.Read(approvals, RegistryHive.CurrentUser, "Run"), StartupApproval.Empty).Token[..24]);
+
+        public bool CompareApproval(StartupRunValue expected, byte[] before, byte[] after, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if (!expected.Matches(Value) || !ApprovalToken(expected.Name).SequenceEqual(before)) return false;
+            approvals.Approve(RegistryHive.CurrentUser, "Run", expected.Name, after[0]);
+            return ApprovalToken(expected.Name).SequenceEqual(after);
+        }
 
         public IReadOnlyList<StartupRunValue> Read() => Value is { } value ? [value] : [];
         public string? WriteRestriction() => null;
@@ -236,8 +327,9 @@ public sealed class StartupRunTests
         {
             BeforeCompare?.Invoke();
             if (Error is not null) throw Error;
-            var state = StartupApproval.For(name, StartupApproval.Read(approvals, RegistryHive.CurrentUser, "Run"),
-                StartupApproval.Empty);
+            var key = scope == StartupSource.MachineRun32 ? "Run32" : "Run";
+            var machine = scope == StartupSource.UserRun ? StartupApproval.Empty : StartupApproval.Read(approvals, RegistryHive.LocalMachine, key);
+            var state = StartupApproval.For(name, StartupApproval.Read(approvals, RegistryHive.CurrentUser, key), machine);
             if (state.Token != approval || (expected is null ? Value is not null : !expected.Matches(Value))) return false;
             token.ThrowIfCancellationRequested();
             Value = replacement;

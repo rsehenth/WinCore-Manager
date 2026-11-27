@@ -1,25 +1,16 @@
-# Build output (.NET / WPF / MSBuild)
+# .NET, WPF and MSBuild
 bin/
 obj/
-.artifacts/
+/.artifacts/
 /artifacts/
-[Dd]ebug/
-[Rr]elease/
-*.binlog
-*.tlog
-*.cache
-*_wpftmp.*
-
-# Distributions and compiled binaries
+/Debug/
+/Release/
 /publish/
 /staging/
-*.zip
-*.nupkg
-*.exe
-*.dll
-*.pdb
-*.msi
-*.msix
+/graphify-out/
+*.binlog
+*.tlog
+*_wpftmp.*
 
 # IDE and editors
 .vs/
@@ -39,37 +30,48 @@ _ReSharper*/
 Thumbs.db
 desktop.ini
 
-# Tests, coverage and diagnostics
+# Test, coverage and diagnostic output
 TestResults/
+coverage-report/
 *.trx
 *.coverage
 *.coveragexml
 coverage*.xml
 coverage*.json
-coverage-report/
 *.dmp
 *.etl
 *.nettrace
 *.diagsession
+*.log
+*.tmp
 
-# Application data (never commit real user data)
+# Application data and private settings
+/Data/
+/Quarantine/
 /settings.json
-**/Data/history.db
-*.db
+/settings.local.json
+/StartupBackups/
+/StartupRunBackups/
+/Tweaks/
+/*.db
+/*.sqlite
+/*.sqlite3
+history.db
 *.db-wal
 *.db-shm
 *.db-journal
-*.sqlite
-*.sqlite3
-winget-update.json
-*.lock
-*.log
-*.dpapi
-*.bak
-*.tmp
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+winget-update.json*
+.wincore-portable.lock
 .wincore-update/
+*.dpapi
 
-# Secrets
+# Credentials
 .env
 .env.*
 !.env.example
@@ -81,10 +83,9 @@ secrets.json
 *.snk
 *.publishsettings
 
-# Local and internal material (kept on disk, not published)
+# Local work notes and generated evidence
 /tasks/*
 !/tasks/RECUPERACAO-RECOVERY.md
-/graphify-out/
 /.commandcode/
 /.claude/
 /PROMPT-REDESIGN.md

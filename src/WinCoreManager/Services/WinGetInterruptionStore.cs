@@ -103,6 +103,8 @@ internal sealed partial class WinGetInterruptionStore(string directory, Func<str
                     data.Identity is null or { Pid: > 0, Created: > 0 } &&
                     metadata.Delegates.All(process => process is { Pid: > 0, Created: > 0 }) &&
                     Enum.IsDefined(metadata.Stage) &&
+                    (metadata.Outcome is not { } outcome || Enum.IsDefined(outcome.ControlledProcesses) &&
+                        Enum.IsDefined(outcome.Delegation) && Enum.IsDefined(outcome.Contract) && Enum.IsDefined(outcome.PendingReason)) &&
                     (metadata.Stage is not (WinGetReceiptStage.Prepared or WinGetReceiptStage.NotStarted) ||
                         metadata.Kind == PackageChangeKind.WinGet && data.Identity is null &&
                         metadata.Delegates.Length == 0 && metadata.Outcome is null);
@@ -215,13 +217,16 @@ internal sealed partial class WinGetInterruptionStore(string directory, Func<str
         WinGetProcessIdentity[] Delegates, WinGetReceiptStage Stage = WinGetReceiptStage.Unknown,
         WinGetReceiptOutcome? Outcome = null);
     internal sealed record WinGetReceiptOutcome(bool RootExited, ControlledProcessState ControlledProcesses,
-        DelegatedProcessState Delegation, bool Interrupted, bool CancellationConfirmed, int? ExitCode);
+        DelegatedProcessState Delegation, bool Interrupted, bool CancellationConfirmed, int? ExitCode,
+        WinGetCompletionContract Contract = WinGetCompletionContract.None, bool RestartRequired = false,
+        WinGetPendingReason PendingReason = WinGetPendingReason.Unspecified);
     private sealed record ReceiptData(ReceiptMetadata Operation, WinGetPackage? Package, WinGetProcessIdentity? Identity, string? Boot);
 
     internal sealed class Receipt(string path, FileStream lease, WinGetPackage? package, WinGetProcessIdentity? identity,
         string? boot, ReceiptMetadata? metadata, bool legacyExternal = false, ReceiptStamp? stamp = null,
         bool unreadable = false, WinGetProcessIdentity? recoveredRoot = null, WinGetProcessIdentity[]? recoveredDelegates = null) : IDisposable
     {
+        private string? _writtenFingerprint;
         internal WinGetPackage? Package { get; } = package;
         internal WinGetProcessIdentity? Identity { get; private set; } = identity is { Pid: > 0, Created: > 0 } ? identity : recoveredRoot;
         internal string? Boot { get; } = boot;
@@ -264,6 +269,16 @@ internal sealed partial class WinGetInterruptionStore(string directory, Func<str
             Persist(overwrite: true);
         }
 
+        internal void MarkUninstallLaunchPending(string target)
+        {
+            if (metadata is not { Kind: PackageChangeKind.Uninstall })
+                throw new IOException("No uninstall journal is available.");
+            // A batch retains the same reservation, but each process starts with fresh evidence.
+            Identity = null;
+            metadata = metadata with { Target = target, Stage = WinGetReceiptStage.LaunchPending, Delegates = [], Outcome = null };
+            Persist(overwrite: true);
+        }
+
         internal void MarkNotStarted()
         {
             if (metadata is null || Identity is not null || Delegates.Count != 0)
@@ -272,15 +287,21 @@ internal sealed partial class WinGetInterruptionStore(string directory, Func<str
             Persist(overwrite: true);
         }
 
-        internal void RecordOutcome(ProcessRunResult run)
+        internal void RecordOutcome(ProcessRunResult run, WinGetPendingReason pendingReason = WinGetPendingReason.Unspecified,
+            bool certifyCompletion = false)
         {
             if (metadata is null) return;
+            var restart = WinGetAttemptDecision.RequiresRestart(run);
+            var contract = certifyCompletion && run.Observation.IsConclusive && run is
+                { StartFailed: false, HasExitCode: true, ExitCode: 0, Interrupted: false, Cancelled: false } && !restart
+                ? run.Observation.Contract : WinGetCompletionContract.None;
             // If process creation could have occurred, never leave a prepared-only record.
             metadata = metadata with
             {
                 Stage = WinGetReceiptStage.Observed,
                 Outcome = new(run.HasExitCode, run.Observation.ControlledProcesses, run.Observation.Delegation,
-                    run.Interrupted, run.Cancelled, run.HasExitCode ? run.ExitCode : null),
+                    run.Interrupted, run.Cancelled, run.HasExitCode ? run.ExitCode : null,
+                    contract, restart, pendingReason),
             };
             Persist(overwrite: true);
         }
@@ -309,31 +330,53 @@ internal sealed partial class WinGetInterruptionStore(string directory, Func<str
 
         internal void Persist(bool overwrite)
         {
-            var temporaryPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-            try
-            {
-                using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                {
-                    // Older copies see a receipt with no release evidence. They can still honor the guard.
-                    var content = metadata is not null
-                        ? $"null\nnull\nnull\n{CurrentFormat}\n{JsonSerializer.Serialize(new ReceiptData(metadata, Package, Identity, Boot))}"
-                        : string.Join('\n', JsonSerializer.Serialize(Package), JsonSerializer.Serialize(Identity),
-                            JsonSerializer.Serialize(Boot), IsExternal ? "\"external\"" : "null");
-                    var bytes = Encoding.UTF8.GetBytes(content);
-                    if (bytes.Length > ReceiptSizeLimit) throw new IOException("The package change receipt exceeds its size limit.");
-                    stream.Write(bytes);
-                    stream.Flush(flushToDisk: true);
-                }
-                // Same-directory rename. A failure leaves the previous receipt intact.
-                const uint writeThrough = 8, replaceExisting = 1;
-                if (MoveFileEx(temporaryPath, path, writeThrough | (overwrite ? replaceExisting : 0)) == 0)
-                    throw new IOException("Could not commit the package change receipt.", new Win32Exception());
-            }
-            finally { File.Delete(temporaryPath); }
+            if (overwrite && _writtenFingerprint is not null) CheckOwned();
+            // Older copies see a receipt with no release evidence. They can still honor the guard.
+            var content = metadata is not null
+                ? $"null\nnull\nnull\n{CurrentFormat}\n{JsonSerializer.Serialize(new ReceiptData(metadata, Package, Identity, Boot))}"
+                : string.Join('\n', JsonSerializer.Serialize(Package), JsonSerializer.Serialize(Identity),
+                    JsonSerializer.Serialize(Boot), IsExternal ? "\"external\"" : "null");
+            var bytes = Encoding.UTF8.GetBytes(content);
+            if (bytes.Length > ReceiptSizeLimit) throw new IOException("The package change receipt exceeds its size limit.");
+            PersistFile(path, bytes, overwrite);
+            _writtenFingerprint = Convert.ToHexString(SHA256.HashData(bytes));
+        }
+
+        internal void ClearOwned()
+        {
+            CheckOwned();
+            Clear();
+        }
+
+        private void CheckOwned()
+        {
+            CheckRegularFile(path);
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var current = ReadStamp(stream);
+            if (current.Length != current.Prefix.Length || current.Fingerprint != _writtenFingerprint)
+                throw new IOException("The update receipt changed during the operation.");
         }
 
         internal void Clear() => File.Delete(path);
         public void Dispose() => lease.Dispose();
+    }
+
+    private static void PersistFile(string path, byte[] bytes, bool overwrite)
+    {
+        var temporaryPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
+        {
+            using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                stream.Write(bytes);
+                stream.Flush(flushToDisk: true);
+            }
+            // Same-directory rename. A failure leaves the previous file intact.
+            const uint writeThrough = 8, replaceExisting = 1;
+            if (MoveFileEx(temporaryPath, path, writeThrough | (overwrite ? replaceExisting : 0)) == 0)
+                throw new IOException("Could not commit the package change record.", new Win32Exception());
+        }
+        finally { File.Delete(temporaryPath); }
     }
 
     [LibraryImport("kernel32.dll", EntryPoint = "MoveFileExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]

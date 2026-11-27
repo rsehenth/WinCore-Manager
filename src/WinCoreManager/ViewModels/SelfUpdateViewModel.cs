@@ -15,6 +15,14 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
     private readonly GitHubReleases _releases;
     private UpdateOffer? _offer;
     private Uri? _releasePage;
+    private DateTimeOffset _lastCheck;
+    public bool IsApplying => IsBusy && State != UpdateState.Checking;
+
+    public void CheckIfStale()
+    {
+        if (DateTimeOffset.UtcNow - _lastCheck >= TimeSpan.FromMinutes(10) && CheckCommand.CanExecute(null))
+            CheckCommand.Execute(null);
+    }
     private CancellationTokenSource? _downloadCancellation;
 
     internal SelfUpdateViewModel() : this(DefaultClient.Value) { }
@@ -29,6 +37,13 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
     public string AvailableVersion => _offer?.Version.ToString() ?? "";
     public string ReleaseNotes => _offer?.Notes ?? "";
     public double PackageMiB => (_offer?.Size ?? 0) / 1048576d;
+    public DateTime? ReleaseDate => _offer?.PublishedAt?.LocalDateTime;
+    public bool HasReleaseDate => ReleaseDate.HasValue;
+    public bool CanInstallOffer => HasOffer && ReleaseTrust.PublisherPublicKey is not null &&
+        System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture ==
+        System.Runtime.InteropServices.Architecture.X64 && !Environment.IsPrivilegedProcess &&
+        File.Exists(Path.Combine(AppContext.BaseDirectory, PortablePackage.ManifestSignature));
+    public bool HasManualOffer => HasOffer && !CanInstallOffer;
     public bool HasOffer => _offer is not null;
     public bool HasReleaseNotes => !string.IsNullOrWhiteSpace(ReleaseNotes);
     public bool HasReleasePage => _releasePage is not null;
@@ -44,6 +59,7 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(StatusText));
                 OnPropertyChanged(nameof(IsDownloading));
+                OnPropertyChanged(nameof(IsApplying));
             }
         }
     }
@@ -51,6 +67,7 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
     public string StatusText => LocalizationService.Source($"Message.Updater.{State}");
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsApplying))]
     [NotifyCanExecuteChangedFor(nameof(CheckCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateCommand))]
     private bool _isBusy;
@@ -59,7 +76,7 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
     private double _progress;
 
     private bool CanCheck() => !IsBusy;
-    private bool CanUpdate() => HasOffer && !IsBusy;
+    private bool CanUpdate() => CanInstallOffer && !IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanCheck), IncludeCancelCommand = true)]
     private async Task CheckAsync(CancellationToken token)
@@ -70,6 +87,7 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
         try
         {
             var result = await _releases.CheckAsync(GitHubReleases.InstalledVersion, token);
+            _lastCheck = DateTimeOffset.UtcNow;
             SetOffer(result.Offer, result.ReleasePage);
             State = result.State;
         }
@@ -86,13 +104,19 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanUpdate))]
     private async Task UpdateAsync()
     {
-        if (_offer is not { } offer || Application.Current?.MainWindow is not MainWindow window || !window.CanCloseForUpdate ||
-            !LocalizedDialog.Confirm(window, LocalizationService.Source("Updater.Title"),
-                LocalizationService.Source("Message.Updater.Confirm", InstalledVersion, offer.Version, PackageMiB),
-                "Updater.Install"))
+        if (!CanUpdate() || _offer is not { } offer || Application.Current?.MainWindow is not MainWindow window)
+            return;
+        if (!window.CanCloseForUpdate)
         {
+            State = UpdateState.OperationActive;
             return;
         }
+        var notes = ReleaseNotes.Length > 1000 ? ReleaseNotes[..1000] + "…" : ReleaseNotes;
+        if (!LocalizedDialog.Confirm(window, LocalizationService.Source("Updater.Title"),
+            LocalizationService.Source("Message.Updater.Confirm", InstalledVersion, offer.Version, PackageMiB) +
+                (offer.PublishedAt is { } published ? Environment.NewLine +
+                    LocalizationService.Current.Format("Updater.PublishDate", published.ToLocalTime().ToString("d", LocalizationService.Current.Culture)) : "") +
+                Environment.NewLine + Environment.NewLine + notes, "Updater.Install", "Updater.Later")) return;
 
         IsBusy = true;
         State = UpdateState.Downloading;
@@ -107,12 +131,12 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
             cancellation.Token.ThrowIfCancellationRequested();
             if (!window.CanCloseForUpdate)
             {
-                throw new UpdateException(UpdateState.Failed);
+                throw new UpdateException(UpdateState.OperationActive);
             }
 
             PortableUpdateCoordinator.Launch(runner, offer.Version);
             runner = null;
-            State = UpdateState.Ready;
+            State = UpdateState.Idle;
             IsBusy = false;
             window.Close();
         }
@@ -184,6 +208,10 @@ public sealed partial class SelfUpdateViewModel : ObservableObject
         _offer = offer;
         _releasePage = releasePage;
         OnPropertyChanged(nameof(HasOffer));
+        OnPropertyChanged(nameof(ReleaseDate));
+        OnPropertyChanged(nameof(HasReleaseDate));
+        OnPropertyChanged(nameof(CanInstallOffer));
+        OnPropertyChanged(nameof(HasManualOffer));
         OnPropertyChanged(nameof(HasReleaseNotes));
         OnPropertyChanged(nameof(HasReleasePage));
         OnPropertyChanged(nameof(AvailableVersion));

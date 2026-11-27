@@ -3,10 +3,11 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using WinCoreManager.Services.Uninstaller;
 
 namespace WinCoreManager.Services.Startup;
 
-internal sealed class StartupRunBackups(string root)
+internal sealed class StartupRunBackups(string root, bool machineScoped = false)
 {
     private const int MaxJournalBytes = 64512;
     private sealed record Journal(int Version, StartupRunSnapshot Snapshot, string Digest);
@@ -34,13 +35,16 @@ internal sealed class StartupRunBackups(string root)
             var key = Path.GetFileNameWithoutExtension(file);
             try
             {
-                if (!StartupPaths.IsSafeFile(file)) throw new InvalidDataException();
+                if (!StartupPaths.IsSafeFile(file) || machineScoped && !MachineUninstallPolicy.IsProtectedImagePath(file))
+                    throw new InvalidDataException();
                 using var stream = WindowsStartupFileMove.OpenVerifiedFileForRead(file);
                 if (stream.Length > MaxJournalBytes) throw new InvalidDataException();
                 var journal = JsonSerializer.Deserialize<Journal>(stream);
                 if (journal?.Snapshot?.Value?.Bytes is null || journal.Version != 1
                     || !StartupRunSource.ValidName(journal.Snapshot.Value.Name)
                     || journal.Snapshot.Value.Command is null || string.IsNullOrWhiteSpace(journal.Snapshot.Approval)
+                    || journal.Snapshot.EnabledApproval is { } enabled &&
+                        (!StartupApproval.TryEnable(journal.Snapshot.Approval, out var known) || enabled != known)
                     || key != Key(journal.Snapshot.Value.Name) || journal.Digest != journal.Snapshot.Fingerprint())
                     throw new InvalidDataException();
                 snapshots.Add(journal.Snapshot.Value.Name, journal.Snapshot);
@@ -60,7 +64,10 @@ internal sealed class StartupRunBackups(string root)
         var pins = new WindowsStartupFileMove.DirectoryPins();
         try
         {
+            if (machineScoped && !Environment.IsPrivilegedProcess) throw new UnauthorizedAccessException();
             pins.Pin(root, create: true);
+            if (machineScoped && !MachineUninstallPolicy.IsProtectedProgramFilesDirectory(root))
+                throw new UnauthorizedAccessException();
             return new JournalLock(pins, WindowsStartupFileMove.OpenExclusiveLock(Path.Combine(root, "changes.lock")));
         }
         catch

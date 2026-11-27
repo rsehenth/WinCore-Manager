@@ -8,7 +8,7 @@ namespace WinCoreManager.Views;
 
 internal partial class LocalizedDialog : Window
 {
-    private LocalizedDialog(Window? owner, string title, string message, string acceptKey, bool confirmation)
+    private LocalizedDialog(Window? owner, string title, string message, string acceptKey, bool confirmation, string? dismissKey = null)
     {
         InitializeComponent();
         if (owner?.IsVisible == true)
@@ -23,6 +23,7 @@ internal partial class LocalizedDialog : Window
         Message = message;
         DataContext = this;
         CancelButton.Visibility = confirmation ? Visibility.Visible : Visibility.Collapsed;
+        if (dismissKey is not null) CancelButton.Content = LocalizationService.Current[dismissKey];
         AcceptButton.IsDefault = !confirmation;
         BindingOperations.SetBinding(AcceptButton, ContentControl.ContentProperty, new Binding($"[{acceptKey}]")
         {
@@ -35,8 +36,8 @@ internal partial class LocalizedDialog : Window
     public string DialogTitle { get; }
     public string Message { get; }
 
-    public static bool Confirm(Window? owner, string title, string message, string acceptKey = "Common.Confirm") =>
-        new LocalizedDialog(owner, title, message, acceptKey, true).ShowDialog() == true;
+    public static bool Confirm(Window? owner, string title, string message, string acceptKey = "Common.Confirm", string? dismissKey = null) =>
+        new LocalizedDialog(owner, title, message, acceptKey, true, dismissKey).ShowDialog() == true;
 
     public static void Inform(Window? owner, string title, string message) =>
         new LocalizedDialog(owner, title, message, "Common.OK", false).ShowDialog();

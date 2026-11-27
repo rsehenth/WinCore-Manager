@@ -18,18 +18,27 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
     public DiskTemperatureResult Read(uint number, string? privateSerial)
     {
         if (privateSerial is null) return new(ReadingState.NoReading, []);
-        // Zero desired access. Only the documented storage query IOCTL is available here.
-        using var disk = CreateFile($@"\\.\PhysicalDrive{number}", 0, 3, 0, 3, 0, 0);
+        using var disk = OpenQueryHandle(number);
         if (disk.IsInvalid) return new(Error(Marshal.GetLastPInvokeError()), []);
-        Span<byte> buffer = stackalloc byte[4096];
-        var status = Query(disk, DeviceDescriptor, buffer, out var length);
+        var status = VerifyIdentity(disk, privateSerial);
         if (status != ReadingState.Available) return new(status, []);
-        // Verify that the handle still refers to the inventoried disk, including after a hot-plug.
-        if (!string.Equals(ReadSerial(buffer[..length]), privateSerial, StringComparison.OrdinalIgnoreCase))
-            return new(ReadingState.NoReading, []);
-        status = Query(disk, DeviceTemperature, buffer, out length);
+        Span<byte> buffer = stackalloc byte[4096];
+        status = Query(disk, DeviceTemperature, buffer, out var length);
         if (status != ReadingState.Available) return new(status, []);
         return ParseTemperatures(buffer[..length]);
+    }
+
+    // A query handle requests zero desired access and supports only the read-only queries used here.
+    internal static SafeFileHandle OpenQueryHandle(uint number) =>
+        CreateFile($@"\\.\PhysicalDrive{number}", 0, 3, 0, 3, 0, 0);
+
+    internal static ReadingState VerifyIdentity(SafeFileHandle disk, string privateSerial)
+    {
+        Span<byte> buffer = stackalloc byte[4096];
+        var status = Query(disk, DeviceDescriptor, buffer, out var length);
+        if (status != ReadingState.Available) return status;
+        return string.Equals(ReadSerial(buffer[..length]), privateSerial, StringComparison.OrdinalIgnoreCase)
+            ? ReadingState.Available : ReadingState.NoReading;
     }
 
     private static string? ReadSerial(ReadOnlySpan<byte> buffer)
@@ -64,7 +73,7 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
         return new(unique.Length > 0 ? ReadingState.Available : ReadingState.NoReading, unique);
     }
 
-    private static ReadingState Query(SafeFileHandle disk, uint property, Span<byte> buffer, out int length)
+    internal static ReadingState Query(SafeFileHandle disk, uint property, Span<byte> buffer, out int length)
     {
         // STORAGE_PROPERTY_QUERY with PropertyStandardQuery and a zeroed AdditionalParameters.
         uint* request = stackalloc uint[3] { property, 0, 0 };
@@ -80,7 +89,7 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
         }
     }
 
-    private static ReadingState Error(int error) => error switch
+    internal static ReadingState Error(int error) => error switch
     {
         5 or 1314 => ReadingState.Restricted,
         1 or 50 => ReadingState.Unsupported,
@@ -93,6 +102,6 @@ internal sealed unsafe class WindowsDiskTemperatures : IDiskTemperatures
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool DeviceIoControl(SafeFileHandle device, uint code, void* input, uint inputLength,
+    internal static extern bool DeviceIoControl(SafeFileHandle device, uint code, void* input, uint inputLength,
         void* output, uint outputLength, out uint written, nint overlapped);
 }

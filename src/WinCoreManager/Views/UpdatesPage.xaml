@@ -5,8 +5,42 @@
              xmlns:h="clr-namespace:WinCoreManager.Helpers">
 
     <UserControl.Resources>
+        <DataTemplate x:Key="UpdateAttemptActions">
+            <WrapPanel Margin="0,4,0,5">
+                <Button Content="{loc:Loc UpdatesDiagnostics.CopyDiagnosis}"
+                        Command="{Binding DataContext.CopyDiagnosisCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}" Margin="0,0,6,4" />
+                <Button Content="{loc:Loc UpdatesDiagnostics.CopyLog}"
+                        Command="{Binding DataContext.CopyAttemptLogCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}" Margin="0,0,6,4" />
+            </WrapPanel>
+        </DataTemplate>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <h:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        <h:CountToVisibilityConverter x:Key="PositiveIntToVisibility" />
+        <Style x:Key="UpdateDetailsTab" TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabUnderline" BorderThickness="0,0,0,2" BorderBrush="Transparent"
+                                Background="Transparent" Padding="12,5">
+                            <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                <Setter TargetName="TabUnderline" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabUnderline" Property="Background" Value="{DynamicResource SubtleBgBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <ContextMenu x:Key="UpdateRowMenu">
             <MenuItem Header="{loc:Loc UpdatesList.Hide}" Click="HideUpdateFromMenu"
                       CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
@@ -24,7 +58,11 @@
 
         <!-- Cabeçalho -->
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="{loc:Loc UpdatesDiagnostics.History}" Click="ShowAttemptHistory"
+                        VerticalAlignment="Center" Margin="12,0,0,0" />
+                <TextBlock Text="{loc:Localized Title}" Style="{StaticResource PageTitleText}" />
+            </DockPanel>
             <TextBlock Margin="0,4,0,0" TextTrimming="CharacterEllipsis"
                        ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"
                        AutomationProperties.LiveSetting="Polite">
@@ -36,6 +74,58 @@
                             <DataTrigger Binding="{Binding ListPreferenceMessage}" Value="">
                                 <Setter Property="Text" Value="{loc:Localized StatusText}" />
                                 <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Border x:Name="UpdateInterruptionPanel" Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,8,0,0"
+                    Visibility="{Binding HasInterruptedUpdate, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Localized InterruptionTarget}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{loc:Localized InterruptionState}" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding InterruptionState}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="{loc:Loc UpdateOperation.RecoveryBlockedActions}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="RecoveryActionText" Text="{loc:Localized RecoveryActionStatus}" FontWeight="SemiBold"
+                               Margin="0,4,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button x:Name="VerifyCompletionButton" Content="{loc:Loc UpdateOperation.VerifyCompletionNow}"
+                                Command="{Binding ResolveInterruptionCommand}"
+                                ToolTip="{loc:Localized RecoveryActionDisabledReason, NullText={x:Null}}"
+                                AutomationProperties.HelpText="{loc:Localized RecoveryActionDisabledReason}"
+                                ToolTipService.ShowOnDisabled="True" Margin="0,0,6,4" />
+                        <Button Content="{loc:Loc UpdateOperation.RecoveryStepsDetails}" Command="{Binding ViewInterruptionDetailsCommand}"
+                                Margin="0,0,6,4" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="ReviewInterruptionButton" Content="{loc:Loc UpdateOperation.ReviewVersion}"
+                                    Command="{Binding ReviewInterruptionCommand}"
+                                    Visibility="{Binding ShowInterruptionReview, Converter={StaticResource BoolToVis}}" Margin="0,0,6,4" />
+                            <Button x:Name="DismissWarningButton" Content="{loc:Loc UpdateOperation.DismissWarning}"
+                                    Command="{Binding DismissWarningCommand}"
+                                    ToolTip="{loc:Localized RecoveryActionDisabledReason, NullText={x:Null}}"
+                                    AutomationProperties.HelpText="{loc:Localized RecoveryActionDisabledReason}"
+                                    ToolTipService.ShowOnDisabled="True" Margin="0,0,0,4" />
+                        </StackPanel>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+            <TextBlock x:Name="RecoveryCompletionText" Text="{loc:Localized RecoveryCompletion}" TextWrapping="Wrap"
+                       AutomationProperties.LiveSetting="Polite">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+                        <Setter Property="Margin" Value="0,4,0,0" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RecoveryCompletion}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -58,7 +148,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" MinWidth="120" MaxWidth="340" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -94,15 +183,13 @@
                 </TextBlock>
             </Grid>
 
-            <CheckBox Grid.Column="2"
-                      Content="{loc:Loc UI.SelectAll}"
-                      VerticalAlignment="Center"
-                      Margin="0,0,12,0"
-                      IsChecked="{Binding AllSelected, Mode=TwoWay}" />
-
-            <Button Grid.Column="3"
+            <Button x:Name="RefreshUpdatesButton" Grid.Column="2"
                     Padding="12,0"
                     Command="{Binding RefreshCommand}"
+                    AutomationProperties.Name="{loc:Loc UI.RefreshList}"
+                    AutomationProperties.HelpText="{loc:Localized RefreshDisabledReason}"
+                    ToolTip="{loc:Localized RefreshDisabledReason, NullText={x:Null}}"
+                    ToolTipService.ShowOnDisabled="True"
                     VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" FontSize="13" Margin="0,0,8,0" />
@@ -110,17 +197,19 @@
                 </StackPanel>
             </Button>
 
-            <Button Grid.Column="4"
+            <Button x:Name="ReviewUpdatesButton" Grid.Column="3"
                     Padding="12,0"
                     Style="{StaticResource PrimaryButton}"
                     Command="{Binding UpdateSelectedCommand}"
-                    ToolTip="{Binding PackageChangeBlockReason}"
+                    AutomationProperties.Name="{loc:Loc UpdateOperation.ReviewButton}"
+                    AutomationProperties.HelpText="{loc:Localized UpdateSelectedDisabledReason}"
+                    ToolTip="{loc:Localized UpdateSelectedDisabledReason, NullText={x:Null}}"
                     ToolTipService.ShowOnDisabled="True"
                     VerticalAlignment="Center"
                     Margin="8,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="&#xE896;" Style="{StaticResource IconText}" FontSize="13" Margin="0,0,8,0" />
-                    <TextBlock Text="{loc:Loc UI.UpdateSelected}" />
+                    <TextBlock Text="{loc:Loc UpdateOperation.ReviewButton}" />
                 </StackPanel>
             </Button>
         </Grid>
@@ -152,43 +241,68 @@
                             </Style>
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="44" CanUserResize="False" CanUserSort="False">
+                            <DataGridTemplateColumn Header="{loc:Loc UI.SelectAll}" Width="44" CanUserResize="False" CanUserSort="False">
+                                <DataGridTemplateColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox x:Name="SelectVisibleUpdates"
+                                                  IsEnabled="{Binding DataContext.CanSelectVisible, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  IsChecked="{Binding DataContext.VisibleSelection, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay}"
+                                                  AutomationProperties.Name="{loc:Loc UI.SelectAll}"
+                                                  AutomationProperties.HelpText="{loc:Loc UpdatesList.SelectVisible}"
+                                                  ToolTip="{loc:Loc UpdatesList.SelectVisible}" ToolTipService.ShowOnDisabled="True" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.HeaderTemplate>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
-                                                  IsEnabled="{Binding CanSelect}"
                                                   HorizontalAlignment="Center"
-                                                  AutomationProperties.Name="{loc:Loc UI.SelectUpdate}" />
+                                                  ToolTip="{loc:Localized VersionWarning, NullText={x:Null}}"
+                                                  ToolTipService.ShowOnDisabled="True"
+                                                  AutomationProperties.Name="{loc:Localized Name, FormatKey=UpdatesList.SelectPackage, Translate=False}"
+                                                  AutomationProperties.HelpText="{loc:Localized VersionWarning}">
+                                            <CheckBox.Style>
+                                                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                                    <Setter Property="IsEnabled" Value="{Binding CanSelect}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsBusy, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </CheckBox.Style>
+                                        </CheckBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTextColumn Header="{loc:Loc UI.Name}" Binding="{Binding Name}" Width="*" MinWidth="120" IsReadOnly="True">
+                            <DataGridTextColumn Header="{loc:Loc UI.Name}" Binding="{Binding Name}" Width="*" MinWidth="96" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                        <Setter Property="ToolTip" Value="{Binding Name}" />
+                                        <Setter Property="ToolTip" Value="{Binding PackageLabel}" />
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="{loc:Loc UI.InstalledVersion}" Binding="{Binding InstalledVersion}" Width="128" IsReadOnly="True">
+                            <DataGridTextColumn x:Name="InstalledColumn" Header="{loc:Loc UpdatesList.InstalledHeader}" Binding="{loc:Localized InstalledVersionText}" SortMemberPath="InstalledVersion" Width="128" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                                         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{loc:Localized VersionWarning, NullText={x:Null}}" />
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="{loc:Loc UI.Available}" Binding="{Binding AvailableVersion}" Width="104" IsReadOnly="True">
+                            <DataGridTextColumn x:Name="AvailableColumn" Header="{loc:Loc UI.Available}" Binding="{loc:Localized AvailableVersionText}" SortMemberPath="AvailableVersion" Width="104" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
                                         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{loc:Localized VersionWarning, NullText={x:Null}}" />
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="{loc:Loc UI.ID}" Binding="{Binding Id}" Width="130" IsReadOnly="True">
+                            <DataGridTextColumn x:Name="PackageIdColumn" Header="{loc:Loc UI.ID}" Binding="{Binding Id}" Width="130" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
@@ -199,7 +313,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="{loc:Loc UI.Source}" Binding="{Binding Source}" Width="70" IsReadOnly="True">
+                            <DataGridTextColumn x:Name="PackageSourceColumn" Header="{loc:Loc UI.Source}" Binding="{Binding Source}" Width="74" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
@@ -208,11 +322,12 @@
                             </DataGridTextColumn>
 
                             <!-- Status: glifo + texto, cor vinda do ViewModel -->
-                            <DataGridTemplateColumn Header="{loc:Loc UI.Status}" Width="124" SortMemberPath="StatusText" IsReadOnly="True">
+                            <DataGridTemplateColumn x:Name="PackageStatusColumn" Header="{loc:Loc UI.Status}" Width="124" SortMemberPath="StatusText" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
+                                        <DockPanel ToolTip="{loc:Localized StatusText}">
                                             <TextBlock x:Name="statusIcon"
+                                                       DockPanel.Dock="Left"
                                                        Style="{StaticResource IconText}"
                                                        FontSize="12"
                                                        Width="14"
@@ -225,8 +340,9 @@
                                             </TextBlock>
                                             <TextBlock Text="{loc:Localized StatusText}"
                                                        VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"
                                                        Foreground="{Binding StatusBrush}" />
-                                        </StackPanel>
+                                        </DockPanel>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{loc:Localized Status}" Value="Queued">
                                                 <Setter TargetName="statusIcon" Property="Text" Value="&#xE121;" />
@@ -363,33 +479,18 @@
             </GridSplitter.Template>
         </GridSplitter>
 
-        <DockPanel x:Name="DetailsArea" Grid.Row="4" LastChildFill="True">
-            <ScrollViewer x:Name="UpdateControlsScroll" DockPanel.Dock="Top"
+        <Grid x:Name="DetailsArea" Grid.Row="4">
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="ControlsRow" Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <ScrollViewer x:Name="UpdateControlsScroll" Grid.Row="0"
                           VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                           Visibility="{Binding HasUpdateControls, Converter={StaticResource BoolToVis}}"
                           IsTabStop="True" FocusVisualStyle="{StaticResource FocusRing}"
                           AutomationProperties.Name="{loc:Loc UpdatesList.Details}">
-                <StackPanel>
-                    <Border x:Name="UpdateInterruptionPanel" Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,0,0,4"
-                            Visibility="{Binding HasInterruptedUpdate, Converter={StaticResource BoolToVis}}">
-                        <Expander IsExpanded="True">
-                            <Expander.Header>
-                                <TextBlock Text="{loc:Loc UpdateOperation.ResolvePending}" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}" />
-                            </Expander.Header>
-                            <StackPanel Margin="0,6,0,0">
-                                <TextBlock Text="{loc:Localized InterruptionTarget}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                <TextBlock Text="{loc:Localized InterruptionNote}" Style="{StaticResource CaptionText}"
-                                        TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-                                <WrapPanel Margin="0,6,0,0">
-                                    <Button Content="{loc:Loc UpdateOperation.Recheck}" Command="{Binding ResolveInterruptionCommand}" Margin="0,0,6,4" />
-                                    <Button Content="{loc:Loc UpdateOperation.RecoveryDetails}" Command="{Binding ViewInterruptionDetailsCommand}" Margin="0,0,6,4" />
-                                    <Button Content="{loc:Loc UpdateOperation.ReviewVersion}" Command="{Binding ReviewInterruptionCommand}"
-                                            Visibility="{Binding ShowInterruptionReview, Converter={StaticResource BoolToVis}}" Margin="0,0,0,4" />
-                                </WrapPanel>
-                            </StackPanel>
-                        </Expander>
-                    </Border>
+                <StackPanel TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
                     <Border
                             Style="{StaticResource CardBorder}"
                             Padding="16,14"
@@ -418,56 +519,188 @@
                             Visibility="{Binding HasOperation, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
                             <DockPanel LastChildFill="True">
+                                <WrapPanel DockPanel.Dock="Right" Margin="8,0,0,0"
+                                           Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVis}}">
+                                    <Button x:Name="StopAllUpdatesButton" Content="{loc:Loc UpdateOperation.StopAll}"
+                                            Style="{StaticResource DangerOutlineButton}" Command="{Binding CancelUpdateCommand}"
+                                            AutomationProperties.HelpText="{loc:Loc UpdateOperation.StopAllHelp}"
+                                            ToolTip="{loc:Loc UpdateOperation.StopAllHelp}" ToolTipService.ShowOnDisabled="True" />
+                                    <Button x:Name="ForceUpdateButton" Content="{loc:Loc UpdateOperation.Force}" Command="{Binding ForceUpdateCommand}"
+                                            Visibility="{Binding ShowForce, Converter={StaticResource BoolToVis}}" Margin="6,0,0,0" />
+                                </WrapPanel>
                                 <TextBlock DockPanel.Dock="Right" Text="{loc:Localized OperationElapsed, FormatKey=UpdateOperation.Elapsed, Translate=False}"
-                                        Style="{StaticResource CaptionText}" Margin="12,0,0,0" />
-                                <TextBlock Text="{loc:Localized OperationTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                           Margin="12,0,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding OperationElapsed}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsUpdating}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="{loc:Localized OperationTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
                                         ToolTip="{loc:Localized OperationTitle}" />
                             </DockPanel>
-                            <TextBlock x:Name="UpdateOperationStatus" Text="{loc:Localized OperationStatus}" AutomationProperties.LiveSetting="Polite" />
-                            <TextBlock Text="{Binding OperationLastMessage}" TextTrimming="CharacterEllipsis" Style="{StaticResource CaptionText}"
-                                    ToolTip="{Binding OperationLastMessage}" />
+                            <TextBlock x:Name="UpdateOperationStatus" Text="{loc:Localized OperationStatus}" TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite" />
+                            <ProgressBar x:Name="UpdateIndeterminateProgress" Margin="0,5,0,4" IsIndeterminate="True"
+                                         Visibility="{Binding ShowUnmeasuredProgress, Converter={StaticResource BoolToVis}}"
+                                         AutomationProperties.Name="{loc:Loc UI.UpdateProgress}"
+                                         AutomationProperties.HelpText="{loc:Localized OperationStatus}" />
+                            <StackPanel Margin="0,4,0,4" Visibility="{Binding ShowDownloadProgress, Converter={StaticResource BoolToVis}}">
+                                <ProgressBar x:Name="UpdateDownloadProgress" Maximum="100" Value="{Binding DownloadPercent, Mode=OneWay}"
+                                             IsIndeterminate="{Binding DownloadIndeterminate}"
+                                             AutomationProperties.Name="{loc:Loc UpdateOperation.DownloadProgress}"
+                                             AutomationProperties.HelpText="{loc:Localized DownloadSize}" />
+                                <WrapPanel Margin="0,4,0,0">
+                                    <TextBlock Text="{loc:Localized DownloadPercentage}" FontWeight="SemiBold" Margin="0,0,8,0" />
+                                    <TextBlock Text="{loc:Localized DownloadSize}" Style="{StaticResource CaptionText}" Margin="0,0,8,0" />
+                                    <TextBlock Text="{loc:Localized DownloadRate}" Style="{StaticResource CaptionText}" Margin="0,0,8,0" />
+                                </WrapPanel>
+                            </StackPanel>
+                            <TextBlock Text="{loc:Localized RemainingUpdates, FormatKey=UpdateOperation.Remaining, Translate=False}"
+                                       Style="{StaticResource CaptionText}"
+                                       Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVis}}" />
                             <TextBlock Text="{loc:Loc UpdateOperation.StallWarning}" TextWrapping="Wrap"
                                     Visibility="{Binding OperationStalled, Converter={StaticResource BoolToVis}}" />
-                            <TextBlock Text="{loc:Localized OperationResult}" TextTrimming="CharacterEllipsis"
-                                    ToolTip="{loc:Localized OperationResult}" Style="{StaticResource CaptionText}" />
-                            <WrapPanel Margin="0,6,0,0" Visibility="{Binding IsUpdating, Converter={StaticResource BoolToVis}}">
-                                <Button x:Name="CancelCurrentUpdateButton" Content="{loc:Loc UpdateOperation.CancelCurrent}"
-                                        Command="{Binding CancelCurrentUpdateCommand}" Margin="0,0,6,4" />
-                                <Button x:Name="ForceUpdateButton" Content="{loc:Loc UpdateOperation.Force}" Command="{Binding ForceUpdateCommand}"
-                                        Visibility="{Binding ShowForce, Converter={StaticResource BoolToVis}}" Margin="0,0,0,4" />
-                            </WrapPanel>
+                            <TextBlock Text="{loc:Localized OperationResult}" TextWrapping="Wrap"
+                                       Style="{StaticResource OptionalCaptionText}" />
+                            <TextBlock x:Name="UpdateBatchSummary" Text="{loc:Localized BatchSummary}" Style="{StaticResource CaptionText}"
+                                       TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                            <TextBlock Text="{loc:Localized SuspendedUpdateCount, FormatKey=UpdateOperation.SuspendedCount, Translate=False}"
+                                       Style="{StaticResource CaptionText}"
+                                       Visibility="{Binding HasSuspendedQueue, Converter={StaticResource BoolToVis}}" />
+                            <Button x:Name="ResumeUpdatesButton" Content="{loc:Loc UpdateOperation.ResumeRemaining}"
+                                    Visibility="{Binding ShowResumeUpdates, Converter={StaticResource BoolToVis}}"
+                                    Command="{Binding ResumeUpdatesCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+                            <TextBlock x:Name="ResumeReviewStatus" Text="{loc:Localized ResumeReview}" TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Polite" />
+                            <ItemsControl ItemsSource="{Binding ResumeDifferences}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{loc:Localized .}" TextWrapping="Wrap" Style="{StaticResource CaptionText}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
 
+            <!-- Operation card / log divider -->
+            <GridSplitter x:Name="LogSplitter" Grid.Row="1" Height="10"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                          ShowsPreview="True" Cursor="SizeNS" Focusable="True" IsTabStop="True"
+                          FocusVisualStyle="{StaticResource FocusRing}"
+                          AutomationProperties.Name="{loc:Loc UpdatesList.ResizeLog}"
+                          AutomationProperties.HelpText="{loc:Loc UpdatesList.ResizeHelp}"
+                          ToolTip="{loc:Loc UpdatesList.ResizeHelp}"
+                          Template="{Binding Template, ElementName=UpdatesSplitter}" />
+
             <!-- Log -->
-            <Border Style="{StaticResource CardBorder}"
+            <Border Grid.Row="2" Style="{StaticResource CardBorder}"
                     Padding="0"
                     Visibility="{Binding ShowLog, Converter={StaticResource BoolToVis}}">
                 <DockPanel>
-                    <Border DockPanel.Dock="Top"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0,0,0,1"
-                            Padding="16,0"
-                            Height="32">
-                        <TextBlock Text="{loc:Loc UI.Log}" Style="{StaticResource LabelText}" VerticalAlignment="Center" />
-                    </Border>
-                    <ScrollViewer x:Name="LogScroll" VerticalScrollBarVisibility="Auto" Padding="16,8"
-                                  AutomationProperties.Name="{loc:Loc UI.Log}" IsTabStop="True"
-                                  FocusVisualStyle="{StaticResource FocusRing}">
-                        <ItemsControl ItemsSource="{Binding LogLines}">
-                            <ItemsControl.ItemTemplate>
+                    <TextBlock DockPanel.Dock="Bottom" Text="{loc:Localized CopyFeedback}" Style="{StaticResource OptionalText}"
+                               AutomationProperties.LiveSetting="Polite" Margin="10,1,10,3" />
+                    <TabControl x:Name="UpdateDetailsTabs" Padding="0" BorderThickness="0"
+                            Background="{DynamicResource CardBgBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+                    <TabItem x:Name="SessionLogTab" Header="{loc:Loc UI.Log}" Style="{StaticResource UpdateDetailsTab}">
+                        <ScrollViewer x:Name="LogScroll" VerticalScrollBarVisibility="Auto" Padding="12,6"
+                                      AutomationProperties.Name="{loc:Loc UI.Log}" IsTabStop="True"
+                                      FocusVisualStyle="{StaticResource FocusRing}">
+                            <ItemsControl ItemsSource="{Binding LogLines}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{loc:Localized .}" Style="{StaticResource MonoText}" TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem x:Name="PendingUpdatesTab" Header="{loc:Localized PendingBatch.Count, FormatKey=UpdateOperation.PendingTab}"
+                             Style="{StaticResource UpdateDetailsTab}"
+                             Visibility="{Binding PendingBatch.Count, Converter={StaticResource PositiveIntToVisibility}}">
+                        <ListBox ItemsSource="{Binding PendingBatch}" Background="Transparent" BorderThickness="0"
+                                 AutomationProperties.Name="{loc:Loc UpdateOperation.PendingList}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{loc:Localized .}"
-                                               Style="{StaticResource MonoText}"
-                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                               ToolTip="{Binding Id}" TextWrapping="Wrap" Margin="7,3" />
                                 </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </TabItem>
+                    <TabItem x:Name="UpdateResultsTab" Header="{loc:Localized Results.Count, FormatKey=UpdateOperation.ResultsTab}"
+                             Style="{StaticResource UpdateDetailsTab}"
+                             Visibility="{Binding Results.Count, Converter={StaticResource PositiveIntToVisibility}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10,4"
+                                      AutomationProperties.Name="{loc:Loc UpdateOperation.ResultsList}">
+                            <ItemsControl ItemsSource="{Binding Results}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="2,4">
+                                            <Expander Foreground="{DynamicResource TextPrimaryBrush}" Padding="2"
+                                                      AutomationProperties.HelpText="{loc:Loc UpdateOperation.PackageLogHelp}">
+                                                <Expander.Header>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                        <TextBlock Text="{loc:Localized Status}" Style="{StaticResource CaptionText}" />
+                                                    </StackPanel>
+                                                </Expander.Header>
+                                                <StackPanel Margin="20,5,6,6">
+                                                    <TextBlock Text="{Binding Id}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{loc:Localized Message}" TextWrapping="Wrap" Margin="0,3,0,8" />
+                                                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource UpdateAttemptActions}" />
+                                                    <TextBlock Text="{loc:Loc UpdateOperation.PackageLog}" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                                    <TextBlock Text="{loc:Localized Log}" Style="{StaticResource MonoText}" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Expander>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem x:Name="AttemptHistoryTab" Header="{loc:Loc UpdatesDiagnostics.History}"
+                             Style="{StaticResource UpdateDetailsTab}"
+                             Visibility="{Binding ShowAttemptHistory, Converter={StaticResource BoolToVis}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10,4">
+                            <StackPanel>
+                                <TextBlock Text="{loc:Localized AttemptHistoryStatus}" Style="{StaticResource OptionalText}" />
+                                <ItemsControl ItemsSource="{Binding AttemptHistory}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Expander Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,4">
+                                                <Expander.Header>
+                                                    <StackPanel Margin="3">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                        <TextBlock Text="{loc:Localized Timestamp, NumberFormat=g}" Style="{StaticResource CaptionText}" />
+                                                    </StackPanel>
+                                                </Expander.Header>
+                                                <StackPanel Margin="20,4,6,6">
+                                                    <TextBlock Text="{loc:Localized Message}" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{loc:Loc UpdatesDiagnostics.HistoryExcerpt}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource UpdateAttemptActions}" />
+                                                </StackPanel>
+                                            </Expander>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    </TabControl>
                 </DockPanel>
             </Border>
-        </DockPanel>
+        </Grid>
     </Grid>
 </UserControl>

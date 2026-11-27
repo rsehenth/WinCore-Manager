@@ -318,7 +318,7 @@ Guardar o item atual na quarentena e recuperar o anterior?</value>
     <value>Aplicativos</value>
   </data>
   <data name="Message.AppsListed01" xml:space="preserve">
-    <value>{0} aplicativo(s) na lista · {1}.</value>
+    <value>{0} aplicativo(s) na lista · inventário técnico com {1} entrada(s).</value>
   </data>
   <data name="Message.Attention0" xml:space="preserve">
     <value>Atenção {0}</value>
@@ -1428,7 +1428,7 @@ Guardar o item atual na quarentena e recuperar o anterior?</value>
     <value>Desligado</value>
   </data>
   <data name="Message.OfficialUninstallersRunOneAtATimeApps" xml:space="preserve">
-    <value>Cada desinstalador oficial será executado sequencialmente. Programas sem desinstalador compatível serão marcados como 'Não suportado' e mantidos.</value>
+    <value>Os desinstaladores da lista serão executados um por vez. Você pode parar a fila após o item atual.</value>
   </data>
   <data name="Message.OfficialUninstallersWillRunOneAtATime" xml:space="preserve">
     <value>Os desinstaladores oficiais serão executados um por vez, na ordem da lista. Acompanhe cada janela do instalador.</value>
@@ -2048,7 +2048,7 @@ Estimativa de {1}. Confira os arquivos que ainda deseja recuperar.</value>
     <value>Agendador de Tarefas: algumas tarefas ou pastas não puderam ser consultadas.</value>
   </data>
   <data name="Message.TechnicalComponentsInAdvancedView01" xml:space="preserve">
-    <value>{0} componente(s) técnico(s) na visão avançada · {1}.</value>
+    <value>{0} componente(s) técnico(s) na visão avançada · inventário técnico com {1} entrada(s).</value>
   </data>
   <data name="Message.TechnicalInventory0Entries" xml:space="preserve">
     <value>inventário técnico com {0} entrada(s)</value>
@@ -2706,9 +2706,7 @@ Estimativa de {1}. Confira os arquivos que ainda deseja recuperar.</value>
   <data name="Message.UpdatedSuccessfully" xml:space="preserve">
     <value>Atualizado com sucesso.</value>
   </data>
-  <data name="Message.Updater.Available" xml:space="preserve">
-    <value>Uma nova versão do WinCore Manager está disponível.</value>
-  </data>
+  <data name="Message.Updater.Available" xml:space="preserve"><value>Uma nova versão do WinCore Manager está disponível.</value></data>
   <data name="Message.Updater.Canceled" xml:space="preserve">
     <value>Atualização cancelada.</value>
   </data>
@@ -2723,9 +2721,7 @@ Estimativa de {1}. Confira os arquivos que ainda deseja recuperar.</value>
 
 Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualização após a verificação do pacote.</value>
   </data>
-  <data name="Message.Updater.Current" xml:space="preserve">
-    <value>O WinCore Manager já está na versão mais recente.</value>
-  </data>
+  <data name="Message.Updater.Current" xml:space="preserve"><value>Você está usando a versão mais recente do WinCore Manager.</value></data>
   <data name="Message.Updater.Downloading" xml:space="preserve">
     <value>Baixando e verificando o pacote…</value>
   </data>
@@ -2756,9 +2752,7 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="Message.Updater.Ready" xml:space="preserve">
     <value>Pacote verificado. Fechando o aplicativo para atualizar…</value>
   </data>
-  <data name="Message.Updater.ReleaseUnavailable" xml:space="preserve">
-    <value>Nenhuma versão estável está disponível no repositório.</value>
-  </data>
+  <data name="Message.Updater.ReleaseUnavailable" xml:space="preserve"><value>Não há uma release estável publicada no repositório oficial.</value></data>
   <data name="Message.Updater.RepositoryUnavailable" xml:space="preserve">
     <value>O repositório oficial está indisponível.</value>
   </data>
@@ -3195,7 +3189,7 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
     <value>Informe o que ainda se sabe sobre o programa</value>
   </data>
   <data name="UI.EstimateHowMuchSpaceYouCanReclaimAnd" xml:space="preserve">
-    <value>Estima quanto espaço dá para recuperar e abre a Limpeza de Disco do Windows.</value>
+    <value>Analisa temporários e caches, mostra prévias e limpa as categorias escolhidas após confirmação.</value>
   </data>
   <data name="UI.Features" xml:space="preserve">
     <value>O que você encontra aqui</value>
@@ -3429,7 +3423,7 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
     <value>Texto da licença MIT em Licencas/WinCoreManager-LICENSE.txt, junto ao executável portátil. Avisos de terceiros: pasta Licencas, NOTICE-BCUninstaller.md e LICENSE-BCUninstaller.txt.</value>
   </data>
   <data name="UI.SeeWhatRunsAtStartupAndEnableOr" xml:space="preserve">
-    <value>Mostra o que abre junto com o Windows e deixa você ligar ou desligar.</value>
+    <value>Mostra o que inicia com o Windows e permite alterar entradas elegíveis.</value>
   </data>
   <data name="UI.SeeWhatStartsWithWindowsAndManageEligible" xml:space="preserve">
     <value>Consulte o que inicia com o Windows e gerencie as entradas pessoais elegíveis.</value>
@@ -3567,7 +3561,7 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
     <value>Versão</value>
   </data>
   <data name="UI.ViewAndAdjustPowerPerformanceAndFolderSettings" xml:space="preserve">
-    <value>Ajusta energia, desempenho e opções de pasta, mostrando o valor atual.</value>
+    <value>Gerencia energia e opções de pastas e abre as configurações de desempenho do Windows.</value>
   </data>
   <data name="UI.ViewInformationAboutYourProcessorGraphicsMemoryDrives" xml:space="preserve">
     <value>Identifica processador, placa de vídeo, memória, discos e sensores.</value>
@@ -3765,7 +3759,7 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
     <value>Tempo decorrido {0}</value>
   </data>
   <data name="UpdateOperation.Waiting" xml:space="preserve">
-    <value>Aguardando</value>
+    <value>Preparando</value>
   </data>
   <data name="UpdateOperation.Downloading" xml:space="preserve">
     <value>Baixando</value>
@@ -3792,13 +3786,13 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
     <value>Concluída</value>
   </data>
   <data name="UpdateOperation.Verifying" xml:space="preserve">
-    <value>Conferindo a versão instalada</value>
+    <value>Verificando instalador</value>
   </data>
   <data name="UpdateOperation.CancelCurrent" xml:space="preserve">
     <value>Cancelar atualização</value>
   </data>
   <data name="UpdateOperation.CancelQueue" xml:space="preserve">
-    <value>Cancelar toda a fila</value>
+    <value>Parar todas as atualizações</value>
   </data>
   <data name="UpdateOperation.Force" xml:space="preserve">
     <value>Forçar encerramento</value>
@@ -3863,22 +3857,25 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="UpdateOperation.CloseWithoutWaitingWarning" xml:space="preserve">
     <value>O instalador ou o WinGet pode continuar executando. O estado ficará registrado para conferência quando você reabrir o WinCore Manager. Deseja fechar a interface?</value>
   </data>
-  <data name="UpdateOperation.InactivitySetting" xml:space="preserve">
-    <value>Aviso de inatividade do WinGet</value>
-  </data>
-  <data name="UpdateOperation.InactivityDescription" xml:space="preserve">
-    <value>Segundos sem novas mensagens antes de avisar.</value>
-  </data>
-  <data name="UpdateOperation.InactivitySaved" xml:space="preserve">
-    <value>Prazo do aviso do WinGet salvo.</value>
-  </data>
   <data name="UpdateOperation.OriginalProcessPending" xml:space="preserve">
-    <value>O processo original ainda está ativo ou seu encerramento não pôde ser confirmado. Aguarde e consulte novamente.</value>
+    <value>O processo original ainda está ativo. Aguarde o encerramento e reconsulte. Veja o PID em Etapas e detalhes.</value>
   </data>
+  <data name="UpdateOperation.RecoveryRootUnverified" xml:space="preserve"><value>A identidade ou o encerramento do processo original não pôde ser verificado. Confira o instalador e reconsulte. Se persistir, abra Etapas e detalhes para buscar suporte.</value></data>
   <data name="UpdateOperation.RecoveryReview" xml:space="preserve"><value>Uma alteração de pacote aguarda verificação. Reconsulte o estado para ver o que falta.</value></data>
   <data name="UpdateOperation.RecoveryIdentity" xml:space="preserve"><value>O estado da operação ficou inconclusivo e o recibo está indisponível. Confirme se a outra instância ainda está aberta e reconsulte.</value></data>
   <data name="UpdateOperation.RecoveryInventory" xml:space="preserve"><value>A consulta de inventário exigida para {0} falhou. Confira o Instalador de Aplicativo e a origem no WinGet e reconsulte.</value></data>
-  <data name="UpdateOperation.RecoveryRestart" xml:space="preserve"><value>Confira as janelas e os registros do instalador. Reinicie o Windows pelo menu Iniciar e reconsulte para avaliar o risco residual.</value></data>
+  <data name="UpdateOperation.RecoveryRestart" xml:space="preserve"><value>Esta sessão não consegue verificar o processo registrado para esta operação (identidade ausente ou recibo ilegível). Depois de conferir que nenhum instalador está aberto, reinicie o Windows e selecione Reconsultar estado em Atualizações.</value></data>
+  <data name="UpdateOperation.RecoveryInstallerRestart" xml:space="preserve"><value>O instalador solicitou uma reinicialização. Reinicie o Windows pelo menu Iniciar e depois selecione Reconsultar estado em Atualizações.</value></data>
+  <data name="UpdateOperation.RecoveryInstallerActive" xml:space="preserve"><value>A última verificação identificou um instalador ativo. Aguarde o término e selecione Reconsultar estado.</value></data>
+  <data name="UpdateOperation.RecoveryInterruptedAttempt" xml:space="preserve"><value>A atualização foi interrompida antes que a conclusão pudesse ser verificada. Confira o estado do instalador.</value></data>
+  <data name="UpdateOperation.RecoveryTerminationUnverified" xml:space="preserve"><value>Não foi possível confirmar o encerramento do WinGet ou dos processos supervisionados.</value></data>
+  <data name="UpdateOperation.RecoveryEvidenceIncomplete" xml:space="preserve"><value>O registro de conclusão está incompleto. As alterações de aplicativos continuam bloqueadas enquanto houver pendência.</value></data>
+  <data name="UpdateOperation.RecoveryMsiLogUnverified" xml:space="preserve"><value>O log do instalador não confirmou a transação esperada do Windows Installer e seu resultado final.</value></data>
+  <data name="UpdateOperation.RecoveryMsiRegistrationUnverified" xml:space="preserve"><value>O Windows Installer não confirmou o registro do produto e do pacote esperados após a transação.</value></data>
+  <data name="UpdateOperation.RecoveryDelegationUnknown" xml:space="preserve"><value>Falta comprovar a conclusão das tarefas que o instalador pode ter delegado fora do WinGet.</value></data>
+  <data name="UpdateOperation.RecoveryFreshInventoryMissing" xml:space="preserve"><value>Uma nova consulta ao inventário do WinGet não conseguiu confirmar a versão instalada.</value></data>
+  <data name="UpdateOperation.RecoveryFreshInventoryMismatch" xml:space="preserve"><value>A versão encontrada no novo inventário do WinGet diverge da versão solicitada.</value></data>
+  <data name="UpdateOperation.RecoverySameSession" xml:space="preserve"><value>Os processos registrados podem ser verificados nesta sessão do Windows. Não é necessário reiniciar.</value></data>
   <data name="UpdateOperation.RecoveryVersion" xml:space="preserve"><value>O inventário de {0} informa {1}. A versão esperada é {2}. Confira se o aplicativo abre na versão observada e registre a revisão manual.</value></data>
   <data name="UpdateOperation.RecoveryBootUnavailable" xml:space="preserve"><value>Não foi possível verificar a sessão de inicialização do Windows. Confira a disponibilidade do WMI e reconsulte.</value></data>
   <data name="UpdateOperation.RecoveryVerified" xml:space="preserve"><value>Reinício e versão instalada confirmados para {0} ({1}). O bloqueio foi liberado.</value></data>
@@ -3888,6 +3885,23 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="Message.ExternalProcessObservationEnded" xml:space="preserve"><value>O prazo de observação terminou. O processo externo pode continuar. Confirme o estado no Windows antes de repetir a operação.</value></data>
   <data name="UpdateOperation.BatchTotals" xml:space="preserve"><value>{0} sucesso(s), {1} falha(s), {2} cancelado(s), {3} inconclusivo(s), {4} não iniciado(s).</value></data>
   <data name="UpdateOperation.ReviewVersion" xml:space="preserve"><value>Revisar operação interrompida</value></data>
+  <data name="UpdateOperation.DismissWarning" xml:space="preserve"><value>Ignorar aviso</value></data>
+  <data name="UpdateOperation.DismissWarningConfirm" xml:space="preserve"><value>Ignorar o aviso encerra a pendência e libera as outras operações. O resultado da instalação continua inconclusivo. Confirme que verificou o aplicativo ou os registros, que os instaladores observados terminaram e que aceita o risco de atividade delegada que o aplicativo não conseguiu observar. Inventário verificado. {0}</value></data>
+  <data name="UpdateOperation.DismissNoLaunch" xml:space="preserve"><value>O recibo confirma que a operação não chegou a iniciar. Ignorar o aviso encerra esta pendência. O resultado da instalação continua inconclusivo. Confirme que aceita encerrar a pendência com essa evidência.</value></data>
+  <data name="UpdateOperation.DismissNoLaunchRecord" xml:space="preserve"><value>O operador confirmou a decisão de ignorar o aviso. O recibo comprova que a operação não iniciou.</value></data>
+  <data name="UpdateOperation.DismissWarningRecord" xml:space="preserve"><value>O operador confirmou a decisão de ignorar o aviso e aceitou o risco residual. O aplicativo verificou a inicialização do Windows {0}, as identidades de processo disponíveis e o inventário ({1}). O resultado da instalação continuou inconclusivo.</value></data>
+  <data name="UpdateOperation.DismissWarningReleased" xml:space="preserve"><value>A decisão de ignorar o aviso foi registrada no Histórico. O bloqueio foi liberado.</value></data>
+  <data name="UpdateOperation.RecoveryRefreshingInventory" xml:space="preserve"><value>Atualizando a lista antes de liberar as operações.</value></data>
+  <data name="UpdateOperation.DismissUnreadableReceipt" xml:space="preserve"><value>O recibo contém dados ilegíveis ou inconsistentes. Ignorar o aviso exige um recibo íntegro. Reconsulte o estado para ver as opções de recuperação.</value></data>
+  <data name="UpdateOperation.RecoveryDelegateActive" xml:space="preserve"><value>Um processo instalador delegado ou uma transação do Windows Installer ainda está ativo. Aguarde o encerramento e reconsulte. Veja o PID em Etapas e detalhes, quando disponível.</value></data>
+  <data name="UpdateOperation.RecoveryDelegateUnverified" xml:space="preserve"><value>A identidade ou o encerramento de um processo instalador delegado não pôde ser verificado. Confira o instalador e reconsulte. Se persistir, abra Etapas e detalhes para buscar suporte.</value></data>
+  <data name="Message.PackageAction.Pending" xml:space="preserve"><value>Uma operação pendente bloqueia alterações de pacotes.</value></data>
+  <data name="Message.PackageAction.OpenUpdates" xml:space="preserve"><value>Abra Atualizações para revisar a pendência.</value></data>
+  <data name="Message.PackageAction.Maintenance" xml:space="preserve"><value>Aguarde a conclusão da operação de manutenção.</value></data>
+  <data name="Message.PackageAction.Busy" xml:space="preserve"><value>Aguarde a conclusão da operação em andamento.</value></data>
+  <data name="Message.PackageAction.InventoryUnavailable" xml:space="preserve"><value>O inventário está indisponível. Atualize a lista para tentar novamente.</value></data>
+  <data name="Message.PackageAction.NoSelection" xml:space="preserve"><value>Marque um item elegível na lista.</value></data>
+  <data name="Message.PackageAction.Protected" xml:space="preserve"><value>O programa selecionado é protegido contra remoção.</value></data>
   <data name="UpdateOperation.ReviewVersionConfirm" xml:space="preserve"><value>Confirme que verificou o resultado no aplicativo ou nos registros do instalador, que os instaladores observados terminaram e que aceita liberar o bloqueio com a possibilidade de trabalho delegado não observado. Inventário verificado: {0}.</value></data>
   <data name="UpdateOperation.RecoveryManualRecord" xml:space="preserve"><value>Revisão manual de {0} após reinício verificado. Versão observada: {1}.</value></data>
   <data name="UpdateOperation.ExternalRestartVerified" xml:space="preserve"><value>Reinício confirmado após a operação externa. Consulte o Histórico para conferir o resultado registrado.</value></data>
@@ -3898,6 +3912,13 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="UpdateOperation.RiskReviewAvailable" xml:space="preserve"><value>Operação {0}. {1}. Confira o resultado do instalador e use a revisão para decidir se aceita o risco residual.</value></data>
   <data name="UpdateOperation.RiskReviewRecord" xml:space="preserve"><value>O aplicativo verificou o boot {0}, as identidades de processos disponíveis e a consulta de inventário ({1}). O operador confirmou a verificação dos instaladores e do resultado e aceitou o risco residual. A conclusão técnica ficou inconclusiva.</value></data>
   <data name="UpdateOperation.RiskReviewReleased" xml:space="preserve"><value>O Histórico registra a revisão de risco residual que liberou o bloqueio.</value></data>
+  <data name="UpdateOperation.WaitingForExternalInstaller" xml:space="preserve"><value>O WinGet terminou, mas um processo do instalador iniciado fora dele ainda está em execução. Aguardando até 2 minutos antes de seguir.</value></data>
+  <data name="UpdateOperation.WindowsInstallerBusy" xml:space="preserve"><value>Uma transação do Windows Installer ainda está em execução. A fila para até que ela termine.</value></data>
+  <data name="UpdateOperation.VerifiedRecoveryReviewNext" xml:space="preserve"><value>Conclusão verificada nesta sessão: o WinGet retornou sucesso, os processos registrados terminaram, nenhuma transação do Windows Installer está ativa e o inventário mostra a versão solicitada. Revise e confirme o encerramento.</value></data>
+  <data name="UpdateOperation.VerifiedRecoveryConfirm" xml:space="preserve"><value>{0}. Os processos observados terminaram e o inventário confere. Um instalador que o WinCore Manager não conseguiu observar não pode ser descartado. Feche outros instaladores antes de confirmar. O WinCore Manager vai conferir novamente a atividade e registrar sua decisão no Histórico.</value></data>
+  <data name="UpdateOperation.VerifiedRecoveryConfirmClosure" xml:space="preserve"><value>Confirmar encerramento</value></data>
+  <data name="UpdateOperation.VerifiedRecoveryRecord" xml:space="preserve"><value>O proprietário confirmou o encerramento na sessão {0}. O WinGet retornou 0, os processos registrados terminaram, nenhuma transação do Windows Installer estava ativa e a versão instalada é {1}.</value></data>
+  <data name="UpdateOperation.VerifiedRecoveryReleased" xml:space="preserve"><value>Conclusão confirmada e registrada no Histórico. Atualizações e Desinstalador foram liberados nesta sessão.</value></data>
   <data name="UpdateOperation.ResolvePending" xml:space="preserve"><value>Resolver atualização pendente</value></data>
   <data name="UpdateOperation.AcceptResidualRisk" xml:space="preserve"><value>Aceitar risco residual</value></data>
   <data name="UpdateOperation.RecoveryReceiptTimestamp" xml:space="preserve"><value>{0} (data do recibo)</value></data>
@@ -3907,7 +3928,7 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="UpdateOperation.RecoveryLeaseBusy" xml:space="preserve"><value>Outra janela ou sessão está usando o recibo. Aguarde a operação terminar ou feche essa janela com a opção de cancelamento e reconsulte.</value></data>
   <data name="UpdateOperation.RecoveryReceiptUnavailable" xml:space="preserve"><value>O recibo está inacessível. Verifique se o armazenamento do aplicativo está disponível e reconsulte o estado.</value></data>
   <data name="UpdateOperation.RecoveryReceiptChanged" xml:space="preserve"><value>O recibo mudou durante a revisão. Reconsulte o estado e confirme a revisão novamente.</value></data>
-  <data name="UpdateOperation.RecoveryHistoryUnavailable" xml:space="preserve"><value>A aceitação do risco não pôde ser registrada no Histórico. O bloqueio continua. Verifique o armazenamento do Histórico e reconsulte.</value></data>
+  <data name="UpdateOperation.RecoveryHistoryUnavailable" xml:space="preserve"><value>A decisão da revisão não pôde ser registrada no Histórico. O bloqueio continua. Verifique o armazenamento do Histórico e reconsulte.</value></data>
   <data name="UpdateOperation.RecoveryNotStarted" xml:space="preserve"><value>O recibo comprova que a atualização ficou antes do lançamento. O bloqueio foi liberado.</value></data>
   <data name="UpdateOperation.RecoveryAlreadyResolved" xml:space="preserve"><value>Outra sessão resolveu a operação pendente.</value></data>
   <data name="UpdateOperation.RecoveryDiagnostic" xml:space="preserve"><value>Data e hora: {0}&#10;Último estado: {1}&#10;Processo principal: {2}&#10;Processos delegados conhecidos: {3}&#10;Inventário: {4}&#10;Reinício posterior: {5}&#10;Saída da operação: {6}</value></data>
@@ -3918,7 +3939,23 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="UpdateOperation.RecoveryProcessUnverified" xml:space="preserve"><value>Atividade não pôde ser descartada</value></data>
   <data name="UpdateOperation.RecoveryBootConfirmed" xml:space="preserve"><value>Confirmado</value></data>
   <data name="UpdateOperation.RecoveryBootMissing" xml:space="preserve"><value>Ainda não confirmado</value></data>
-  <data name="UpdateOperation.RecoveryNotChecked" xml:space="preserve"><value>Aguardando verificação dos processos</value></data>
+  <data name="UpdateOperation.VerifyCompletionNow" xml:space="preserve"><value>Verificar conclusão agora</value></data>
+  <data name="UpdateOperation.RecoveryNotChecked" xml:space="preserve"><value>Aguardando a liberação das verificações de processos e reinício</value></data>
+  <data name="UpdateOperation.RecoveryBlockedActions" xml:space="preserve"><value>Atualizações, desinstalações e reparos conflitantes estão bloqueados. Você pode consultar as listas e continuar navegando.</value></data>
+  <data name="UpdateOperation.RecoveryUninstallBlocked" xml:space="preserve"><value>Desinstalar selecionados está bloqueado pela operação pendente.</value></data>
+  <data name="UpdateOperation.RecoveryMaintenanceBlocked" xml:space="preserve"><value>Reparos que podem conflitar com a operação pendente estão bloqueados. As ferramentas de diagnóstico compatíveis continuam disponíveis.</value></data>
+  <data name="UpdateOperation.OpenRecovery" xml:space="preserve"><value>Abrir recuperação em Atualizações</value></data>
+  <data name="UpdateOperation.RecoveryStepsDetails" xml:space="preserve"><value>Etapas e detalhes</value></data>
+  <data name="UpdateOperation.RecoverySteps" xml:space="preserve"><value>1. Confira o processo original e os instaladores delegados. Aguarde o encerramento de qualquer atividade identificada.&#10;2. Se necessário, reinicie pelo menu Iniciar e reconsulte o estado.&#10;3. Aguarde a leitura do inventário WinGet e confira a versão encontrada.&#10;4. Confira o aplicativo ou os registros do instalador e avalie o risco residual.&#10;5. Confirme o encerramento da pendência quando a revisão estiver disponível. A decisão será registrada no Histórico.</value></data>
+  <data name="UpdateOperation.RecoveryChecking" xml:space="preserve"><value>Verificando o recibo, as identidades dos processos e o reinício do Windows…</value></data>
+  <data name="UpdateOperation.RecoveryCheckingDismissal" xml:space="preserve"><value>Verificando se é seguro ignorar o aviso…</value></data>
+  <data name="UpdateOperation.RecoveryCheckingInventory" xml:space="preserve"><value>Reconsultando o inventário WinGet…</value></data>
+  <data name="UpdateOperation.RecoveryDismissBlocked" xml:space="preserve"><value>O aviso foi mantido.</value></data>
+  <data name="UpdateOperation.RecoveryReviewDeclined" xml:space="preserve"><value>Revisão cancelada. A operação continua pendente.</value></data>
+  <data name="UpdateOperation.RecoveryReviewNext" xml:space="preserve"><value>Confira o resultado no aplicativo ou nos registros do instalador. Depois, revise o risco residual para decidir se a pendência pode ser encerrada.</value></data>
+  <data name="UpdateOperation.RecoveryInventoryExpectedVersion" xml:space="preserve"><value>O WinGet encontrou a versão solicitada ({0}). A confirmação do resultado ainda exige revisão.</value></data>
+  <data name="UpdateOperation.RecoveryInventoryDifferentVersion" xml:space="preserve"><value>O WinGet encontrou {0}, uma versão diferente da solicitada. O sucesso da instalação continua sem comprovação.</value></data>
+  <data name="UpdateOperation.RecoveryProcessWithPid" xml:space="preserve"><value>{0} (PID {1})</value></data>
   <data name="UpdateOperation.RecoveryInventoryUnavailable" xml:space="preserve"><value>Indisponível</value></data>
   <data name="UpdateOperation.RecoveryInventoryVersion" xml:space="preserve"><value>Versão observada: {0}</value></data>
   <data name="UpdateOperation.RecoveryInventoryUnknownVersion" xml:space="preserve"><value>Aplicativo localizado. A versão instalada é desconhecida.</value></data>
@@ -3963,6 +4000,790 @@ Versão instalada: {0}. O WinCore Manager será fechado para aplicar a atualiza�
   <data name="Message.UpdatesList.HiddenSaveFailed" xml:space="preserve"><value>Não foi possível salvar a lista de aplicativos ocultos.</value></data>
   <data name="Message.UpdatesList.RatioSaveFailed" xml:space="preserve"><value>O tamanho da lista foi alterado nesta sessão. Não foi possível salvá-lo.</value></data>
   <data name="UpdatesList.Resize" xml:space="preserve"><value>Redimensionar lista de atualizações</value></data>
+  <data name="UpdatesList.ResizeLog" xml:space="preserve"><value>Redimensionar painel da operação e registro</value></data>
   <data name="UpdatesList.ResizeHelp" xml:space="preserve"><value>Arraste a divisória ou use as setas para cima e para baixo.</value></data>
   <data name="UpdatesList.Details" xml:space="preserve"><value>Progresso e recuperação de atualizações</value></data>
+  <data name="UpdateOperation.StopAll" xml:space="preserve"><value>Parar todas as atualizações</value></data>
+  <data name="UpdateOperation.StopAllHelp" xml:space="preserve"><value>Solicita a parada da atualização atual e impede o início dos próximos itens.</value></data>
+  <data name="UpdateOperation.QueueStopping" xml:space="preserve"><value>Solicitando parada das atualizações...</value></data>
+  <data name="UpdateOperation.QueueStopped" xml:space="preserve"><value>Fila interrompida pelo usuário. Nenhuma nova atualização será iniciada.</value></data>
+  <data name="UpdateOperation.QueueNeedsReview" xml:space="preserve"><value>Fila interrompida. Uma operação ainda precisa de verificação.</value></data>
+  <data name="UpdateOperation.Remaining" xml:space="preserve"><value>Restantes na fila: {0}</value></data>
+  <data name="UpdateOperation.DownloadProgress" xml:space="preserve"><value>Progresso do download</value></data>
+  <data name="UpdateOperation.DownloadIndeterminate" xml:space="preserve"><value>Baixando instalador — progresso detalhado indisponível.</value></data>
+  <data name="UpdateOperation.DownloadPercentage" xml:space="preserve"><value>≈{0}%</value></data>
+  <data name="UpdateOperation.DownloadAmount" xml:space="preserve"><value>{0:N1} {1} / {2:N1} {3}</value></data>
+  <data name="UpdateOperation.DownloadRate" xml:space="preserve"><value>≈{0:N1} MB/s</value></data>
+  <data name="UpdateOperation.DownloadEta" xml:space="preserve"><value>aproximadamente {0} s restantes</value></data>
+  <data name="UpdateOperation.Confirming" xml:space="preserve"><value>Confirmando conclusão</value></data>
+  <data name="UpdateOperation.ResumeRemaining" xml:space="preserve"><value>Retomar atualizações restantes</value></data>
+  <data name="UpdateOperation.ResumeReview" xml:space="preserve"><value>O inventário mudou. Revise as diferenças e a seleção na lista antes de atualizar.</value></data>
+  <data name="UpdateOperation.ResumeUnavailable" xml:space="preserve"><value>{0}: atualização para {1} não está mais disponível ou elegível.</value></data>
+  <data name="UpdateOperation.ResumeVersionChanged" xml:space="preserve"><value>{0}: antes {1} → {2}, agora {3} → {4}.</value></data>
+  <data name="UpdateOperation.SuspendedCount" xml:space="preserve"><value>Pendentes na fila suspensa: {0}</value></data>
+  <data name="UpdateOperation.QueueReadyToResume" xml:space="preserve"><value>Operação revisada. Você pode retomar as atualizações restantes.</value></data>
+  <data name="UpdateOperation.QueueReviewResolved" xml:space="preserve"><value>Operação revisada. Você pode iniciar um novo lote.</value></data>
+  <data name="UpdateOperation.SuspendedQueueNotSaved" xml:space="preserve"><value>A fila suspensa fica disponível nesta sessão porque não pôde ser salva.</value></data>
+  <data name="UpdateOperation.SuspendedQueueUnavailable" xml:space="preserve"><value>Não foi possível abrir a fila suspensa. Confira a seleção antes de iniciar outro lote.</value></data>
+  <data name="Uninstaller.MarkColumn" xml:space="preserve"><value>Marcar</value></data>
+  <data name="Uninstaller.ConfirmAction" xml:space="preserve"><value>Desinstalar</value></data>
+  <data name="Uninstaller.MarkProgram" xml:space="preserve"><value>Marcar {0} para desinstalação</value></data>
+  <data name="Uninstaller.SelectVisible" xml:space="preserve"><value>Marcar todos os elegíveis</value></data>
+  <data name="Uninstaller.SelectionScope" xml:space="preserve"><value>Aplica-se aos itens da busca e do filtro atuais que podem ser removidos em lote.</value></data>
+  <data name="Message.Uninstaller.NoSelection" xml:space="preserve"><value>Marque a caixa de um aplicativo para desinstalá-lo.</value></data>
+  <data name="Uninstaller.ProgramsToRemove" xml:space="preserve"><value>Aplicativos a desinstalar</value></data>
+  <data name="Message.Uninstaller.OperationRunning" xml:space="preserve"><value>Aguarde a desinstalação em andamento.</value></data>
+  <data name="Message.Uninstaller.UpdateRunning" xml:space="preserve"><value>Aguarde a instalação de atualizações em andamento.</value></data>
+  <data name="Message.Uninstaller.RecoveryRunning" xml:space="preserve"><value>Aguarde a verificação da operação pendente em Atualizações.</value></data>
+  <data name="Message.Uninstaller.UpdateScanning" xml:space="preserve"><value>Aguarde a consulta de atualizações em andamento.</value></data>
+  <data name="Message.Uninstaller.ElevatedSession" xml:space="preserve"><value>Abra o WinCore Manager sem privilégios de administrador para desinstalar este aplicativo.</value></data>
+  <data name="Message.Uninstaller.MachineExecutable" xml:space="preserve"><value>O WinCore não valida a elevação nem a conclusão deste desinstalador EXE de máquina. Use Aplicativos instalados do Windows e atualize o inventário depois.</value></data>
+  <data name="Message.Uninstaller.ReviewIndividually" xml:space="preserve"><value>Um item marcado exige revisão individual. Deixe apenas esse item marcado para prosseguir.</value></data>
+  <data name="Message.Uninstaller.SelectionChanged" xml:space="preserve"><value>A lista de itens marcados mudou. Confira a seleção e confirme novamente.</value></data>
+  <data name="Message.Uninstaller.ReservationUnavailable" xml:space="preserve"><value>Não foi possível reservar a operação de desinstalação. Confira o Registro em Atualizações.</value></data>
+  <data name="Message.Uninstaller.StillListed" xml:space="preserve"><value>O desinstalador de {0} concluiu a execução, mas a entrada continua no inventário.</value></data>
+  <data name="Message.StartupUnrecognizedPurpose" xml:space="preserve"><value>Finalidade, fabricante ou argumentos fora do controle permitido.</value></data>
+  <data name="Message.StartupManagedInWindows" xml:space="preserve"><value>Gerenciar no Windows</value></data>
+  <data name="Message.StartupOpenNative" xml:space="preserve"><value>Abrir ferramenta do Windows</value></data>
+  <data name="Message.CleanupUserTemp" xml:space="preserve"><value>Temporários do usuário</value></data>
+  <data name="Message.CleanupUserTempDescription" xml:space="preserve"><value>Arquivos .tmp na raiz da pasta Temp do perfil, criados e alterados há pelo menos sete dias. Feche aplicativos abertos antes de limpar.</value></data>
+  <data name="Message.CleanupUserReports" xml:space="preserve"><value>Relatórios de erro do usuário</value></data>
+  <data name="Message.CleanupUserReportsDescription" xml:space="preserve"><value>Arquivos .wer das pastas de relatórios do perfil. Podem ser necessários para diagnosticar falhas.</value></data>
+  <data name="Message.CleanupUserDumps" xml:space="preserve"><value>Dumps de aplicativos do usuário</value></data>
+  <data name="Message.CleanupUserDumpsDescription" xml:space="preserve"><value>Arquivos .dmp na pasta padrão CrashDumps do perfil. Podem ser necessários para diagnosticar falhas.</value></data>
+  <data name="Message.CleanupPartial" xml:space="preserve"><value>Análise parcial. Confira a prévia e analise de novo após limpar.</value></data>
+  <data name="Message.CleanupDirect" xml:space="preserve"><value>Limpeza direta</value></data>
+  <data name="Message.CleanupDelegated" xml:space="preserve"><value>Delegada à Limpeza de Disco do Windows</value></data>
+  <data name="Message.CleanupItemCount" xml:space="preserve"><value>{0} itens</value></data>
+  <data name="Message.CleanupAnalyzeFirst" xml:space="preserve"><value>Analise e selecione os arquivos antes de limpar.</value></data>
+  <data name="Message.CleanupDirectResult" xml:space="preserve"><value>{0} arquivos removidos e {1} ignorados. Espaço alocado liberado de {2}.</value></data>
+  <data name="Message.CleanupStopped" xml:space="preserve"><value>Operação de limpeza interrompida.</value></data>
+  <data name="Message.CleanupRecycleVerified" xml:space="preserve"><value>Lixeira de {0} esvaziada. O Windows informou {1} itens e {2} antes da remoção.</value></data>
+  <data name="Message.CleanupConfirmTitle" xml:space="preserve"><value>Confirmar exclusão</value></data>
+  <data name="Message.CleanupConfirmItems" xml:space="preserve"><value>Excluir permanentemente os itens das categorias selecionadas?&#10;&#10;{0}</value></data>
+  <data name="Message.CleanupIntro" xml:space="preserve"><value>Analise os arquivos elegíveis e confira a prévia antes de escolher o que limpar.</value></data>
+  <data name="Message.CleanupAnalyze" xml:space="preserve"><value>Analisar</value></data>
+  <data name="Message.CleanupPermanentWarning" xml:space="preserve"><value>A exclusão é permanente. Confira a prévia e guarde os relatórios e dumps que ainda precisa investigar.</value></data>
+  <data name="Message.CleanupSelected" xml:space="preserve"><value>Limpar selecionadas</value></data>
+  <data name="Message.CleanupCategories" xml:space="preserve"><value>Categorias de limpeza</value></data>
+  <data name="Message.CleanupPreview" xml:space="preserve"><value>Ver arquivos da análise</value></data>
+  <data name="Message.DeckCraftScopeConflict" xml:space="preserve"><value>O log MSI confirma que o DeckCraft retornou 1603 ao tentar atualizar por usuário uma instalação existente para todos. Use o MSI oficial da versão 0.19.1, escolha Todos os usuários (Everyone) e confirme o UAC se o Windows solicitar.</value></data>
+  <data name="Message.Uninstaller.OpenWindowsApps" xml:space="preserve"><value>Abrir aplicativos instalados no Windows</value></data>
+  <data name="Message.CleanupRecyclePreview" xml:space="preserve"><value>Conferir itens na Lixeira</value></data>
+  <data name="Message.Uninstaller.UntrustedMachineCommand" xml:space="preserve"><value>A origem no Registro ou o executável da instalação por máquina não passou na validação para elevação.</value></data>
+  <data name="Message.Uninstaller.ImageChanged" xml:space="preserve"><value>O executável mudou após a preparação da confirmação. Atualize o inventário e confira o aplicativo novamente.</value></data>
+  <data name="Message.Uninstaller.AwaitingUac" xml:space="preserve"><value>Aguardando a autorização do Windows para desinstalar {0}.</value></data>
+  <data name="Message.Uninstaller.Running" xml:space="preserve"><value>O desinstalador de {0} está em execução. Se ele abrir uma janela, conclua-a para continuar.</value></data>
+  <data name="Message.Uninstaller.Lingering" xml:space="preserve"><value>{0} saiu do Registro. Um processo do desinstalador continua aberto, mas não impede outras operações.</value></data>
+  <data name="Message.Residue.ExactNameUserData" xml:space="preserve"><value>Pasta de dados do usuário com o nome exato do programa removido. Conteúdo verificado, sem links.</value></data>
+  <data name="Message.Uninstaller.OfferResidueTitle" xml:space="preserve"><value>Procurar resíduos</value></data>
+  <data name="Message.Uninstaller.OfferResidue" xml:space="preserve"><value>{0} foi desinstalado. Deseja procurar arquivos e chaves que ficaram para trás? A lista aparece antes de qualquer remoção.</value></data>
+  <data name="Message.Uninstaller.UacWarning" xml:space="preserve"><value>O Windows pode pedir aprovação do Controle de Conta de Usuário (UAC) para cada aplicativo instalado para todos os usuários.</value></data>
+  <data name="Message.Uninstaller.InventoryUnverified" xml:space="preserve"><value>O desinstalador de {0} terminou, mas a consulta à origem no Registro não pôde confirmar a remoção.</value></data>
+  <data name="Uninstaller.ScopeMachine" xml:space="preserve"><value>Instalação para todos os usuários</value></data>
+  <data name="Uninstaller.ScopeUser" xml:space="preserve"><value>Instalação para o usuário atual</value></data>
+  <data name="Cleanup.WerLogs" xml:space="preserve"><value>Logs temporários de relatórios de erros</value></data>
+  <data name="Cleanup.WerLogsDescription" xml:space="preserve"><value>Arquivos .log na pasta temporária do Windows Error Reporting, criados e alterados há pelo menos sete dias.</value></data>
+  <data name="Cleanup.Thumbnails" xml:space="preserve"><value>Cache de miniaturas do Explorador</value></data>
+  <data name="Cleanup.ThumbnailsDescription" xml:space="preserve"><value>O Explorador recria as miniaturas ao abrir pastas. Arquivos em uso são preservados.</value></data>
+  <data name="Cleanup.Chrome" xml:space="preserve"><value>Cache do Google Chrome</value></data>
+  <data name="Cleanup.Edge" xml:space="preserve"><value>Cache do Microsoft Edge</value></data>
+  <data name="Cleanup.Brave" xml:space="preserve"><value>Cache do Brave</value></data>
+  <data name="Cleanup.Firefox" xml:space="preserve"><value>Cache do Mozilla Firefox</value></data>
+  <data name="Cleanup.BrowserDescription" xml:space="preserve"><value>Cache de conteúdo dos perfis padrão. Cookies, senhas, sessões, favoritos e histórico são preservados.</value></data>
+  <data name="Cleanup.Discord" xml:space="preserve"><value>Cache do Discord</value></data>
+  <data name="Cleanup.DiscordDescription" xml:space="preserve"><value>Cache de conteúdo, código e GPU do Discord. Feche o aplicativo para limpar.</value></data>
+  <data name="Cleanup.Nvidia" xml:space="preserve"><value>Caches de shaders NVIDIA</value></data>
+  <data name="Cleanup.Amd" xml:space="preserve"><value>Caches de shaders AMD</value></data>
+  <data name="Cleanup.ShaderDescription" xml:space="preserve"><value>Jogos e aplicativos podem recompilar shaders e demorar mais na próxima abertura.</value></data>
+  <data name="Cleanup.Npm" xml:space="preserve"><value>Cache de download do npm</value></data>
+  <data name="Cleanup.Pip" xml:space="preserve"><value>Cache HTTP do pip</value></data>
+  <data name="Cleanup.NuGet" xml:space="preserve"><value>Cache HTTP do NuGet</value></data>
+  <data name="Cleanup.DownloadDescription" xml:space="preserve"><value>Pacotes podem ser baixados novamente. Projetos e dependências instaladas são preservados.</value></data>
+  <data name="Cleanup.AppRunning" xml:space="preserve"><value>Feche o aplicativo e analise novamente.</value></data>
+  <data name="Cleanup.NoEligible" xml:space="preserve"><value>Pasta detectada. Nenhum arquivo elegível.</value></data>
+  <data name="Cleanup.NotDetected" xml:space="preserve"><value>Pasta de cache ou descarte não encontrada.</value></data>
+  <data name="Cleanup.UnavailableAfterScan" xml:space="preserve"><value>{0} arquivos ficaram indisponíveis após a análise.</value></data>
+  <data name="Cleanup.GuardRefused" xml:space="preserve"><value>Arquivo alterado ou protegido: {0}</value></data>
+  <data name="Cleanup.LockedFile" xml:space="preserve"><value>Arquivo em uso: {0}</value></data>
+  <data name="Cleanup.MissingFile" xml:space="preserve"><value>Arquivo indisponível: {0}</value></data>
+  <data name="Cleanup.FileError" xml:space="preserve"><value>Falha Windows {1}: {0}</value></data>
+  <data name="Cleanup.Result" xml:space="preserve"><value>{0} arquivos removidos. {1} ignorados. {2} falhas. Espaço liberado: {3}.</value></data>
+  <data name="Cleanup.Remaining" xml:space="preserve"><value>Limpeza interrompida. {0} arquivos ainda não processados.</value></data>
+  <data name="Cleanup.CategoryResult" xml:space="preserve"><value>{0} · {1} removidos, {2} ignorados, {3} falhas, {4} pendentes · {5} ({6} bytes)</value></data>
+  <data name="Cleanup.PreviewCount" xml:space="preserve"><value>Prévia de arquivos ({0} de {1})</value></data>
+  <data name="Cleanup.SingleItem" xml:space="preserve"><value>1 item</value></data>
+  <data name="Cleanup.Deleting" xml:space="preserve"><value>Limpando os arquivos confirmados…</value></data>
+  <data name="Cleanup.SelectToClean" xml:space="preserve"><value>Selecione uma categoria elegível para limpar.</value></data>
+  <data name="Cleanup.NothingToSelect" xml:space="preserve"><value>Nenhuma categoria está disponível para limpeza. Veja o estado de cada uma.</value></data>
+  <data name="Cleanup.DirectSection" xml:space="preserve"><value>Limpeza pelo WinCore Manager</value></data>
+  <data name="Cleanup.NativeSection" xml:space="preserve"><value>Limpeza avançada do Windows</value></data>
+  <data name="Cleanup.NativeDescription" xml:space="preserve"><value>O Windows mede e executa estas categorias. Abra a Limpeza de Disco para ver os tamanhos e escolher o que remover.</value></data>
+  <data name="Cleanup.RecycleDescription" xml:space="preserve"><value>O Windows informa a estimativa e executa a operação da Lixeira.</value></data>
+  <data name="Cleanup.SelectRecycle" xml:space="preserve"><value>Selecionar a Lixeira deste volume</value></data>
+  <data name="Cleanup.ResultDetails" xml:space="preserve"><value>Resultados por categoria</value></data>
+  <data name="Cleanup.OpenSourceComponents" xml:space="preserve"><value>Componentes de código aberto</value></data>
+  <data name="Cleanup.BitBroomName" xml:space="preserve"><value>BitBroom</value></data>
+  <data name="Cleanup.BitBroomCredit" xml:space="preserve"><value>Componentes de análise e limpeza de arquivos adaptados do projeto open source BitBroom.</value></data>
+  <data name="Cleanup.BitBroomRepository" xml:space="preserve"><value>Repositório oficial do BitBroom</value></data>
+  <data name="Cleanup.MitLicense" xml:space="preserve"><value>Licença MIT</value></data>
+  <data name="UpdatesList.CatalogError" xml:space="preserve"><value>Origem {0} · {1}</value></data>
+  <data name="UpdatesList.PartialScan" xml:space="preserve"><value>Consulta parcial. Confira as origens no Registro.</value></data>
+  <data name="UpdatesList.UnknownVersion" xml:space="preserve"><value>Desconhecida</value></data>
+  <data name="UpdatesList.SummaryWithUnknown" xml:space="preserve"><value>Disponíveis: {0} · Versão incerta: {1} · Ocultos: {2}</value></data>
+  <data name="UpdatesList.InstalledHeader" xml:space="preserve"><value>Instalada</value></data>
+  <data name="UpdatesList.UnknownTarget" xml:space="preserve"><value>O WinGet não informou uma versão de destino confiável.</value></data>
+  <data name="UpdatesList.UnknownBattleNet" xml:space="preserve"><value>A versão instalada é desconhecida. Confira a instalação antes de atualizar.</value></data>
+  <data name="UpdatesList.SelectVisible" xml:space="preserve"><value>Seleciona as atualizações elegíveis que aparecem no filtro atual.</value></data>
+  <data name="UpdatesList.SelectPackage" xml:space="preserve"><value>Selecionar atualização de {0}</value></data>
+  <data name="UpdateOperation.ReviewButton" xml:space="preserve"><value>Revisar seleção</value></data>
+  <data name="UpdateOperation.ReviewTitle" xml:space="preserve"><value>Revisar atualizações ({0})</value></data>
+  <data name="UpdateOperation.ReviewPackage" xml:space="preserve"><value>{0} ({1} · {2})&#10;{3} → {4}&#10;</value></data>
+  <data name="UpdateOperation.ConfirmBatch" xml:space="preserve"><value>Iniciar atualizações</value></data>
+  <data name="UpdateOperation.ReviewCancelled" xml:space="preserve"><value>Revisão cancelada. A seleção foi mantida.</value></data>
+  <data name="UpdateOperation.ResumeScanIncomplete" xml:space="preserve"><value>Atualize a lista quando as origens estiverem acessíveis. A fila permanece salva.</value></data>
+  <data name="UpdateOperation.PendingTab" xml:space="preserve"><value>Fila ({0})</value></data>
+  <data name="UpdateOperation.PendingList" xml:space="preserve"><value>Pacotes ainda na fila</value></data>
+  <data name="UpdateOperation.ResultsTab" xml:space="preserve"><value>Resultados ({0})</value></data>
+  <data name="UpdateOperation.ResultsList" xml:space="preserve"><value>Resultados das atualizações</value></data>
+  <data name="UpdateOperation.PackageLog" xml:space="preserve"><value>Registro do pacote</value></data>
+  <data name="UpdateOperation.PackageLogHelp" xml:space="preserve"><value>Expanda para ler o resultado e o registro do pacote.</value></data>
+  <data name="UpdateOperation.NoPackageOutput" xml:space="preserve"><value>O WinGet não retornou linhas de diagnóstico para esta tentativa.</value></data>
+  <data name="UpdateOperation.RestartPending" xml:space="preserve"><value>Reinicialização pendente</value></data>
+  <data name="UpdateOperation.WindowsCancelled" xml:space="preserve"><value>O Windows cancelou o instalador ou o pedido de elevação (1223).</value></data>
+  <data name="UpdateOperation.MsiFatalError" xml:space="preserve"><value>O Windows Installer retornou o erro fatal MSI 1603. Confira o registro do pacote.</value></data>
+  <data name="About.UniGetUIName" xml:space="preserve"><value>UniGetUI</value></data>
+  <data name="About.UniGetUICredit" xml:space="preserve"><value>A consulta de atualizações adapta código do projeto open source UniGetUI.</value></data>
+  <data name="About.UniGetUIRepository" xml:space="preserve"><value>Repositório do UniGetUI</value></data>
+  <data name="Essentials.Verify" xml:space="preserve"><value>Verificar instalações</value></data>
+  <data name="Essentials.Verifying" xml:space="preserve"><value>Verificando instalações…</value></data>
+  <data name="Essentials.Installed" xml:space="preserve"><value>Instalado</value></data>
+  <data name="Essentials.NotVerified" xml:space="preserve"><value>Não verificado</value></data>
+  <data name="Essentials.CannotVerify" xml:space="preserve"><value>As fontes disponíveis não confirmam o estado deste item.</value></data>
+  <data name="Essentials.DirectXUnverified" xml:space="preserve"><value>O instalador reúne componentes legados independentes. A presença do DirectX no Windows não confirma esses componentes.</value></data>
+  <data name="Essentials.OfficialPage" xml:space="preserve"><value>Página oficial</value></data>
+  <data name="Tweaks.VisualTitle" xml:space="preserve"><value>Desempenho visual do Windows</value></data>
+  <data name="Tweaks.VisualDescription" xml:space="preserve"><value>Personalize animações, efeitos visuais e a aparência das janelas utilizando as configurações avançadas do próprio Windows.</value></data>
+  <data name="Tweaks.VisualOpen" xml:space="preserve"><value>Abrir opções de desempenho</value></data>
+  <data name="Startup.ApprovalEnabled" xml:space="preserve"><value>Entrada ativada. A mudança vale a partir do próximo login.</value></data>
+  <data name="Startup.ApprovalRestored" xml:space="preserve"><value>Entrada desativada. O estado original do Windows foi restaurado.</value></data>
+  <data name="Startup.Unsupported" xml:space="preserve"><value>Origem não suportada</value></data>
+  <data name="Startup.MachineWriteRequired" xml:space="preserve"><value>Esta entrada é de todos os usuários. A alteração exige acesso de escrita ao Registro da máquina.</value></data>
+  <data name="Message.Updater.LocalBuild" xml:space="preserve"><value>Esta é uma compilação local. Compare a versão com a página oficial de releases.</value></data>
+  <data name="Message.Updater.OperationActive" xml:space="preserve"><value>Aguarde o fim da operação em andamento para aplicar a atualização.</value></data>
+  <data name="Updater.PublishDate" xml:space="preserve"><value>Publicada em {0}</value></data>
+  <data name="Updater.ManualRequired" xml:space="preserve"><value>A instalação automática exige uma distribuição portátil compatível e autenticada. Consulte a release oficial.</value></data>
+  <data name="Updater.Later" xml:space="preserve"><value>Agora não</value></data>
+  <data name="Cleanup.GroupWindows" xml:space="preserve"><value>Windows e temporários</value></data>
+  <data name="Cleanup.GroupBrowsers" xml:space="preserve"><value>Navegadores</value></data>
+  <data name="Cleanup.GroupApplications" xml:space="preserve"><value>Aplicativos</value></data>
+  <data name="Cleanup.GroupDevelopment" xml:space="preserve"><value>Desenvolvimento</value></data>
+  <data name="Cleanup.Attention" xml:space="preserve"><value>Atenção</value></data>
+  <data name="Cleanup.SelectAll" xml:space="preserve"><value>Selecionar elegíveis</value></data>
+  <data name="Cleanup.DeselectAll" xml:space="preserve"><value>Desmarcar tudo</value></data>
+  <data name="Maintenance.Admin" xml:space="preserve"><value>Requer administrador</value></data>
+  <data name="Maintenance.StartRepair" xml:space="preserve"><value>Iniciar reparo</value></data>
+  <data name="Maintenance.RunCheck" xml:space="preserve"><value>Executar verificação</value></data>
+  <data name="Maintenance.FlushDns" xml:space="preserve"><value>Limpar cache DNS</value></data>
+  <data name="Maintenance.VerifyDescription" xml:space="preserve"><value>Verifica a integridade dos arquivos protegidos do Windows sem realizar reparos.</value></data>
+  <data name="Maintenance.RepairDescription" xml:space="preserve"><value>Verifica e tenta reparar a imagem de componentes do Windows.</value></data>
+  <data name="About.Description" xml:space="preserve"><value>Aplicativo para gerenciamento, manutenção e diagnóstico do Windows.</value></data>
+  <data name="About.Published" xml:space="preserve"><value>Versão publicada</value></data>
+  <data name="About.Candidate" xml:space="preserve"><value>Candidato à homologação</value></data>
+  <data name="About.Development" xml:space="preserve"><value>Compilação de desenvolvimento</value></data>
+  <data name="About.FeatureDashboard" xml:space="preserve"><value>Painel</value></data>
+  <data name="About.FeatureDashboardDetails" xml:space="preserve"><value>Resumo do sistema e das operações recentes.</value></data>
+  <data name="About.FeatureEssentials" xml:space="preserve"><value>Aplicativos Essenciais</value></data>
+  <data name="About.FeatureEssentialsDetails" xml:space="preserve"><value>Detecta instalações registradas e abre as páginas oficiais.</value></data>
+  <data name="About.FeatureSettings" xml:space="preserve"><value>Configurações</value></data>
+  <data name="About.FeatureSettingsDetails" xml:space="preserve"><value>Define idioma, tema, armazenamento e retenção do Histórico.</value></data>
+  <data name="About.FeatureUpdater" xml:space="preserve"><value>Atualização do WinCore</value></data>
+  <data name="About.FeatureUpdaterDetails" xml:space="preserve"><value>Consulta releases estáveis do GitHub. A instalação requer pacote portátil autenticado.</value></data>
+  <data name="About.BcuRepository" xml:space="preserve"><value>Repositório do Bulk Crap Uninstaller</value></data>
+  <data name="About.OtherComponents" xml:space="preserve"><value>O pacote também inclui os avisos de .NET, WPF, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Dependency Injection, System.Management, SQLitePCLRaw, SQLite e YamlDotNet.</value></data>
+  <data name="UpdatesDiagnostics.CopyDiagnosis" xml:space="preserve"><value>Copiar diagnóstico</value></data>
+  <data name="UpdatesDiagnostics.CopyLog" xml:space="preserve"><value>Copiar log completo</value></data>
+  <data name="UpdatesDiagnostics.Copied" xml:space="preserve"><value>Log copiado</value></data>
+  <data name="UpdatesDiagnostics.ClipboardBusy" xml:space="preserve"><value>A área de transferência está ocupada. Tente novamente.</value></data>
+  <data name="UpdatesDiagnostics.History" xml:space="preserve"><value>Tentativas anteriores</value></data>
+  <data name="UpdatesDiagnostics.NoHistory" xml:space="preserve"><value>Nenhuma tentativa de atualização no Histórico.</value></data>
+  <data name="UpdatesDiagnostics.HistoryUnavailable" xml:space="preserve"><value>Não foi possível ler o Histórico.</value></data>
+  <data name="UpdatesDiagnostics.HistoryExcerpt" xml:space="preserve"><value>O log integral não está disponível. O Histórico guarda apenas o texto registrado.</value></data>
+  <data name="UpdatesDiagnostics.CapturedExcerpt" xml:space="preserve"><value>A sessão guardou apenas o trecho disponível abaixo.</value></data>
+  <data name="UpdatesDiagnostics.App" xml:space="preserve"><value>Aplicativo</value></data>
+  <data name="UpdatesDiagnostics.Id" xml:space="preserve"><value>ID do pacote</value></data>
+  <data name="UpdatesDiagnostics.Installed" xml:space="preserve"><value>Versão instalada</value></data>
+  <data name="UpdatesDiagnostics.Target" xml:space="preserve"><value>Versão pretendida</value></data>
+  <data name="UpdatesDiagnostics.Result" xml:space="preserve"><value>Resultado</value></data>
+  <data name="UpdatesDiagnostics.Code" xml:space="preserve"><value>Código de retorno</value></data>
+  <data name="UpdatesDiagnostics.Time" xml:space="preserve"><value>Data e hora</value></data>
+  <data name="UpdatesDiagnostics.Message" xml:space="preserve"><value>Mensagem</value></data>
+  <data name="UpdatesDiagnostics.Excerpts" xml:space="preserve"><value>Trechos diagnósticos</value></data>
+  <data name="About.Technologies" xml:space="preserve"><value>C# · WPF · .NET 10 · SQLite</value></data>
+  <data name="DiskSpace.Open" xml:space="preserve"><value>Analisar espaço</value></data>
+  <data name="DiskSpace.Title" xml:space="preserve"><value>Análise de espaço em disco</value></data>
+  <data name="DiskSpace.Intro" xml:space="preserve"><value>Descubra quais arquivos e pastas ocupam mais espaço no computador.</value></data>
+  <data name="DiskSpace.Drive" xml:space="preserve"><value>Unidade para analisar</value></data>
+  <data name="DiskSpace.Start" xml:space="preserve"><value>Iniciar análise</value></data>
+  <data name="DiskSpace.Cancel" xml:space="preserve"><value>Cancelar análise</value></data>
+  <data name="DiskSpace.Refresh" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="DiskSpace.Close" xml:space="preserve"><value>Fechar</value></data>
+  <data name="DiskSpace.Overview" xml:space="preserve"><value>Visão geral</value></data>
+  <data name="DiskSpace.Folders" xml:space="preserve"><value>Maiores pastas</value></data>
+  <data name="DiskSpace.Files" xml:space="preserve"><value>Maiores arquivos</value></data>
+  <data name="DiskSpace.Capacity" xml:space="preserve"><value>Capacidade</value></data>
+  <data name="DiskSpace.Used" xml:space="preserve"><value>Usado no volume</value></data>
+  <data name="DiskSpace.UsedShort" xml:space="preserve"><value>Usado</value></data>
+  <data name="DiskSpace.Free" xml:space="preserve"><value>Livre</value></data>
+  <data name="DiskSpace.Logical" xml:space="preserve"><value>Tamanho lógico</value></data>
+  <data name="DiskSpace.Allocated" xml:space="preserve"><value>Alocação medida</value></data>
+  <data name="DiskSpace.FileCount" xml:space="preserve"><value>Arquivos</value></data>
+  <data name="DiskSpace.Ready" xml:space="preserve"><value>Selecione uma unidade e inicie a análise.</value></data>
+  <data name="DiskSpace.NoDrives" xml:space="preserve"><value>Nenhuma unidade local fixa acessível.</value></data>
+  <data name="DiskSpace.Loading" xml:space="preserve"><value>Procurando unidades locais…</value></data>
+  <data name="DiskSpace.Unavailable" xml:space="preserve"><value>A unidade ficou indisponível. Atualize a lista e selecione uma unidade.</value></data>
+  <data name="DiskSpace.Scanning" xml:space="preserve"><value>Analisando {0} · {1:N0} arquivos · {2:N0} pastas · {3}</value></data>
+  <data name="DiskSpace.Cancelling" xml:space="preserve"><value>Cancelando análise…</value></data>
+  <data name="DiskSpace.Cancelled" xml:space="preserve"><value>Análise cancelada.</value></data>
+  <data name="DiskSpace.Finished" xml:space="preserve"><value>Análise concluída em {0}.</value></data>
+  <data name="DiskSpace.FinishedPartial" xml:space="preserve"><value>Análise com cobertura parcial · {0}.</value></data>
+  <data name="DiskSpace.Counts" xml:space="preserve"><value>{0:N0} arquivos encontrados · {1:N0} pastas analisadas · {2:N0} inacessíveis</value></data>
+  <data name="DiskSpace.Coverage" xml:space="preserve"><value>Cobertura parcial · {0:N0} pastas inacessíveis · {1:N0} pontos de nova análise ignorados · {2:N0} arquivos sem alocação · {3:N0} sem identidade confirmada.</value></data>
+  <data name="DiskSpace.Measurement" xml:space="preserve"><value>Os totais da análise podem diferir do uso do volume. {0:N0} hard links adicionais ignorados.</value></data>
+  <data name="DiskSpace.Map" xml:space="preserve"><value>Mapa de espaço</value></data>
+  <data name="DiskSpace.MapEmpty" xml:space="preserve"><value>Sem tamanho lógico contabilizado nesta pasta.</value></data>
+  <data name="DiskSpace.FoldersKey" xml:space="preserve"><value>Pastas</value></data>
+  <data name="DiskSpace.FilesKey" xml:space="preserve"><value>Arquivos do ranking</value></data>
+  <data name="DiskSpace.Other" xml:space="preserve"><value>Outros</value></data>
+  <data name="DiskSpace.Up" xml:space="preserve"><value>Voltar à pasta anterior</value></data>
+  <data name="DiskSpace.Explore" xml:space="preserve"><value>Explorar pasta</value></data>
+  <data name="DiskSpace.Tree" xml:space="preserve"><value>Árvore de pastas</value></data>
+  <data name="DiskSpace.MoreFolders" xml:space="preserve"><value>Mostrar mais pastas</value></data>
+  <data name="DiskSpace.Folder" xml:space="preserve"><value>Pasta</value></data>
+  <data name="DiskSpace.Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="DiskSpace.Path" xml:space="preserve"><value>Caminho</value></data>
+  <data name="DiskSpace.Share" xml:space="preserve"><value>% analisado</value></data>
+  <data name="DiskSpace.SizeColumn" xml:space="preserve"><value>Tamanho</value></data>
+  <data name="DiskSpace.AllocationColumn" xml:space="preserve"><value>Alocação</value></data>
+  <data name="DiskSpace.Type" xml:space="preserve"><value>Extensão</value></data>
+  <data name="DiskSpace.Date" xml:space="preserve"><value>Modificado em</value></data>
+  <data name="DiskSpace.FilterName" xml:space="preserve"><value>Filtrar por nome</value></data>
+  <data name="DiskSpace.FilterExt" xml:space="preserve"><value>Extensão do arquivo</value></data>
+  <data name="DiskSpace.Ranking" xml:space="preserve"><value>{0:N0} de {1:N0} resultados do ranking · até {2:N0} arquivos armazenados</value></data>
+  <data name="DiskSpace.MoreFiles" xml:space="preserve"><value>Mostrar mais arquivos</value></data>
+  <data name="DiskSpace.NoFiles" xml:space="preserve"><value>Nenhum arquivo corresponde aos filtros.</value></data>
+  <data name="DiskSpace.NoFolders" xml:space="preserve"><value>Nenhuma subpasta analisada.</value></data>
+  <data name="DiskSpace.Denied" xml:space="preserve"><value>Pasta inacessível durante a análise.</value></data>
+  <data name="DiskSpace.Copy" xml:space="preserve"><value>Copiar caminho</value></data>
+  <data name="DiskSpace.Explorer" xml:space="preserve"><value>Abrir localização</value></data>
+  <data name="DiskSpace.Copied" xml:space="preserve"><value>Caminho copiado.</value></data>
+  <data name="DiskSpace.CopyFailed" xml:space="preserve"><value>Não foi possível copiar o caminho.</value></data>
+  <data name="DiskSpace.ExplorerFailed" xml:space="preserve"><value>O Explorador não pôde abrir essa localização. A entrada pode ter mudado.</value></data>
+  <data name="DiskSpace.Unknown" xml:space="preserve"><value>Indisponível</value></data>
+  <data name="DiskSpace.OtherDetails" xml:space="preserve"><value>Itens pequenos e arquivos fora do ranking nesta pasta.</value></data>
+  <data name="DiskSpace.MapTip" xml:space="preserve"><value>{0} · {1}&#10;{2}</value></data>
+  <data name="DiskHealth.Title" xml:space="preserve">
+    <value>Saúde dos discos</value>
+  </data>
+  <data name="DiskHealth.Refresh" xml:space="preserve">
+    <value>Atualizar leitura</value>
+  </data>
+  <data name="DiskHealth.Loading" xml:space="preserve">
+    <value>Consultando os discos físicos…</value>
+  </data>
+  <data name="DiskHealth.Empty" xml:space="preserve">
+    <value>Nenhum disco físico disponível.</value>
+  </data>
+  <data name="DiskHealth.Timeout" xml:space="preserve">
+    <value>A leitura não terminou no tempo previsto. Tente atualizar mais tarde.</value>
+  </data>
+  <data name="DiskHealth.Details" xml:space="preserve">
+    <value>Mais detalhes</value>
+  </data>
+  <data name="DiskHealth.Overview" xml:space="preserve">
+    <value>Visão geral</value>
+  </data>
+  <data name="DiskHealth.SmartData" xml:space="preserve">
+    <value>Dados SMART</value>
+  </data>
+  <data name="DiskHealth.Understand" xml:space="preserve">
+    <value>Entenda os resultados</value>
+  </data>
+  <data name="DiskHealth.Unavailable" xml:space="preserve">
+    <value>Não disponível</value>
+  </data>
+  <data name="DiskHealth.HealthLine" xml:space="preserve">
+    <value>Saúde: {0}</value>
+  </data>
+  <data name="DiskHealth.LifeLine" xml:space="preserve">
+    <value>Vida útil: {0}</value>
+  </data>
+  <data name="DiskHealth.Captured" xml:space="preserve">
+    <value>Coleta em {0:g}</value>
+  </data>
+  <data name="DiskHealth.Raw" xml:space="preserve">
+    <value>Valor bruto: {0}</value>
+  </data>
+  <data name="DiskHealth.Normalized" xml:space="preserve">
+    <value>Normalizado: {0}</value>
+  </data>
+  <data name="DiskHealth.State.Unknown" xml:space="preserve">
+    <value>Desconhecido</value>
+  </data>
+  <data name="DiskHealth.State.Healthy" xml:space="preserve">
+    <value>Saudável</value>
+  </data>
+  <data name="DiskHealth.State.Attention" xml:space="preserve">
+    <value>Atenção</value>
+  </data>
+  <data name="DiskHealth.State.Critical" xml:space="preserve">
+    <value>Aviso crítico</value>
+  </data>
+  <data name="DiskHealth.NvmeExplanation" xml:space="preserve">
+    <value>A vida útil restante é estimada pelo desgaste informado pelo controlador NVMe. Essa estimativa não prevê quanto tempo o disco continuará funcionando.</value>
+  </data>
+  <data name="DiskHealth.Limits" xml:space="preserve">
+    <value>Os indicadores dependem do modelo e do driver. A vida útil aparece somente quando o dispositivo informa uma medida de desgaste interpretável.</value>
+  </data>
+  <data name="DiskHealth.Backup" xml:space="preserve">
+    <value>A leitura indicou um problema ou desgaste. Faça backup dos arquivos importantes e compare os indicadores em leituras futuras.</value>
+  </data>
+  <data name="DiskHealth.Metric.NvmeWarning" xml:space="preserve">
+    <value>Avisos críticos NVMe</value>
+  </data>
+  <data name="DiskHealth.Meaning.NvmeWarning" xml:space="preserve">
+    <value>Bits de aviso do controlador podem indicar falta de reserva, temperatura crítica, perda de confiabilidade, mídia somente leitura ou falha de proteção.</value>
+  </data>
+  <data name="DiskHealth.Metric.Temperature" xml:space="preserve">
+    <value>Temperatura</value>
+  </data>
+  <data name="DiskHealth.Meaning.Temperature" xml:space="preserve">
+    <value>Temperatura composta informada pelo controlador.</value>
+  </data>
+  <data name="DiskHealth.Metric.Spare" xml:space="preserve">
+    <value>Reserva disponível</value>
+  </data>
+  <data name="DiskHealth.Meaning.Spare" xml:space="preserve">
+    <value>Percentual de reserva disponível para substituir áreas desgastadas.</value>
+  </data>
+  <data name="DiskHealth.Metric.SpareThreshold" xml:space="preserve">
+    <value>Limite de reserva</value>
+  </data>
+  <data name="DiskHealth.Meaning.SpareThreshold" xml:space="preserve">
+    <value>Limite de aviso registrado no dispositivo.</value>
+  </data>
+  <data name="DiskHealth.Metric.Wear" xml:space="preserve">
+    <value>Desgaste informado</value>
+  </data>
+  <data name="DiskHealth.Meaning.Wear" xml:space="preserve">
+    <value>O parâmetro Percentage Used pode atingir ou exceder 100% ao alcançar a resistência estimada.</value>
+  </data>
+  <data name="DiskHealth.Metric.DataRead" xml:space="preserve">
+    <value>Dados lidos pelo host</value>
+  </data>
+  <data name="DiskHealth.Meaning.DataRead" xml:space="preserve">
+    <value>Total informado em unidades de 512.000 bytes.</value>
+  </data>
+  <data name="DiskHealth.Metric.DataWritten" xml:space="preserve">
+    <value>Dados gravados pelo host</value>
+  </data>
+  <data name="DiskHealth.Meaning.DataWritten" xml:space="preserve">
+    <value>Total informado em unidades de 512.000 bytes.</value>
+  </data>
+  <data name="DiskHealth.Metric.PowerCycles" xml:space="preserve">
+    <value>Ciclos de energia</value>
+  </data>
+  <data name="DiskHealth.Meaning.PowerCycles" xml:space="preserve">
+    <value>Número de ciclos de energia registrados.</value>
+  </data>
+  <data name="DiskHealth.Metric.PowerHours" xml:space="preserve">
+    <value>Horas ligado</value>
+  </data>
+  <data name="DiskHealth.Meaning.PowerHours" xml:space="preserve">
+    <value>Horas de funcionamento informadas pelo controlador.</value>
+  </data>
+  <data name="DiskHealth.Metric.PowerHoursAta" xml:space="preserve">
+    <value>Tempo de funcionamento (ATA 09)</value>
+  </data>
+  <data name="DiskHealth.Meaning.PowerHoursAta" xml:space="preserve">
+    <value>A unidade do valor bruto varia conforme o fabricante. Consulte a documentação do modelo para interpretá-lo.</value>
+  </data>
+  <data name="DiskHealth.Metric.UnsafeShutdowns" xml:space="preserve">
+    <value>Desligamentos inesperados</value>
+  </data>
+  <data name="DiskHealth.Meaning.UnsafeShutdowns" xml:space="preserve">
+    <value>Desligamentos ocorridos sem a notificação esperada pelo controlador.</value>
+  </data>
+  <data name="DiskHealth.Metric.MediaErrors" xml:space="preserve">
+    <value>Erros de mídia e integridade</value>
+  </data>
+  <data name="DiskHealth.Meaning.MediaErrors" xml:space="preserve">
+    <value>Eventos em que o controlador detectou um erro de integridade de dados não recuperado.</value>
+  </data>
+  <data name="DiskHealth.Metric.ErrorLog" xml:space="preserve">
+    <value>Registros no log de erros</value>
+  </data>
+  <data name="DiskHealth.Meaning.ErrorLog" xml:space="preserve">
+    <value>Total histórico de entradas. Consulte os avisos críticos e erros de mídia para avaliar a condição.</value>
+  </data>
+  <data name="DiskHealth.Metric.Reallocated" xml:space="preserve">
+    <value>Setores realocados (ATA 05)</value>
+  </data>
+  <data name="DiskHealth.Meaning.Reallocated" xml:space="preserve">
+    <value>Áreas substituídas pelo disco. Um aumento merece atenção.</value>
+  </data>
+  <data name="DiskHealth.Metric.Pending" xml:space="preserve">
+    <value>Setores pendentes (ATA C5)</value>
+  </data>
+  <data name="DiskHealth.Meaning.Pending" xml:space="preserve">
+    <value>Áreas que o disco tem dificuldade para ler e pode precisar substituir.</value>
+  </data>
+  <data name="DiskHealth.Metric.Uncorrectable" xml:space="preserve">
+    <value>Erros não corrigíveis (ATA C6)</value>
+  </data>
+  <data name="DiskHealth.Meaning.Uncorrectable" xml:space="preserve">
+    <value>Registros que o disco não conseguiu corrigir durante a leitura ou verificação.</value>
+  </data>
+  <data name="DiskHealth.Metric.AtaStatus" xml:space="preserve">
+    <value>Previsão de falha do dispositivo</value>
+  </data>
+  <data name="DiskHealth.Meaning.AtaStatus" xml:space="preserve">
+    <value>Um valor 1 indica um aviso do dispositivo. Um valor 0 indica que essa leitura não registrou aviso.</value>
+  </data>
+  <data name="DiskHealth.Meaning.Vendor" xml:space="preserve">
+    <value>A interpretação dos valores ATA depende da documentação do fabricante para este modelo.</value>
+  </data>
+  <data name="Optional.Open" xml:space="preserve">
+    <value>Aplicativos do Windows</value>
+  </data>
+  <data name="Optional.Title" xml:space="preserve">
+    <value>Aplicativos opcionais do Windows</value>
+  </data>
+  <data name="Optional.Description" xml:space="preserve">
+    <value>Gerencie aplicativos opcionais instalados no Windows. A remoção pode liberar espaço, mas funcionalidades associadas deixarão de estar disponíveis.</value>
+  </data>
+  <data name="Optional.Suggested" xml:space="preserve">
+    <value>Sugestões de remoção</value>
+  </data>
+  <data name="Optional.Others" xml:space="preserve">
+    <value>Outros aplicativos opcionais</value>
+  </data>
+  <data name="Optional.AllCategories" xml:space="preserve">
+    <value>Todas as categorias</value>
+  </data>
+  <data name="Optional.ShowAbsent" xml:space="preserve">
+    <value>Mostrar não instalados</value>
+  </data>
+  <data name="Optional.SelectSuggested" xml:space="preserve">
+    <value>Selecionar sugeridos</value>
+  </data>
+  <data name="Optional.SelectEligible" xml:space="preserve">
+    <value>Selecionar todos os elegíveis</value>
+  </data>
+  <data name="Optional.Clear" xml:space="preserve">
+    <value>Desmarcar</value>
+  </data>
+  <data name="Optional.Remove" xml:space="preserve">
+    <value>Remover selecionados</value>
+  </data>
+  <data name="Optional.RemoveCount" xml:space="preserve">
+    <value>Remover selecionados ({0})</value>
+  </data>
+  <data name="Optional.Reinstall" xml:space="preserve">
+    <value>Reinstalar pela Microsoft Store</value>
+  </data>
+  <data name="Optional.Loading" xml:space="preserve">
+    <value>Consultando os aplicativos deste usuário…</value>
+  </data>
+  <data name="Optional.Empty" xml:space="preserve">
+    <value>Nenhum aplicativo corresponde aos filtros.</value>
+  </data>
+  <data name="Optional.Partial" xml:space="preserve">
+    <value>Parte do inventário não pôde ser verificada.</value>
+  </data>
+  <data name="Optional.State.Available" xml:space="preserve">
+    <value>Elegível</value>
+  </data>
+  <data name="Optional.State.NotInstalled" xml:space="preserve">
+    <value>Não instalado</value>
+  </data>
+  <data name="Optional.State.Unverified" xml:space="preserve">
+    <value>Não verificado</value>
+  </data>
+  <data name="Optional.State.Protected" xml:space="preserve">
+    <value>Protegido ou não removível</value>
+  </data>
+  <data name="Optional.State.Ambiguous" xml:space="preserve">
+    <value>Identidade ambígua</value>
+  </data>
+  <data name="Optional.Appx" xml:space="preserve">
+    <value>APPX/MSIX</value>
+  </data>
+  <data name="Optional.Win32" xml:space="preserve">
+    <value>Win32</value>
+  </data>
+  <data name="Optional.AppxMethod" xml:space="preserve">
+    <value>Usuário atual · Remoção oficial do pacote</value>
+  </data>
+  <data name="Optional.Win32Method" xml:space="preserve">
+    <value>Desinstalador oficial registrado do aplicativo</value>
+  </data>
+  <data name="Optional.LowImpact" xml:space="preserve">
+    <value>Impacto restrito ao aplicativo</value>
+  </data>
+  <data name="Optional.ReviewImpact" xml:space="preserve">
+    <value>Confira o impacto</value>
+  </data>
+  <data name="Optional.Review" xml:space="preserve">
+    <value>Confira os aplicativos e o escopo. O WinCore executará cada desinstalação em sequência.</value>
+  </data>
+  <data name="Optional.DataLoss" xml:space="preserve">
+    <value>O desinstalador pode remover dados locais do aplicativo. Exporte o que precisar antes de continuar.</value>
+  </data>
+  <data name="Optional.Summary" xml:space="preserve">
+    <value>Concluídos: {0} · Falhas: {1} · Cancelados: {2} · Bloqueados: {3}</value>
+  </data>
+  <data name="Optional.Stop" xml:space="preserve">
+    <value>A fila encerra após a operação em andamento.</value>
+  </data>
+  <data name="Optional.OperationError" xml:space="preserve">
+    <value>Ocorreu um erro ao acompanhar a remoção.</value>
+  </data>
+  <data name="Optional.LinkError" xml:space="preserve">
+    <value>Não foi possível abrir a página oficial.</value>
+  </data>
+  <data name="Optional.Win32Unverified" xml:space="preserve">
+    <value>A assinatura ou o registro do OneDrive não pôde ser confirmado.</value>
+  </data>
+  <data name="Optional.Outcome.Success" xml:space="preserve">
+    <value>O pacote foi removido e a ausência foi confirmada para o usuário atual.</value>
+  </data>
+  <data name="Optional.Outcome.Failure" xml:space="preserve">
+    <value>O Windows não concluiu a remoção do pacote.</value>
+  </data>
+  <data name="Optional.Outcome.Cancelled" xml:space="preserve">
+    <value>Remoção cancelada antes do início.</value>
+  </data>
+  <data name="Optional.Outcome.Interrupted" xml:space="preserve">
+    <value>O estado final não pôde ser confirmado. Confira a recuperação em Atualizações antes de continuar.</value>
+  </data>
+  <data name="Optional.Outcome.NotExecutable" xml:space="preserve">
+    <value>A identidade, a elegibilidade ou as dependências do pacote mudaram. Atualize o inventário.</value>
+  </data>
+  <data name="Optional.Name.Microsoft.GetHelp" xml:space="preserve">
+    <value>Obter Ajuda</value>
+  </data>
+  <data name="Optional.Name.Microsoft.BingWeather" xml:space="preserve">
+    <value>Clima</value>
+  </data>
+  <data name="Optional.Name.Microsoft.WindowsMaps" xml:space="preserve">
+    <value>Mapas</value>
+  </data>
+  <data name="Optional.Name.Microsoft.Getstarted" xml:space="preserve">
+    <value>Introdução</value>
+  </data>
+  <data name="Optional.Name.Microsoft.Microsoft3DViewer" xml:space="preserve">
+    <value>Visualizador 3D</value>
+  </data>
+  <data name="Optional.Name.Microsoft.YourPhone" xml:space="preserve">
+    <value>Vincular ao Celular</value>
+  </data>
+  <data name="Optional.Name.Microsoft.WindowsSoundRecorder" xml:space="preserve">
+    <value>Gravador de Som</value>
+  </data>
+  <data name="Optional.Name.Microsoft.ScreenSketch" xml:space="preserve">
+    <value>Ferramenta de Captura</value>
+  </data>
+  <data name="Optional.Name.Microsoft.WindowsCamera" xml:space="preserve">
+    <value>Câmera</value>
+  </data>
+  <data name="Optional.Name.Microsoft.Windows.Photos" xml:space="preserve">
+    <value>Microsoft Fotos</value>
+  </data>
+  <data name="Optional.Name.Microsoft.WindowsAlarms" xml:space="preserve">
+    <value>Relógio</value>
+  </data>
+  <data name="Optional.Name.Microsoft.OutlookForWindows" xml:space="preserve">
+    <value>Outlook para Windows</value>
+  </data>
+  <data name="Optional.Name.MicrosoftTeams" xml:space="preserve">
+    <value>Microsoft Teams (pessoal)</value>
+  </data>
+  <data name="Optional.Name.Microsoft.MicrosoftStickyNotes" xml:space="preserve">
+    <value>Notas Autoadesivas</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.MicrosoftOfficeHub" xml:space="preserve">
+    <value>Remove o hub Microsoft 365. A suíte Office usa instalações independentes.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.GetHelp" xml:space="preserve">
+    <value>O aplicativo de ajuda guiada do Windows ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.BingNews" xml:space="preserve">
+    <value>O aplicativo de leitura do Microsoft News ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.BingWeather" xml:space="preserve">
+    <value>O aplicativo dedicado de previsão do tempo ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.WindowsFeedbackHub" xml:space="preserve">
+    <value>O envio de comentários pelo Hub de Feedback ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.MicrosoftSolitaireCollection" xml:space="preserve">
+    <value>Os jogos Paciência deste pacote ficarão indisponíveis.</value>
+  </data>
+  <data name="Optional.Impact.Clipchamp.Clipchamp" xml:space="preserve">
+    <value>O editor de vídeo Clipchamp ficará indisponível. Confira seus projetos locais.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.Todos" xml:space="preserve">
+    <value>O aplicativo de listas ficará indisponível. Confira a sincronização das tarefas.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.WindowsMaps" xml:space="preserve">
+    <value>O aplicativo de mapas ficará indisponível. Mapas baixados podem ser perdidos.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.Getstarted" xml:space="preserve">
+    <value>Os guias interativos de introdução do Windows ficarão indisponíveis.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.MSPaint" xml:space="preserve">
+    <value>Os recursos 3D deste editor ficarão indisponíveis. Confira seus projetos locais.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.Microsoft3DViewer" xml:space="preserve">
+    <value>A visualização de modelos no Visualizador 3D ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.SkypeApp" xml:space="preserve">
+    <value>O aplicativo Skype deste pacote ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.Copilot" xml:space="preserve">
+    <value>Remove o aplicativo Copilot identificado neste inventário.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.PowerAutomateDesktop" xml:space="preserve">
+    <value>Fluxos locais e automações que dependem do Power Automate podem parar.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.YourPhone" xml:space="preserve">
+    <value>Chamadas, mensagens e notificações integradas com o celular ficarão indisponíveis.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.ZuneMusic" xml:space="preserve">
+    <value>Se este for seu reprodutor padrão, escolha outro para abrir arquivos de áudio e vídeo.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.WindowsSoundRecorder" xml:space="preserve">
+    <value>O Gravador ficará indisponível. Confira o local das gravações antes de remover.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.ScreenSketch" xml:space="preserve">
+    <value>A ferramenta e os atalhos associados de captura podem ficar indisponíveis.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.WindowsCamera" xml:space="preserve">
+    <value>A interface do aplicativo Câmera ficará indisponível.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.Windows.Photos" xml:space="preserve">
+    <value>Você pode precisar de outro aplicativo padrão para visualizar e editar fotos.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.Paint" xml:space="preserve">
+    <value>Edições pelo Paint ficarão indisponíveis. Salve os trabalhos abertos.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.WindowsAlarms" xml:space="preserve">
+    <value>Alarmes, temporizadores e sessões de foco do Relógio ficarão indisponíveis.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.OutlookForWindows" xml:space="preserve">
+    <value>O Outlook deste pacote ficará indisponível. Verifique rascunhos e dados locais.</value>
+  </data>
+  <data name="Optional.Impact.MicrosoftTeams" xml:space="preserve">
+    <value>A variante pessoal deste pacote ficará indisponível. Confira contas e arquivos locais.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.MicrosoftStickyNotes" xml:space="preserve">
+    <value>Notas locais podem ser perdidas. Confirme a sincronização ou exporte as notas antes de continuar.</value>
+  </data>
+  <data name="Optional.Impact.Microsoft.GamingApp" xml:space="preserve">
+    <value>O aplicativo Xbox e sua interface de gerenciamento de jogos ficarão indisponíveis.</value>
+  </data>
+  <data name="Optional.Impact.Win32.OneDrive" xml:space="preserve">
+    <value>A sincronização e o backup de pastas serão interrompidos. Baixe os arquivos disponíveis somente na nuvem que precisar acessar neste dispositivo.</value>
+  </data>
+  <data name="ResidueAdvanced.Files" xml:space="preserve">
+    <value>Arquivos e pastas</value>
+  </data>
+  <data name="ResidueAdvanced.Registry" xml:space="preserve">
+    <value>Registro do Windows</value>
+  </data>
+  <data name="ResidueAdvanced.Value" xml:space="preserve">
+    <value>Valor do Registro</value>
+  </data>
+  <data name="ResidueAdvanced.KeyPath" xml:space="preserve">
+    <value>Caminho da chave</value>
+  </data>
+  <data name="ResidueAdvanced.ValueType" xml:space="preserve">
+    <value>Valor e tipo</value>
+  </data>
+  <data name="ResidueAdvanced.Confidence.High" xml:space="preserve">
+    <value>Confirmado</value>
+  </data>
+  <data name="ResidueAdvanced.Confidence.Medium" xml:space="preserve">
+    <value>Possível</value>
+  </data>
+  <data name="ResidueAdvanced.Confidence.Low" xml:space="preserve">
+    <value>Origem desconhecida</value>
+  </data>
+  <data name="ResidueAdvanced.Confidence.Protected" xml:space="preserve">
+    <value>Protegido ou compartilhado</value>
+  </data>
+  <data name="ResidueAdvanced.RegistryReadOnly" xml:space="preserve">
+    <value>A chave está disponível para consulta. A remoção supervisionada exige uma chave elegível no perfil atual.</value>
+  </data>
+  <data name="ResidueAdvanced.EvidenceOnly" xml:space="preserve">
+    <value>Valor em uma área compartilhada, disponível para diagnóstico.</value>
+  </data>
+  <data name="ResidueAdvanced.PublisherBranch" xml:space="preserve">
+    <value>A chave do fabricante pode conter configurações de outros aplicativos.</value>
+  </data>
+  <data name="ResidueAdvanced.ValuePathMatch" xml:space="preserve">
+    <value>O comando aponta para o local do aplicativo. Este valor pertence a uma área compartilhada do Registro.</value>
+  </data>
+  <data name="ResidueAdvanced.ValueNameMatch" xml:space="preserve">
+    <value>O nome do valor corresponde ao aplicativo. Este valor pertence a uma área compartilhada do Registro.</value>
+  </data>
+  <data name="ResidueAdvanced.ProductCode" xml:space="preserve">
+    <value>O identificador ProductCode corresponde ao produto.</value>
+  </data>
+  <data name="ResidueAdvanced.TransactionUnavailable" xml:space="preserve">
+    <value>A alteração transacional não foi confirmada. O backup foi preservado.</value>
+  </data>
+  <data name="ResidueAdvanced.Empty" xml:space="preserve">
+    <value>Nenhum item nesta aba com o filtro atual.</value>
+  </data>
+  <data name="About.DiskScopeCredit" xml:space="preserve">
+    <value>A consulta SMART adapta trechos do DiskScope (MIT).</value>
+  </data>
+  <data name="About.DiskScopeRepository" xml:space="preserve">
+    <value>Repositório do DiskScope</value>
+  </data>
+  <data name="ResidueAdvanced.Association" xml:space="preserve">
+    <value>Referência de associação declarada pelo aplicativo. O Windows pode compartilhar esta associação com outros aplicativos.</value>
+  </data>
+  <data name="DiskHealth.Subtitle" xml:space="preserve">
+    <value>Condição, vida útil e temperatura de cada disco físico.</value>
+  </data>
+  <data name="DiskHealth.LifeLabel" xml:space="preserve">
+    <value>Vida útil restante</value>
+  </data>
+  <data name="DiskHealth.Interface" xml:space="preserve">
+    <value>Interface</value>
+  </data>
+  <data name="DiskHealth.Volumes" xml:space="preserve">
+    <value>Unidades {0}</value>
+  </data>
+  <data name="DiskHealth.Badge.NoData" xml:space="preserve">
+    <value>Sem dados</value>
+  </data>
+  <data name="DiskHealth.Note.NoWear" xml:space="preserve">
+    <value>Este disco não informa desgaste.</value>
+  </data>
+  <data name="DiskHealth.Note.Backup" xml:space="preserve">
+    <value>Faça backup dos arquivos importantes.</value>
+  </data>
+  <data name="ResidueAdvanced.Details" xml:space="preserve">
+    <value>Detalhes da seleção</value>
+  </data>
+  <data name="ResidueAdvanced.NonTransactionalRemoved" xml:space="preserve">
+    <value>Chave removida com verificação etapa a etapa, sem transação do Registro (backup .reg e snapshot disponíveis).</value>
+  </data>
+  <data name="ResidueAdvanced.NonTransactionalRestored" xml:space="preserve">
+    <value>Chave recriada a partir do snapshot sem transação do Registro. Permissões (ACL), proprietário e data de modificação não são restaurados; revise a chave.</value>
+  </data>
 </root>

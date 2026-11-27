@@ -3,6 +3,7 @@ using WinCoreManager.Helpers;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WinCoreManager.Models;
+using WinCoreManager.Services;
 
 namespace WinCoreManager.ViewModels;
 
@@ -37,7 +38,24 @@ public partial class UpdateItemRow : ObservableObject
     public string AvailableVersion => Package.AvailableVersion;
 
     public string Source => Package.Source;
-    public bool CanSelect => Status is not (UpdateRowStatus.Success or UpdateRowStatus.SuccessRebootRequired);
+    public string PackageLabel => $"{Name}\n{Id} · {Source}";
+    public string InstalledVersionText => VersionForDisplay(InstalledVersion);
+    public string AvailableVersionText => VersionForDisplay(AvailableVersion);
+    public string? VersionWarning => Unverified(AvailableVersion) && AvailableVersion.Length > 0
+        ? LocalizationService.Source("UpdatesList.UnknownTarget")
+        : Unverified(InstalledVersion) && InstalledVersion.Length > 0
+            ? LocalizationService.Source(WinGetBattleNetInstallation.IsExactTarget(Package)
+                ? "UpdatesList.UnknownBattleNet" : "UpdateOperation.UnknownInstalledVersion")
+            : null;
+    public bool CanSelect => Status is not (UpdateRowStatus.Success or UpdateRowStatus.SuccessRebootRequired) &&
+        (AvailableVersion.Length == 0 || !Unverified(AvailableVersion)) &&
+        (InstalledVersion.Length == 0 || !Unverified(InstalledVersion) || WinGetBattleNetInstallation.IsExactTarget(Package));
+
+    private static bool Unverified(string value) =>
+        !WingetTableParser.IsCompleteField(value) || WingetTableParser.IsUnknownVersion(value);
+
+    internal static string VersionForDisplay(string value) => Unverified(value)
+        ? LocalizationService.Source("UpdatesList.UnknownVersion") : value;
 
     [ObservableProperty]
     private bool _isSelected;

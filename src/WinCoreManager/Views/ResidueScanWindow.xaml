@@ -7,8 +7,8 @@
         Title="{loc:Loc UI.AdvancedLeftoverCleanup}"
         Width="980"
         Height="700"
-        MinWidth="820"
-        MinHeight="560"
+        MinWidth="400"
+        MinHeight="460"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         UseLayoutRounding="True"
@@ -21,6 +21,30 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <helpers:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
         <helpers:InverseBooleanConverter x:Key="InverseBool" />
+        <helpers:NullToCollapsedConverter x:Key="NullToCollapsed" />
+        <Style x:Key="ResidueTab" TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Underline" BorderThickness="0,0,0,2" BorderBrush="Transparent"
+                                Background="Transparent" Padding="12,7">
+                            <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                <Setter TargetName="Underline" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Underline" Property="Background" Value="{DynamicResource SubtleBgBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="24,20,24,16">
@@ -55,25 +79,9 @@
         </StackPanel>
 
         <!-- Filtros e ações -->
-        <Grid Grid.Row="1" Margin="0,0,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <ComboBox Grid.Column="0"
-                      Width="150"
-                      Margin="0,0,8,0"
-                      VerticalAlignment="Center"
-                      AutomationProperties.Name="{loc:Loc UI.FilterByCategory}"
-                      ItemsSource="{Binding CategoryOptions}"
-                      ItemTemplate="{StaticResource LocalizedStringTemplate}"
-                      SelectedItem="{Binding SelectedCategory}" />
-            <ComboBox Grid.Column="1"
-                      Width="170"
+        <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+            <ComboBox
+                      MinWidth="170"
                       Margin="0,0,8,0"
                       VerticalAlignment="Center"
                       AutomationProperties.Name="{loc:Loc UI.FilterByConfidence}"
@@ -81,14 +89,14 @@
                       ItemTemplate="{StaticResource LocalizedStringTemplate}"
                       SelectedItem="{Binding SelectedConfidence}" />
 
-            <CheckBox Grid.Column="3"
+            <CheckBox
                       Content="{loc:Loc UI.SelectEligibleItems}"
                       VerticalAlignment="Center"
                       Margin="0,0,12,0"
                       IsChecked="{Binding SelectAllEligible, Mode=TwoWay}"
                       IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}" />
 
-            <Button Grid.Column="4"
+            <Button
                     Padding="12,0"
                     Style="{StaticResource PrimaryButton}"
                     VerticalAlignment="Center"
@@ -98,108 +106,140 @@
                     <TextBlock Text="{loc:Localized SelectedCount, FormatKey=Residue.CleanSelected}" />
                 </StackPanel>
             </Button>
-        </Grid>
+        </WrapPanel>
 
         <!-- Lista de resíduos -->
-        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <DockPanel Grid.Row="2">
+            <Expander x:Name="ResultDetails" DockPanel.Dock="Bottom" Margin="0,6,0,0"
+                      Header="{loc:Loc ResidueAdvanced.Details}" Visibility="{Binding Location, Converter={StaticResource NullToCollapsed}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="112" Padding="8,4">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Location}" Style="{StaticResource MonoText}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding DetailedValue}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Localized Justification}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Expander>
+            <TabControl x:Name="ResultTabs" SelectionChanged="OnResultTabChanged"
+                        Background="{DynamicResource WindowBgBrush}" BorderBrush="{DynamicResource GridLineBrush}"
+                        Foreground="{DynamicResource TextPrimaryBrush}">
+                <TabItem Header="{loc:Loc ResidueAdvanced.Files}" Style="{StaticResource ResidueTab}">
+                    <DataGrid x:Name="FileResults" SelectionChanged="OnResultSelected"
+                              Margin="6,0"
+                              ItemsSource="{Binding Rows}"
+                              IsReadOnly="False"
+                              SelectionMode="Single"
+                              RowHeight="36"
+                              HeadersVisibility="Column"
+                              AutomationProperties.Name="{loc:Loc UI.LeftoversFound}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="44" CanUserResize="False" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                  IsEnabled="{Binding CanSelect}"
+                                                  HorizontalAlignment="Center"
+                                                  AutomationProperties.Name="{loc:Loc UI.SelectLeftoverForCleanup}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                <DataGrid x:Name="ResidueGrid"
-                          Margin="6,0"
-                          ItemsSource="{Binding Rows}"
-                          IsReadOnly="False"
-                          SelectionMode="Single"
-                          RowHeight="42"
-                          HeadersVisibility="Column"
-                          AutomationProperties.Name="{loc:Loc UI.LeftoversFound}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="44" CanUserResize="False" CanUserSort="False">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
-                                              IsEnabled="{Binding CanSelect}"
-                                              HorizontalAlignment="Center"
-                                              AutomationProperties.Name="{loc:Loc UI.SelectLeftoverForCleanup}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="{loc:Loc UI.Category}" Binding="{loc:Localized CategoryLabel}" Width="88" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{loc:Loc UI.Confidence}" Binding="{loc:Localized ConfidenceLabel}" Width="116" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                        <Setter Property="Foreground" Value="{Binding ConfidenceBrush}" />
+                                        <Setter Property="TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{loc:Loc UI.Location}" Binding="{Binding Location}" Width="2*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+                                        <Setter Property="FontSize" Value="11.5" />
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{Binding Location}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{loc:Loc UI.Reason}" Binding="{loc:Localized Justification}" Width="2*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{loc:Localized Justification}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{loc:Loc UI.Size}" Binding="{loc:Localized SizeText, BinarySizes=True}" Width="80" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="{loc:Loc ResidueAdvanced.Registry}" Style="{StaticResource ResidueTab}">
+                    <DataGrid x:Name="RegistryResults" SelectionChanged="OnResultSelected"
+                              Margin="6,0"
+                              ItemsSource="{Binding Rows}"
+                              IsReadOnly="False"
+                              SelectionMode="Single"
+                              RowHeight="36"
+                              HeadersVisibility="Column"
+                              AutomationProperties.Name="{loc:Loc UI.LeftoversFound}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="44" CanUserResize="False" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                  IsEnabled="{Binding CanSelect}"
+                                                  HorizontalAlignment="Center"
+                                                  AutomationProperties.Name="{loc:Loc UI.SelectLeftoverForCleanup}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="{loc:Loc UI.Category}" Binding="{loc:Localized CategoryLabel}" Width="88" IsReadOnly="True" />
-                        <DataGridTextColumn Header="{loc:Loc UI.Confidence}" Binding="{loc:Localized ConfidenceLabel}" Width="100" IsReadOnly="True">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="SemiBold" />
-                                    <Setter Property="Foreground" Value="{Binding ConfidenceBrush}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="{loc:Loc UI.Location}" Binding="{Binding Location}" Width="2*" IsReadOnly="True">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
-                                    <Setter Property="FontSize" Value="11.5" />
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                    <Setter Property="ToolTip" Value="{Binding Location}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="{loc:Loc UI.Reason}" Binding="{loc:Localized Justification}" Width="2*" IsReadOnly="True">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                    <Setter Property="ToolTip" Value="{loc:Localized Justification}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="{loc:Loc UI.Size}" Binding="{loc:Localized SizeText, BinarySizes=True}" Width="80" IsReadOnly="True">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
 
-                <!-- Estado vazio -->
-                <StackPanel HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Visibility="{Binding HasItems, Converter={StaticResource InverseBoolToVis}}">
-                    <Border Style="{StaticResource IconTile}" Width="52" Height="52" CornerRadius="8">
-                        <TextBlock Text="&#xE946;"
-                                   Style="{StaticResource IconText}"
-                                   FontSize="22"
-                                   Foreground="{DynamicResource AccentTextBrush}"
-                                   HorizontalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="{loc:Localized StatusText}"
-                               Style="{StaticResource CaptionText}"
-                               TextAlignment="Center"
-                               MaxWidth="460"
-                               TextWrapping="Wrap"
-                               Margin="0,12,0,0" />
-                </StackPanel>
-
-                <!-- Rodapé com resumo -->
-                <Border Grid.Row="1"
-                        Background="{DynamicResource SubtleBgBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="0,1,0,0"
-                        CornerRadius="0,0,11,11"
-                        Padding="18,0"
-                        Height="36">
-                    <TextBlock Text="{loc:Localized SummaryText, BinarySizes=True}"
-                               Style="{StaticResource CaptionText}"
-                               VerticalAlignment="Center"
-                               TextTrimming="CharacterEllipsis" />
-                </Border>
-            </Grid>
-        </Border>
+                            <DataGridTextColumn Header="{loc:Loc UI.Confidence}" Binding="{loc:Localized ConfidenceLabel}" Width="116" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                        <Setter Property="Foreground" Value="{Binding ConfidenceBrush}" />
+                                        <Setter Property="TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{loc:Loc ResidueAdvanced.KeyPath}" Binding="{Binding Location}" Width="2*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+                                        <Setter Property="FontSize" Value="11.5" />
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{Binding Location}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{loc:Loc UI.Reason}" Binding="{loc:Localized Justification}" Width="2*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{loc:Localized Justification}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{loc:Loc ResidueAdvanced.ValueType}" Binding="{Binding ValueDetails}"
+                                                Width="120" IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
 
         <!-- Progresso -->
         <Border Grid.Row="3"

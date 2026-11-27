@@ -8,19 +8,22 @@ namespace WinCoreManager;
 
 public partial class MainWindow : Window
 {
-    internal bool CanCloseForUpdate => DataContext is MainViewModel viewModel &&
+    internal bool CanCloseForUpdate => OperationsIdle && DataContext is MainViewModel viewModel &&
+        !viewModel.Updates.HasInterruptedUpdate;
+
+    private bool OperationsIdle => DataContext is MainViewModel viewModel &&
         OtherOperationsIdle(viewModel) && !viewModel.Updates.IsBusy && !viewModel.Updates.IsCheckingInterruption;
 
     private static bool OtherOperationsIdle(MainViewModel viewModel) =>
         !viewModel.Maintenance.IsRunning && !viewModel.Uninstallers.IsRunning && LocalWritesIdle(viewModel);
 
     private static bool LocalWritesIdle(MainViewModel viewModel) =>
-        !viewModel.Startup.ChangeCommand.IsRunning && !viewModel.Cleanup.EmptyCommand.IsRunning &&
+        !viewModel.Startup.ChangeCommand.IsRunning && !viewModel.Cleanup.EmptyCommand.IsRunning && !viewModel.Cleanup.EmptyNativeCommand.IsRunning &&
         !viewModel.Tweaks.ApplyCommand.IsRunning && !viewModel.Tweaks.UndoCommand.IsRunning &&
         !viewModel.Settings.ClearHistoryCommand.IsRunning;
 
-    internal bool CanCloseNormally => CanCloseForUpdate
-        && DataContext is MainViewModel viewModel && !viewModel.Settings.SelfUpdate.IsBusy;
+    internal bool CanCloseNormally => OperationsIdle
+        && DataContext is MainViewModel viewModel && !viewModel.Settings.SelfUpdate.IsApplying;
 
     internal Func<IReadOnlyList<string>, string?>? ChooseUpdateCloseAction { get; set; }
     private bool _askingAboutClose;
@@ -50,7 +53,7 @@ public partial class MainWindow : Window
             try
             {
                 if (LocalWritesIdle(viewModel) && !viewModel.Updates.IsBusy && !viewModel.Updates.IsCheckingInterruption &&
-                    !viewModel.Settings.SelfUpdate.IsBusy &&
+                    !viewModel.Settings.SelfUpdate.IsApplying &&
                     (viewModel.Maintenance.IsRunning || viewModel.Uninstallers.IsUninstalling))
                 {
                     var maintenance = viewModel.Maintenance;
@@ -70,7 +73,7 @@ public partial class MainWindow : Window
                     return;
                 }
 
-                if (!OtherOperationsIdle(viewModel) || viewModel.Settings.SelfUpdate.IsBusy || !viewModel.Updates.IsUpdating)
+                if (!OtherOperationsIdle(viewModel) || viewModel.Settings.SelfUpdate.IsApplying || !viewModel.Updates.IsUpdating)
                 {
                     LocalizedDialog.Inform(this, Title, LocalizationService.Source("Message.WaitForTheOperationBeforeClosing"));
                     return;

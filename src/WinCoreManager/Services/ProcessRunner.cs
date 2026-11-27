@@ -12,6 +12,9 @@ public sealed class ProcessRunResult
     public bool Interrupted { get; init; }
     public bool HasExitCode { get; init; } = true;
     internal ExternalProcessObservation Observation { get; init; }
+    internal WinGetMsiResult? MsiResult { get; init; }
+    internal bool RestartRequestedByInstaller { get; init; }
+    internal string? InstallerFailureDetail { get; set; }
 
     /// <summary>True quando o processo nem chegou a iniciar (ex.: UAC recusado, exe ausente).</summary>
     public bool StartFailed { get; init; }
@@ -133,7 +136,8 @@ public static partial class ProcessRunner
             ReadUntilEnd(process.StandardError, errors, onErrorLine));
 
         var observed = await ObserveExitAsync(process, observation ?? ProcessObservationPolicy.Direct,
-            cancellationToken, terminateOnCancellation, control).ConfigureAwait(false);
+            cancellationToken, terminateOnCancellation, control,
+            settleInstallerWork: observation == ProcessObservationPolicy.Uninstall).ConfigureAwait(false);
 
         drain.CancelAfter(TimeSpan.FromSeconds(3));
         try
@@ -169,17 +173,28 @@ public static partial class ProcessRunner
 
     internal static async Task<(bool Exited, bool TerminationRequested, bool DelegateActive)> ObserveExitAsync(Process process,
         ProcessObservationPolicy policy, CancellationToken cancellationToken, bool terminateOwnedProcess = false,
-        WinGetProcessControl? control = null)
+        WinGetProcessControl? control = null, bool settleInstallerWork = false)
     {
         using var observationLifetime = new CancellationTokenSource();
         var observation = control is null ? Task.CompletedTask : ObserveDescendantsAsync(control, observationLifetime.Token);
         (bool Exited, bool TerminationRequested) exit;
-        try { exit = await WaitForExitAsync(process, policy, cancellationToken, terminateOwnedProcess).ConfigureAwait(false); }
+        var clock = Stopwatch.StartNew();
+        try
+        {
+            exit = await WaitForExitAsync(process, policy, cancellationToken, terminateOwnedProcess).ConfigureAwait(false);
+        }
         finally
         {
             await observationLifetime.CancelAsync().ConfigureAwait(false);
             await observation.ConfigureAwait(false);
         }
+        var settleClock = Stopwatch.StartNew();
+        // The background poll has stopped. One observer now owns the delegate set.
+        while (control is not null && exit is { Exited: true, TerminationRequested: false } &&
+               !cancellationToken.IsCancellationRequested && clock.Elapsed < policy.MaximumWait &&
+               (!settleInstallerWork || settleClock.Elapsed < control.DelegateSettleWindow) &&
+               (control.ObserveDelegates() || settleInstallerWork && WinGetNative.WindowsInstallerBusy()))
+            await Task.Delay(250, CancellationToken.None).ConfigureAwait(false);
         return (exit.Exited, exit.TerminationRequested, control?.ObserveDelegates() == true);
     }
 

@@ -29,6 +29,12 @@
                 <TextBlock Text="{loc:Loc Essentials.Intro}" Style="{StaticResource CaptionText}"
                            TextWrapping="Wrap" Margin="0,0,0,16" />
 
+                <WrapPanel Margin="0,0,0,10">
+                    <Button Content="{loc:Loc Essentials.Verify}" Command="{Binding RefreshCommand}" Margin="0,0,8,4" />
+                    <TextBlock Text="{loc:Loc Essentials.Verifying}" VerticalAlignment="Center"
+                               Style="{StaticResource CaptionText}" AutomationProperties.LiveSetting="Polite"
+                               Visibility="{Binding IsChecking, Converter={StaticResource BoolToVisibility}}" />
+                </WrapPanel>
                 <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -120,14 +126,49 @@
                                                FontSize="13" TextWrapping="Wrap" Margin="0,10,0,12" />
                                     <StackPanel Grid.Row="2">
                                         <TextBlock Text="{Binding Note}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
-                                        <Button HorizontalAlignment="Left" AutomationProperties.Name="{Binding OpenLabel}"
-                                                Command="{Binding DataContext.OpenPageCommand, RelativeSource={RelativeSource AncestorType=views:EssentialsPage}}"
-                                                CommandParameter="{Binding App.Id}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{loc:Loc Essentials.Open}" VerticalAlignment="Center" />
-                                                <TextBlock Text="&#xE8A7;" Style="{StaticResource IconText}" Margin="8,0,0,0" />
-                                            </StackPanel>
-                                        </Button>
+                                        <TextBlock Text="{loc:Loc Essentials.NotVerified}" Style="{StaticResource CaptionText}"
+                                                   Visibility="{Binding IsUnverified, Converter={StaticResource BoolToVisibility}}" />
+                                        <TextBlock Text="{loc:Localized Details}" TextWrapping="Wrap" Margin="0,2,0,6">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource CaptionText}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Detection.State}" Value="NotInstalled">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <WrapPanel>
+                                            <Button HorizontalAlignment="Left" Margin="0,0,6,4"
+                                                    Command="{Binding DataContext.OpenPageCommand, RelativeSource={RelativeSource AncestorType=views:EssentialsPage}}"
+                                                    CommandParameter="{Binding App.Id}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                        <Setter Property="Content" Value="{loc:Loc Essentials.Open}" />
+                                                        <Setter Property="AutomationProperties.Name" Value="{Binding OpenLabel}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsInstalled}" Value="True">
+                                                                <Setter Property="Content" Value="{loc:Loc Essentials.Installed}" />
+                                                                <Setter Property="AutomationProperties.Name" Value="{loc:Loc Essentials.Installed}" />
+                                                                <Setter Property="IsEnabled" Value="False" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <TextBlock Text="&#xE73E;" Style="{StaticResource IconText}" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource SuccessBrush}" Margin="0,0,8,4"
+                                                       Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVisibility}}" />
+                                            <TextBlock VerticalAlignment="Center" Margin="0,0,0,4"
+                                                       Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVisibility}}">
+                                                <Hyperlink Foreground="{DynamicResource AccentTextBrush}"
+                                                           Command="{Binding DataContext.OpenPageCommand, RelativeSource={RelativeSource AncestorType=views:EssentialsPage}}"
+                                                           CommandParameter="{Binding App.Id}">
+                                                    <Run Text="{loc:Loc Essentials.OfficialPage}" />
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </WrapPanel>
                                     </StackPanel>
                                 </Grid>
                             </Border>

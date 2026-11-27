@@ -1,6 +1,7 @@
 using WinCoreManager.Localization;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using WinCoreManager.Models;
 using WinCoreManager.Services;
@@ -13,11 +14,15 @@ public partial class ResidueScanWindow : Window
 {
     private readonly ResidueScanViewModel _viewModel;
 
-    private ResidueScanWindow(ResidueScanViewModel viewModel)
+    internal ResidueScanWindow(ResidueScanViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
+        MaxWidth = SystemParameters.WorkArea.Width;
+        MaxHeight = SystemParameters.WorkArea.Height;
+        SourceInitialized += (_, _) => Helpers.WindowEffects.Apply(this);
         DataContext = viewModel;
+        ResultDetails.DataContext = null;
         Loaded += OnLoaded;
         Closing += OnClosing;
     }
@@ -66,8 +71,26 @@ public partial class ResidueScanWindow : Window
         LocalizationService.Source("Message.RestoreFromQuarantine"),
         LocalizationService.Source("Message.AnItemAlreadyExistsAtTheOriginalLocation2", entry.OriginalPath));
 
+    private void OnResultTabChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (!ReferenceEquals(e.Source, ResultTabs) || _viewModel is null) return;
+        _viewModel.ShowRegistryTab(ResultTabs.SelectedIndex == 1);
+        UpdateResultDetails();
+    }
+
+    private void OnResultSelected(object sender, SelectionChangedEventArgs e) => UpdateResultDetails();
+
+    private void UpdateResultDetails()
+    {
+        if (ResultDetails is null || ResultTabs is null) return;
+        var grid = ResultTabs.SelectedIndex == 1 ? RegistryResults : FileResults;
+        ResultDetails.DataContext = grid?.SelectedItem as ResidueItemRow;
+        ResultDetails.IsExpanded = ResultDetails.DataContext is not null;
+    }
+
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        _viewModel.ShowRegistryTab(ResultTabs.SelectedIndex == 1);
         _viewModel.AttachFilter(System.Windows.Data.CollectionViewSource.GetDefaultView(_viewModel.Rows));
         await _viewModel.RefreshQuarantineAsync();
         _viewModel.ScanCommand.Execute(null);

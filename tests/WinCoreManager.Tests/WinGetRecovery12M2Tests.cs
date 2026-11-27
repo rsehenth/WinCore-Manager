@@ -567,7 +567,7 @@ public class WinGetRecovery12M2Tests
 
                 Assert.Contains("Pending operation: Battle.net (Blizzard.BattleNet)", vm.PackageChangeBlockReason);
                 Assert.Contains("Main process: No evidence available", vm.InterruptionDetails);
-                Assert.Contains("Inventory: Observed version: 2.0", vm.InterruptionDetails);
+                Assert.Contains("Inventory: Waiting for the process and restart checks to clear", vm.InterruptionDetails);
             }
             finally { locale.Apply(original); }
         });

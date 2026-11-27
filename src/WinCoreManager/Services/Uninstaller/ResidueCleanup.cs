@@ -76,11 +76,11 @@ public sealed class ResidueCleanupPlanner(IResidueAnalysisService analysisServic
         }
 
         var current = revalidated.Items
-            .ToDictionary(i => $"{i.Category}|{i.Location}|{i.Is64BitView}", i => i, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(i => $"{i.Category}|{i.Location}|{i.Is64BitView}|{i.ValueName}", i => i, StringComparer.OrdinalIgnoreCase);
 
         foreach (var item in selectedItems)
         {
-            if (!current.TryGetValue($"{item.Category}|{item.Location}|{item.Is64BitView}", out var revalidatedItem))
+            if (!current.TryGetValue($"{item.Category}|{item.Location}|{item.Is64BitView}|{item.ValueName}", out var revalidatedItem))
             {
                 blocked.Add(new ResidueCleanupItemResult
                 {
@@ -167,9 +167,14 @@ public sealed class ResidueCleanupExecutor(
             ResidueCleanupItemResult result;
             try
             {
-                result = item.Category == ResidueCategory.RegistryKey
-                    ? CleanRegistryKey(item, plan.Program.Name, cancellationToken)
-                    : CleanFileSystemItem(item, plan.Program.Name, cancellationToken);
+                result = item.Category switch
+                {
+                    ResidueCategory.RegistryKey when registryWriter is IAtomicResidueRegistryWriter && !plan.RegistryConsentGranted =>
+                        Blocked(item, LocalizationService.Source("Message.ReviewRequired")),
+                    ResidueCategory.RegistryKey => CleanRegistryKey(item, plan.Program.Name, cancellationToken),
+                    ResidueCategory.RegistryValue => Blocked(item, LocalizationService.Source("ResidueAdvanced.EvidenceOnly")),
+                    _ => CleanFileSystemItem(item, plan.Program.Name, cancellationToken),
+                };
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -268,6 +273,9 @@ public sealed class ResidueCleanupExecutor(
             return Blocked(item, LocalizationService.Source("Message.TheRegistryKeyPathIsInvalidTheOperation"));
         }
 
+        if (!registryWriter.CanWriteKey(hive, subKeyPath))
+            return Blocked(item, LocalizationService.Source("ResidueAdvanced.RegistryReadOnly"));
+
         if (!registryReader.KeyExists(hive, subKeyPath, item.Is64BitView))
         {
             return Blocked(item, LocalizationService.Source("Message.TheRegistryKeyNoLongerExistsThereIs"));
@@ -306,6 +314,25 @@ public sealed class ResidueCleanupExecutor(
         }
 
         ct.ThrowIfCancellationRequested();
+        if (registryWriter is IAtomicResidueRegistryWriter atomic)
+        {
+            var outcome = atomic.DeleteVerifiedOutcome(hive, subKeyPath, item.Is64BitView, current, ct);
+            if (!outcome.Succeeded)
+            {
+                return outcome.RemovedKeys > 0
+                    ? new ResidueCleanupItemResult
+                    {
+                        Item = item,
+                        Outcome = ResidueCleanupItemOutcome.Failed,
+                        Message = LocalizationService.Source("Message.PARTIALREMOVAL0Of1KeysRemoved2",
+                            outcome.RemovedKeys, outcome.TotalKeys, outcome.Error),
+                        QuarantineEntryId = backup.Id,
+                        RegistryBackupFile = backup.RegistryBackupFile,
+                    }
+                    : RegistryNotRemoved(item, backup, outcome.Error);
+            }
+            return RegistryRemoved(item, backup, outcome.Mode);
+        }
         var paths = RegistrySnapshot.PostOrderPaths(subKeyPath, current).ToList();
         for (var i = 0; i < paths.Count; i++)
         {
@@ -327,15 +354,20 @@ public sealed class ResidueCleanupExecutor(
             };
         }
 
-        return new ResidueCleanupItemResult
-        {
-            Item = item,
-            Outcome = ResidueCleanupItemOutcome.Success,
-            Message = LocalizationService.Source("Message.RegistryKeyRemovedRegBackupAndSnapshotAvailable"),
-            QuarantineEntryId = backup.Id,
-            RegistryBackupFile = backup.RegistryBackupFile,
-        };
+        return RegistryRemoved(item, backup);
     }
+
+    private static ResidueCleanupItemResult RegistryRemoved(ResidueItem item, QuarantineEntry backup,
+        RegistryMutationMode mode = RegistryMutationMode.Transactional) => new()
+    {
+        Item = item,
+        Outcome = ResidueCleanupItemOutcome.Success,
+        Message = LocalizationService.Source(mode == RegistryMutationMode.SupervisedNonTransactional
+            ? "ResidueAdvanced.NonTransactionalRemoved"
+            : "Message.RegistryKeyRemovedRegBackupAndSnapshotAvailable"),
+        QuarantineEntryId = backup.Id,
+        RegistryBackupFile = backup.RegistryBackupFile,
+    };
 
     private static ResidueCleanupItemResult Blocked(ResidueItem item, string message) => new()
     {

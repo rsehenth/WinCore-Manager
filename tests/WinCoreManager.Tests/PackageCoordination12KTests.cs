@@ -20,7 +20,10 @@ public sealed class PackageCoordination12KTests
         var release = marker + ".release";
         ProcessRunResult? observed = null;
         service.Run = async (_, control, token) =>
-            observed = await ProcessRunner.RunWinGetAsync(Fixture("quiet-delegate", marker, release), null, token, control);
+        {
+            control.DelegateSettleWindow = TimeSpan.FromMilliseconds(500); // delegate outlives the supervised wait
+            return observed = await ProcessRunner.RunWinGetAsync(Fixture("quiet-delegate", marker, release), null, token, control);
+        };
         var vm = new UpdatesViewModel(service, history, settings, store);
         try
         {
@@ -50,7 +53,7 @@ public sealed class PackageCoordination12KTests
         var marker = Path.Combine(settings.DataDirectory, "child");
         Directory.CreateDirectory(settings.DataDirectory);
         var release = marker + ".release";
-        var control = new WinGetProcessControl();
+        var control = new WinGetProcessControl { DelegateSettleWindow = TimeSpan.FromMilliseconds(500) };
         var run = ProcessRunner.RunWinGetAsync(Fixture(mode, marker, release), null, default, control, delegationPossible);
         try
         {

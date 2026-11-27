@@ -83,7 +83,7 @@ public class UpdatesViewModelTests
         Assert.False(viewModel.Rows[0].IsSelected);
         Assert.True(viewModel.Rows[1].IsSelected);
         Assert.True(viewModel.AllSelected);
-        Assert.Equal(50, viewModel.UpdateProgress);
+        Assert.Equal(1, viewModel.RemainingUpdates);
         Assert.Contains("1 não iniciado", viewModel.StatusText);
         Assert.Equal(HistoryStatus.Success, Assert.Single(await history.RecentAsync(5)).Status);
     }

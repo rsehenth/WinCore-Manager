@@ -52,12 +52,13 @@ public partial class App : Application
 
         services.AddSingleton<IUninstallRegistryView, WindowsUninstallRegistryView>();
         services.AddSingleton<ResiduePathRules>(sp => ResiduePathRules.ForEnvironment(sp.GetRequiredService<ISettingsService>().DataDirectory));
-        services.AddSingleton<WindowsResidueRegistry>();
+        services.AddSingleton(sp => new WindowsResidueRegistry(sp.GetRequiredService<ResiduePathRules>()));
         services.AddSingleton<IResidueRegistryReader>(sp => sp.GetRequiredService<WindowsResidueRegistry>());
         services.AddSingleton<IResidueRegistryWriter>(sp => sp.GetRequiredService<WindowsResidueRegistry>());
         services.AddSingleton<IProgramInventoryService, RegistryProgramScanner>();
         services.AddSingleton<IUninstallPlanner, UninstallPlanner>();
         services.AddSingleton<IUninstallExecutor, ProcessUninstallExecutor>();
+        services.AddSingleton<OptionalAppInventory>();
         services.AddSingleton<IResidueAnalysisService, ResidueAnalysisService>();
         services.AddSingleton<IResidueQuarantineService>(sp => new ResidueQuarantineService(
             Path.Combine(sp.GetRequiredService<ISettingsService>().DataDirectory, "Quarantine"),
@@ -82,6 +83,15 @@ public partial class App : Application
         services.AddSingleton<IStartupProductReader, WindowsStartupProductReader>();
         services.AddSingleton<IStartupShortcutReader, WindowsStartupShortcutReader>();
         services.AddSingleton<StartupPolicy>();
+        services.AddSingleton(sp =>
+        {
+            StartupRunSource MachineRun(StartupSource scope) => new(new WindowsStartupRunRegistry(scope),
+                sp.GetRequiredService<IStartupRegistry>(), sp.GetRequiredService<IStartupProductReader>(),
+                sp.GetRequiredService<StartupPolicy>(), new StartupRunBackups(Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    "WinCoreManager.StartupBackups", scope.ToString()), machineScoped: true), scope);
+            return new MachineStartupSources(MachineRun(StartupSource.MachineRun64), MachineRun(StartupSource.MachineRun32));
+        });
         services.AddSingleton(_ => new StartupBackupStore(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WinCoreManager", "StartupBackups")));
         services.AddSingleton(sp => new StartupFolderSource(
@@ -100,7 +110,11 @@ public partial class App : Application
         services.AddSingleton<IWindowsTools, WindowsTools>();
         services.AddSingleton<IWindowsFeatureConfirmation, WindowsFeatureConfirmation>();
         services.AddSingleton<ICleanupPlatform, WindowsCleanupPlatform>();
-        services.AddSingleton<CleanupService>();
+        services.AddSingleton(sp => new CleanupService(sp.GetRequiredService<ICleanupPlatform>(),
+            sp.GetRequiredService<IWindowsTools>(), sp.GetRequiredService<IHistoryService>())
+        {
+            DirectFiles = CleanupFiles.ForCurrentUser(),
+        });
         services.AddSingleton<CleanupViewModel>();
         services.AddSingleton<ITweakPlatform, WindowsTweakPlatform>();
         services.AddSingleton<ITweakJournal>(_ => new WindowsTweakJournal(Path.Combine(
@@ -124,7 +138,11 @@ public partial class App : Application
         services.AddSingleton<ICpuProvider, WindowsCpuProvider>();
         services.AddSingleton<IGpuProvider, WindowsGpuProvider>();
         services.AddSingleton<IRamProvider, WindowsRamProvider>();
-        services.AddSingleton<IStorageProvider, WindowsStorageProvider>();
+        services.AddSingleton<WindowsStorageProvider>();
+        services.AddSingleton<IStorageProvider>(sp => sp.GetRequiredService<WindowsStorageProvider>());
+        services.AddSingleton<IDiskHealthProbe, WindowsSmart>();
+        services.AddSingleton<DiskHealthService>();
+        services.AddSingleton<DiskHealthViewModel>();
         services.AddSingleton<IComplementaryProvider, WindowsComplementaryProvider>();
         services.AddSingleton<IHardwareInventory, HardwareInventory>();
         services.AddSingleton<ISensorProviderFactory, WindowsSensorFactory>();
@@ -134,10 +152,11 @@ public partial class App : Application
 
         services.AddSingleton<DashboardViewModel>();
         services.AddSingleton<WindowsActivationViewModel>();
+        services.AddSingleton<IEssentialInstallationService, EssentialInstallationService>();
         services.AddSingleton<EssentialsViewModel>();
         services.AddSingleton(sp => new UpdatesViewModel(sp.GetRequiredService<IWinGetService>(),
             sp.GetRequiredService<IHistoryService>(), sp.GetRequiredService<ISettingsService>(),
-            sp.GetRequiredService<WinGetInterruptionStore>()));
+            sp.GetRequiredService<WinGetInterruptionStore>()) { ReviewBatch = UpdatesViewModel.ShowBatchReview });
         services.AddSingleton<MaintenanceViewModel>();
         services.AddSingleton<HistoryViewModel>();
         services.AddSingleton<SettingsViewModel>();
@@ -165,6 +184,8 @@ public partial class App : Application
         var mainWindow = Services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();
+        _ = Dispatcher.InvokeAsync(() => ((MainViewModel)mainWindow.DataContext).Settings.SelfUpdate.CheckIfStale(),
+            System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         if (Services.GetRequiredService<ISettingsService>() is SettingsService { LoadProblem: { } problem })
         {
             MessageBox.Show(mainWindow, PresentationText.Translate(problem, LocalizationService.Current.Culture),

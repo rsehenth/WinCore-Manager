@@ -75,7 +75,12 @@ public partial class MaintenanceViewModel : ViewModelBase
     private string _statusText = LocalizationService.Source("Message.NoMaintenanceOperationInProgress");
 
     internal Func<bool>? PackageChangesBlocked { get; set; }
+    internal Func<string?>? PendingPackageChangeHint { get; set; }
     internal TryReserveOperation? TryReservePackageChange { get; set; }
+
+    public string? PendingRecoveryNotice => PendingPackageChangeHint?.Invoke();
+
+    internal void NotifyPackageChangeState() => OnPropertyChanged(nameof(PendingRecoveryNotice));
 
     private bool TryReserve(bool conflicts, string target, out PackageChangeReservation? reservation)
     {

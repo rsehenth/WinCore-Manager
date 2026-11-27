@@ -85,18 +85,6 @@
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
-                <DockPanel>
-                    <ComboBox x:Name="WinGetInactivitySelector" DockPanel.Dock="Right" MinWidth="100" VerticalAlignment="Center"
-                              ItemsSource="{Binding WinGetInactivityOptions}" SelectedItem="{Binding WinGetInactivitySeconds}"
-                              AutomationProperties.Name="{loc:Loc UpdateOperation.InactivitySetting}" />
-                    <StackPanel Margin="0,0,16,0">
-                        <TextBlock Text="{loc:Loc UpdateOperation.InactivitySetting}" Style="{StaticResource CardTitleText}" />
-                        <TextBlock Text="{loc:Loc UpdateOperation.InactivityDescription}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
-                    </StackPanel>
-                </DockPanel>
-            </Border>
-
             <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16" DataContext="{Binding SelfUpdate}">
                 <StackPanel>
                     <TextBlock Text="{loc:Loc Updater.Title}" Style="{StaticResource CardTitleText}" />
@@ -106,6 +94,10 @@
                                AutomationProperties.LiveSetting="Polite" />
                     <StackPanel Visibility="{Binding HasOffer, Converter={StaticResource UpdateVisibility}}" Margin="0,8,0,0">
                         <TextBlock Text="{loc:Localized AvailableVersion, FormatKey=Updater.AvailableVersion, Translate=False}" />
+                        <TextBlock Text="{loc:Localized ReleaseDate, FormatKey=Updater.PublishDate, NumberFormat=d}"
+                                   Visibility="{Binding HasReleaseDate, Converter={StaticResource UpdateVisibility}}" />
+                        <TextBlock Text="{loc:Loc Updater.ManualRequired}" Style="{StaticResource CaptionText}" TextWrapping="Wrap"
+                                   Visibility="{Binding HasManualOffer, Converter={StaticResource UpdateVisibility}}" />
                         <TextBlock Text="{loc:Localized PackageMiB, FormatKey=Updater.PackageSize, NumberFormat=N1}" Margin="0,3,0,0" />
                         <StackPanel Visibility="{Binding HasReleaseNotes, Converter={StaticResource UpdateVisibility}}" Margin="0,9,0,0">
                             <TextBlock Text="{loc:Loc Updater.ReleaseNotes}" FontWeight="SemiBold" />
@@ -120,7 +112,7 @@
                     <WrapPanel Margin="0,12,0,0">
                         <Button Content="{loc:Loc Updater.Check}" Command="{Binding CheckCommand}" Margin="0,0,8,4" />
                         <Button Content="{loc:Loc Updater.Install}" Command="{Binding UpdateCommand}" Margin="0,0,8,4"
-                                Visibility="{Binding HasOffer, Converter={StaticResource UpdateVisibility}}" />
+                                Visibility="{Binding CanInstallOffer, Converter={StaticResource UpdateVisibility}}" />
                         <Button Content="{loc:Loc UI.Cancel}" Command="{Binding CancelCommand}" Margin="0,0,8,4">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

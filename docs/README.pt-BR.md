@@ -2,153 +2,95 @@
 
 # WinCore Manager
 
-Utilitário desktop para Windows voltado ao gerenciamento e à manutenção supervisionada do sistema, criado com C#, WPF e .NET 10.
+O WinCore Manager é um utilitário desktop para gerenciamento e manutenção supervisionada do Windows. **0.2.0-rc.3 Premium** é a versão candidata consolidada, criada com C#, WPF e .NET 10.
 
-![Windows x64](https://img.shields.io/badge/Windows-x64-0078D4)
-![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)
-![Versão 0.1.0](https://img.shields.io/badge/version-0.1.0-informational)
-[![Licença: MIT](https://img.shields.io/badge/license-MIT-green)](../LICENSE)
-
-## Visão geral
-
-O WinCore Manager reúne em uma interface tarefas comuns de manutenção do Windows: atualização de aplicativos pelo WinGet, desinstalação, itens de inicialização, limpeza, ajustes e informações de hardware. A prioridade é clareza e controle. Você vê o que vai acontecer, confirma as alterações e pode revisar os resultados depois.
-
-Ele não promete otimização automática nem solução garantida de problemas.
-
-## Screenshots
-
-As duas imagens são renderizações reais do aplicativo, preenchidas com dados sintéticos de demonstração. Os nomes de aplicativos, versões, registros de histórico e os dados de WinGet e de ativação do Windows são fictícios, e nenhuma operação foi executada. A interface aparece em inglês.
-
-### Painel
-
-![Painel do WinCore Manager](assets/screenshots/wincore-manager-dashboard.png)
-
-### Atualizações
-
-![Atualizações do WinCore Manager](assets/screenshots/wincore-manager-updates.png)
-
-## Funcionalidades
+## Recursos
 
 | Área | O que faz |
 | --- | --- |
-| Painel | Situação de atualizações e manutenção, atividade recente, edição e ativação do Windows com atalho para as configurações de ativação. |
-| Atualizações | Lista atualizações de aplicativos pelo WinGet, atualiza os pacotes selecionados com supervisão, oculta atualizações indesejadas e oferece recuperação supervisionada de operações interrompidas. |
-| Manutenção | Executa um conjunto fixo de ferramentas do Windows: SFC, DISM RestoreHealth, CHKDSK `/scan`, limpeza do cache DNS e reparo combinado DISM + SFC. |
-| Desinstalador | Lista programas instalados com busca e categorias, executa desinstaladores um por vez e procura resíduos, com backup antes da remoção. |
-| Inicializar | Mostra o que inicia com o Windows e permite ativar ou desativar itens pessoais elegíveis. |
-| Limpeza | Mostra o espaço usado no volume do Windows, abre a Limpeza de Disco do Windows e esvazia a Lixeira após confirmação. |
-| Tweaks | Mostra tempos de energia, efeitos visuais e opções do Explorador de Arquivos, aplica alterações a pedido, desfaz a última e dá acesso à Proteção do Sistema. |
-| Meu Computador | Inventário de hardware somente leitura e leitura de sensores, quando o hardware e as permissões permitem. |
-| Essenciais | Lista selecionada de componentes, drivers e ferramentas. Cada item abre uma página no navegador; o WinCore Manager não instala nada. |
-| Histórico | Registro local e pesquisável das operações e resultados, com configuração de retenção. |
-| Configurações | Temas Light e Dark, português (Brasil) e inglês (EUA), modo portátil, retenção do histórico e opções do WinGet. |
-| Sobre | Versão, créditos e licenças. |
+| Painel e Saúde dos Discos | Mostra a situação do sistema, a atividade recente e a saúde das unidades. **Mais detalhes** exibe as evidências SMART de NVMe e ATA disponíveis, em modo somente leitura. |
+| Atualizações | Encontra atualizações pelo WinGet, permite revisar a fila, mostra andamento e diagnóstico por pacote e oferece recuperação supervisionada de operações interrompidas. O diagnóstico de catálogo adapta código do UniGetUI. |
+| Manutenção | Executa ferramentas do Windows sob demanda, como SFC, DISM RestoreHealth, CHKDSK `/scan` e limpeza do cache DNS. A área detalhada de saúde mostra as métricas disponíveis para cada disco. |
+| Desinstalador | Lista e filtra programas instalados. Executa os desinstaladores em sequência após confirmação. A aba **Aplicativos do Windows** lista opcionais elegíveis, incluindo pacotes APPX compatíveis do usuário atual. |
+| Resíduos | Procura evidências em arquivos e no Registro associadas a um programa desinstalado. Arquivos elegíveis podem ir para quarentena. Chaves elegíveis exigem backup verificado e confirmação. |
+| Inicializar | Lista o que inicia com o Windows e permite alterar valores Run e atalhos elegíveis. |
+| Limpeza e análise de espaço | Regras do BitBroom agrupam temporários e caches para prévia e limpeza confirmada. O analisador mostra quais pastas e arquivos ocupam mais espaço. |
+| Tweaks | Ajusta opções compatíveis de energia e do Explorador, oferece desfazer quando disponível e abre os controles pertinentes do Windows. |
+| Meu Computador | Mostra inventário de hardware e leituras de sensores em modo somente leitura, quando disponíveis. |
+| Essenciais | Detecta aplicativos e runtimes globais selecionados e oferece links para as fontes oficiais. |
+| Histórico | Mantém um registro local pesquisável das operações e dos resultados, com retenção configurável. |
+| Configurações e Sobre | Permitem escolher tema claro ou escuro, PT-BR ou EN-US, modo portátil e retenção do histórico. Exibem versão e créditos. |
+| Autoatualização do WinCore | Consulta versões estáveis do WinCore e pode encaminhar à página oficial. As ferramentas Update e Recovery acompanham o portátil. |
 
-Quando o Windows aparece como não ativado, o Painel também oferece, após confirmação, abrir o repositório do Microsoft Activation Scripts (MAS), um projeto de terceiros sem vínculo com a Microsoft ou com o WinCore Manager. O WinCore Manager apenas abre essa página no navegador: não baixa, não inclui nem executa script de ativação. O projeto tem licença própria, a licença MIT daqui não se aplica a ele, e usá-lo pode violar os termos de licença da Microsoft. Use apenas cópias devidamente licenciadas do Windows.
+## Interface
 
-A atualização automática do próprio WinCore Manager existe no código, mas **não está habilitada**: não há canal oficial de releases nem chave de publicador configurados.
+As capturas do [Painel](assets/screenshots/wincore-manager-dashboard.png) e de [Atualizações](assets/screenshots/wincore-manager-updates.png) mostram uma versão anterior com dados de demonstração.
 
-## Requisitos
+## Requisitos e execução
 
-**Para executar o pacote portátil**
+- **Executar** no Windows 10 ou 11 x64. O portátil inclui o runtime .NET 10. Para usar Atualizações, instale o WinGet pelo Instalador de Aplicativo da Microsoft.
+- **Compilar** no Windows x64 com a versão do [SDK .NET 10](https://dotnet.microsoft.com/download/dotnet/10.0) fixada em [global.json](../global.json) e acesso ao NuGet para restaurar dependências.
+- **Usar o portátil** pela pasta `publish/portable/WinCoreManager.exe` ou conferir o ZIP com `artifacts/release/SHA256SUMS.txt`, extrair `WinCoreManager-0.2.0-rc.3-win-x64-portable.zip` em uma pasta local nova com permissão de gravação e abrir `WinCoreManager/WinCoreManager.exe`. O Windows pode exibir um aviso do SmartScreen para esta compilação sem assinatura de código.
 
-- Windows 10 ou Windows 11 de 64 bits.
-- WinGet (Instalador de Aplicativo da Microsoft) para a área de Atualizações.
-- Nenhuma instalação separada do .NET: o pacote portátil é autossuficiente.
-- Aprovação de administrador nas operações que exigem.
-
-**Para compilar o código-fonte**
-
-- Windows x64.
-- [SDK do .NET 10](https://dotnet.microsoft.com/download/dotnet/10.0), que inclui o necessário para compilar projetos WPF.
-- Acesso à internet para restaurar os pacotes NuGet.
-
-## Como executar o pacote portátil
-
-Baixe `WinCoreManager-0.1.0-win-x64-portable.zip` na página de [Releases](https://github.com/rsehenth/WinCore-Manager/releases), extraia em uma pasta local com permissão de gravação e execute `WinCoreManager.exe`. Os binários não têm assinatura de código, então o SmartScreen do Windows pode exibir um aviso. Compare o SHA-256 do arquivo com o publicado na release.
-
-## Como compilar
-
-Execute a partir da raiz do repositório.
+### Compilar pela raiz do repositório
 
 ```powershell
 dotnet restore WinCoreManager.sln
-```
-
-```powershell
 dotnet build WinCoreManager.sln -c Release --no-restore
-```
-
-```powershell
 dotnet test WinCoreManager.sln -c Release --no-build -- xUnit.ParallelizeTestCollections=false
+dotnet run --project src/WinCoreManager/WinCoreManager.csproj -c Release --no-build
 ```
 
-Execute os testes em série, como acima: eles compartilham o estado do WPF e do idioma, e a execução paralela falha. Três testes entre volumes são ignorados, a menos que `WINCORE_QUARANTINE_SECOND_VOLUME` aponte para uma pasta em um volume NTFS local diferente daquele que contém `TEMP`.
+Execute os testes em série. Eles compartilham o estado do WPF e do idioma. Três testes entre volumes exigem que `WINCORE_QUARANTINE_SECOND_VOLUME` aponte para um volume NTFS local diferente daquele de `TEMP`.
 
-### Como publicar uma build portátil
+Para montar o pacote Release completo com Update, Recovery, licenças, ZIP e somas SHA-256, execute no Windows PowerShell a partir da raiz:
 
 ```powershell
-dotnet publish src/WinCoreManager/WinCoreManager.csproj -c Release -r win-x64 --self-contained -o artifacts/portable
+.\tools\New-PortableRelease.ps1
 ```
 
-```powershell
-Set-Content artifacts/portable/settings.json '{"PortableMode":true}'
-```
+Use `-PortableDirectory` e `-ReleaseDirectory` para compilar em novos caminhos se as saídas já existirem. O script preserva instalações e pacotes existentes.
 
-A saída da publicação já contém os arquivos de licença. O resultado é um aplicativo portátil funcional. Ele não inclui o atualizador auxiliar, o assistente de Recovery independente nem o manifesto do pacote. Esses itens são montados pelo script do mantenedor `tools/New-PortableCandidate.ps1`, que também exige um arquivo de seleção de testes e um host de testes com dois volumes.
+## Estrutura do repositório
 
-## Limitações do WinGet
+| Caminho | Conteúdo |
+| --- | --- |
+| `WinCoreManager.sln` | Solução da raiz para o aplicativo, o atualizador e os testes |
+| `src/` | Aplicativo WPF e fontes compartilhadas por Update e Recovery |
+| `tests/` | Testes automatizados |
+| `tools/` | Empacotamento, ferramentas de teste e ferramentas visuais |
+| `distribution/Licencas/` | Textos de licenças e avisos de terceiros |
+| `docs/` | README em português e recursos da documentação |
+| `publish/portable/`, `artifacts/release/` | Portátil e ZIP com hashes gerados localmente |
 
-- Somente as fontes oficiais `winget` e `msstore` são usadas.
-- **Atualizar um pacote aceita automaticamente os termos da fonte e do pacote** e executa sem perguntas do WinGet. Revise os termos do que você selecionar.
-- Atualizações são recusadas enquanto o próprio WinCore Manager estiver elevado. Os instaladores ainda podem pedir aprovação de administrador.
-- Pacotes com versão instalada desconhecida não são atualizados, exceto em um caso do Battle.net verificado de forma restrita, que pede confirmação.
-- Um pacote pode ser recusado quando os metadados do instalador não podem ser verificados.
-- O cancelamento pode precisar esperar a etapa atual. Um instalador fora do controle do WinCore Manager pode continuar em execução.
-- Algumas atualizações exigem reiniciar o Windows ou uma revisão manual antes de novas alterações em pacotes.
+## Permissões e limites da validação
 
-## Segurança e funcionamento
+Execute como usuário padrão. Ferramentas protegidas do Windows e ações para toda a máquina podem exigir validação ou elevação. Para usar o WinGet, mantenha o WinCore sem elevação. Os instaladores podem pedir aprovação administrativa. Atualizar aceita os termos dos pacotes selecionados e das fontes. Um instalador externo pode continuar em execução após o cancelamento. Revise resultados pendentes antes de começar outra operação de pacote.
 
-- Alterações com efeito real pedem confirmação quando aplicável.
-- Algumas operações precisam de privilégios elevados.
-- Instaladores e desinstaladores de terceiros executam código próprio e não ficam sob controle integral do WinCore Manager.
-- Uma operação com resultado inconclusivo pode exigir revisão supervisionada antes de novas alterações.
-- Tenha um backup antes de alterar o Windows. Nenhuma ferramenta garante que uma alteração seja segura em qualquer sistema.
+A saúde dos discos é somente leitura e depende do disco, controlador, driver e permissões. Métricas SMART ausentes ficam indisponíveis. A remoção de APPX opcionais depende da identidade do pacote, da conta atual e das políticas do Windows. O fallback supervisionado para chaves inteiras elegíveis em `HKCU` fica disponível quando o gerenciador de transações retorna `6801` em uma sessão sem elevação. Ele exige backup verificado e pode ser interrompido após uma remoção parcial. Leitura SMART em hardware variado, remoção APPX real e fallback HKCU não atômico em diferentes configurações do Windows ainda precisam de homologação em máquina real. Os testes do pacote incluíram casos automatizados e abertura do aplicativo para consulta.
 
-Veja também as [instruções de recuperação](../tasks/RECUPERACAO-RECOVERY.md) para atualizações interrompidas do pacote portátil.
+## Futuras atualizações e recuperação
 
-## Privacidade e persistência
+Este RC é um pacote local sem assinatura, destinado à instalação manual. A autoatualização em produção exige uma versão estável compatível, assinaturas do publicador e a identidade de confiança correspondente. Até existir uma versão assim, obtenha um pacote de origem confiável, confira o hash publicado e extraia em outra pasta. Feche o WinCore e siga o [guia de recuperação e transferência de dados](../tasks/RECUPERACAO-RECOVERY.md) se precisar copiar preferências e a árvore `Data` completa de uma instalação. O ZIP manual tem a pasta superior `WinCoreManager/`. O pacote assinado da autoatualização segue o formato próprio do atualizador.
 
-O WinCore Manager não tem sistema de contas, e não foi encontrado código de telemetria ou analytics no código-fonte. Há acesso à rede quando o WinGet consulta suas fontes e quando o aplicativo lê manifestos de pacotes do WinGet nos serviços de pacotes da Microsoft e no repositório `winget-pkgs`. Os links abertos vão para o navegador padrão.
+## Dados pessoais
 
-| Dados | Finalidade | Localização |
-| --- | --- | --- |
-| `settings.json` | Preferências e atualizações ocultas | Ao lado do executável no modo portátil; caso contrário, `%LOCALAPPDATA%\WinCoreManager` |
-| `history.db` (SQLite) | Histórico de operações | `Data\` ao lado do executável no modo portátil; caso contrário, `%LOCALAPPDATA%\WinCoreManager` |
-| `winget-update.json` | Recibo de atualização em andamento, para recuperação | `%LOCALAPPDATA%\WinCoreManager`, inclusive no modo portátil |
-| Quarentena | Backups de resíduos removidos | Na pasta de dados ou em `%LOCALAPPDATA%\WinCoreManager\Quarantine` |
-| Backups de inicialização | Restaurar itens desativados | `%APPDATA%\WinCoreManager\StartupBackups` e `%LOCALAPPDATA%\WinCoreManager\StartupRunBackups` |
-| Diário de ajustes | Desfazer o último ajuste | `%LOCALAPPDATA%\WinCoreManager\Tweaks` |
+| Dado | Local |
+| --- | --- |
+| Preferências | `settings.json` ao lado do executável no modo portátil, ou em `%LOCALAPPDATA%\WinCoreManager` |
+| Histórico SQLite | `Data\history.db` ao lado do executável no modo portátil, ou `%LOCALAPPDATA%\WinCoreManager\history.db` |
+| Recibos e fila do WinGet | `%LOCALAPPDATA%\WinCoreManager`, inclusive no modo portátil |
+| Quarentena | `Quarantine` na pasta de dados ativa. Backups anteriores podem estar em `%LOCALAPPDATA%\WinCoreManager\Quarantine`. |
+| Backups de inicialização e diário de ajustes | `%APPDATA%\WinCoreManager\StartupBackups`, `%LOCALAPPDATA%\WinCoreManager\StartupRunBackups` e `Tweaks`. Valores Run da máquina usam `%ProgramFiles%\WinCoreManager.StartupBackups`. |
 
-Como parte dos dados fica no perfil do usuário, apagar a pasta portátil não remove tudo.
+O portátil novo começa com a pasta `Data/` vazia e uma configuração genérica de modo portátil. Para copiar uma instalação fechada, preserve com o banco os arquivos auxiliares SQLite WAL e SHM que existirem.
 
-## Estado do projeto
+## Créditos e licenças
 
-**WinCore Manager 0.1.0** está publicado como pré-lançamento para uso pessoal supervisionado. Ainda não é uma release estável. A homologação completa de instaladores externos e do comportamento de DPI nativo entre monitores ainda tem limitações documentadas.
+- [Bulk Crap Uninstaller](https://github.com/BCUninstaller/Bulk-Crap-Uninstaller), de Marcin Szeniak, Apache-2.0. [Licença](../LICENSE-BCUninstaller.txt) e [aviso](../NOTICE-BCUninstaller.md).
+- [BitBroom](https://github.com/pwnapplehat/BitBroom), MIT. [Licença](../distribution/Licencas/BitBroom.LICENSE.txt).
+- [UniGetUI](https://github.com/Devolutions/UniGetUI), MIT. [Licença](../distribution/Licencas/UniGetUI.LICENSE.txt).
+- [DiskScope](https://github.com/UnstableNT/diskscope), MIT. [Licença](../distribution/Licencas/DiskScope.LICENSE.txt).
+- .NET, WPF, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Microsoft.Extensions.DependencyInjection, System.Management, System.CodeDom, SQLite, SQLitePCLRaw e YamlDotNet. Os testes usam xUnit e o SDK de testes .NET. [Avisos de terceiros](../THIRD-PARTY-NOTICES.md).
 
-## Contribuição e segurança
-
-Veja [CONTRIBUTING.md](../CONTRIBUTING.md), [SECURITY.md](../SECURITY.md) e o [changelog](../CHANGELOG.md). Comentários, nomes de testes e mensagens internas estão em grande parte em português.
-
-## Créditos
-
-- [Bulk Crap Uninstaller](https://github.com/BCUninstaller/Bulk-Crap-Uninstaller), de Marcin Szeniak (Klocman): partes do desinstalador são adaptadas dele (Apache-2.0).
-- .NET, WPF, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Microsoft.Extensions.DependencyInjection e System.Management.
-- SQLite, SQLitePCLRaw e YamlDotNet.
-- xUnit nos testes.
-
-Criado por [Lucas Sehnem](https://github.com/rsehenth).
-
-## Licença
-
-O código original do WinCore Manager é distribuído sob a [Licença MIT](../LICENSE) (SPDX: `MIT`). Componentes de terceiros e código adaptado mantêm suas próprias licenças; veja [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
+Criado por [Lucas Sehnem](https://github.com/rsehenth). O código original usa a [Licença MIT](../LICENSE). Consulte o [guia de contribuição](../CONTRIBUTING.md) e a [política de segurança](../SECURITY.md).

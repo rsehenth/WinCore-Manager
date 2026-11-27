@@ -74,6 +74,13 @@ public partial class MainViewModel : ObservableObject
 
         CurrentViewModel = Dashboard;
         Uninstallers.PackageChangesBlocked = Maintenance.PackageChangesBlocked = () => Updates.PackageChangesBlockedNow;
+        Uninstallers.PendingPackageChangeHint = Maintenance.PendingPackageChangeHint = () => Updates.PendingPackageChangeHint;
+        Uninstallers.PackageActivityReason = () => Updates.IsUpdating
+            ? LocalizationService.Source("Message.Uninstaller.UpdateRunning")
+            : Updates.IsCheckingInterruption
+                ? LocalizationService.Source("Message.Uninstaller.RecoveryRunning")
+                : Updates.IsScanning ? LocalizationService.Source("Message.Uninstaller.UpdateScanning") : null;
+        Uninstallers.NavigateToPackageRecovery = () => OnNavigateRequested(Updates);
         Uninstallers.TryReservePackageChange = Maintenance.TryReservePackageChange = Updates.TryReservePackageChange;
         Uninstallers.ApplicationBusy = Updates.BlocksPackageChanges;
         Maintenance.ApplicationUpdateRunning = Updates.BlocksPackageChanges;
@@ -81,9 +88,10 @@ public partial class MainViewModel : ObservableObject
         Maintenance.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(MaintenanceViewModel.PackageConflictRunning))
-                Updates.MaintenanceRunning = Maintenance.PackageConflictRunning || Uninstallers.IsUninstalling;
+                Updates.MaintenanceRunning = Maintenance.PackageConflictRunning;
             if (args.PropertyName == nameof(MaintenanceViewModel.IsRunning))
             {
+                Uninstallers.MaintenanceRunning = Maintenance.IsRunning;
                 Uninstallers.ApplicationBusy = Maintenance.IsRunning || Updates.IsScanning || Updates.BlocksPackageChanges;
                 RefreshDashboardIfVisible();
             }
@@ -100,6 +108,15 @@ public partial class MainViewModel : ObservableObject
                 Uninstallers.ApplicationBusy = Updates.IsScanning || Updates.BlocksPackageChanges || Maintenance.IsRunning;
             }
 
+            if (args.PropertyName is nameof(UpdatesViewModel.PendingPackageChangeHint) or nameof(UpdatesViewModel.BlocksPackageChanges))
+            {
+                Uninstallers.NotifyPackageChangeState();
+                Maintenance.NotifyPackageChangeState();
+            }
+            if (args.PropertyName is nameof(UpdatesViewModel.IsUpdating) or nameof(UpdatesViewModel.IsCheckingInterruption)
+                or nameof(UpdatesViewModel.IsScanning))
+                Uninstallers.NotifyPackageChangeState();
+
             if (args.PropertyName == nameof(UpdatesViewModel.IsBusy) && !Updates.IsBusy)
             {
                 RefreshDashboardIfVisible();
@@ -110,9 +127,12 @@ public partial class MainViewModel : ObservableObject
         {
             if (args.PropertyName is nameof(UninstallersViewModel.IsScanning) or nameof(UninstallersViewModel.IsUninstalling))
             {
-                Updates.MaintenanceRunning = Maintenance.PackageConflictRunning || Uninstallers.IsUninstalling;
+                Updates.UninstallRunning = Uninstallers.IsUninstalling;
                 Maintenance.ApplicationUninstallRunning = Uninstallers.IsRunning;
                 RefreshDashboardIfVisible();
+                if (args.PropertyName == nameof(UninstallersViewModel.IsUninstalling) &&
+                    !Uninstallers.IsUninstalling && CurrentViewModel == History)
+                    History.Reload();
             }
         };
     }
@@ -156,6 +176,14 @@ public partial class MainViewModel : ObservableObject
         else if (item.ViewModel is CleanupViewModel cleanup && cleanup.RefreshCommand.CanExecute(null))
         {
             cleanup.RefreshCommand.Execute(null);
+        }
+        else if (item.ViewModel is EssentialsViewModel essentials && essentials.RefreshCommand.CanExecute(null))
+        {
+            essentials.RefreshCommand.Execute(null);
+        }
+        else if (item.ViewModel is SettingsViewModel settings)
+        {
+            settings.SelfUpdate.CheckIfStale();
         }
         else if (item.ViewModel is TweaksViewModel tweaks && tweaks.RefreshCommand.CanExecute(null))
         {

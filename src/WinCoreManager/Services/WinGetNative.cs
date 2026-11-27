@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using WinCoreManager.Localization;
@@ -106,6 +107,20 @@ internal static partial class WinGetNative
         var state = WaitForSingleObject(process, 0);
         if (state == uint.MaxValue) nativeError = Marshal.GetLastPInvokeError();
         return state != 0;
+    }
+
+    // Documented Windows Installer signal: the service holds this mutex while a transaction executes.
+    // It also covers MSI work started by brokers outside the supervised tree. Unknown states count as busy.
+    internal static bool WindowsInstallerBusy(string name = @"Global\_MSIExecute")
+    {
+        try
+        {
+            if (!Mutex.TryOpenExisting(name, out var mutex)) return false;
+            mutex.Dispose();
+            return true;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or WaitHandleCannotBeOpenedException)
+        { return true; }
     }
 
     internal static void Terminate(SafeFileHandle job)

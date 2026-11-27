@@ -129,7 +129,8 @@ public static class ResidueNameMatcher
                 input = input[..^2];
             }
 
-            input = TrimEndAny(input, ["Application", "Helper", " v", " CE"]).TrimEnd();
+            // Inno's default AppVerName is "<name> version <x>"; Portuguese builds use "versão".
+            input = TrimEndAny(input, ["Application", "Helper", " v", " CE", " version", " versão", " versao"]).TrimEnd();
         }
         while (previous.Length != input.Length);
 

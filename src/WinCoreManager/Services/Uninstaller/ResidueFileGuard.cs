@@ -20,6 +20,9 @@ internal sealed record ResidueFileInspection(
     bool HasHardLinks,
     long TotalBytes);
 
+internal readonly record struct CleanupFileIdentity(
+    uint Volume, ulong FileId, long Creation, long LastWrite, long Change, long Length, long Allocated);
+
 /// <summary>Handle aberto e validado: o movimento atua neste objeto, não em um caminho reinterpretado.</summary>
 internal sealed class GuardedFile(SafeFileHandle handle, bool isDirectory, uint volumeSerial) : IDisposable
 {
@@ -113,6 +116,37 @@ internal static class ResidueFileGuard
         return !handle.IsInvalid
                && string.Equals(GetFinalPath(handle), normalizedPath, StringComparison.OrdinalIgnoreCase);
     }
+
+    internal static bool IsPlainReadFile(SafeFileHandle handle, string path) =>
+        GetFileType(handle) == FileTypeDisk && GetFileInformationByHandle(handle, out var info) &&
+        ((FileAttributes)info.FileAttributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) == 0 &&
+        info.NumberOfLinks == 1 && string.Equals(GetFinalPath(handle), path, StringComparison.OrdinalIgnoreCase);
+
+    internal static SafeFileHandle OpenCleanupFile(string path, bool deleting) =>
+        CreateFileW(@"\\?\" + path, FileReadAttributes | (deleting ? Delete : 0),
+            deleting ? 0 : ShareRead | ShareWrite | ShareDelete, IntPtr.Zero, OpenExisting,
+            FlagBackupSemantics | FlagOpenReparsePoint | 0x00100000, IntPtr.Zero); // FILE_FLAG_OPEN_NO_RECALL
+
+    internal static CleanupFileIdentity? ReadCleanupIdentity(SafeFileHandle handle, string path)
+    {
+        const FileAttributes excluded = FileAttributes.Directory | FileAttributes.System | FileAttributes.ReadOnly |
+            WindowsFeatures.CleanupFiles.IndirectAttributes;
+        if (handle.IsInvalid || !GetFileInformationByHandle(handle, out var info) || GetFileType(handle) != FileTypeDisk
+            || info.NumberOfLinks != 1 || ((FileAttributes)info.FileAttributes & excluded) != 0
+            || !string.Equals(GetFinalPath(handle), path, StringComparison.OrdinalIgnoreCase)
+            || !GetCleanupBasicInfo(handle, 0, out var basic, (uint)Marshal.SizeOf<CleanupBasicInfo>())
+            || !GetCleanupStandardInfo(handle, 1, out var standard, (uint)Marshal.SizeOf<CleanupStandardInfo>())
+            || standard.Links != 1 || standard.DeletePending != 0 || standard.Allocated < 0 || standard.Length < 0
+            || ((FileAttributes)basic.Attributes & excluded) != 0)
+            return null;
+
+        return new(info.VolumeSerialNumber, ((ulong)info.FileIndexHigh << 32) | info.FileIndexLow,
+            basic.Creation, basic.LastWrite, basic.Change, standard.Length, standard.Allocated);
+    }
+
+    // FILE_DISPOSITION_INFO receives one BOOLEAN. The exclusive handle commits the deletion on close.
+    internal static bool DeleteCleanupFile(SafeFileHandle handle) =>
+        SetFileInformationByHandle(handle, 4, [1], 1);
 
     /// <summary>Diretório real: nem ele nem um ancestral é link, montagem ou nome curto.</summary>
     public static bool IsPlainDirectory(string normalizedPath)
@@ -402,6 +436,31 @@ internal static class ResidueFileGuard
         public int Attributes;
         public int ReparseTag;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CleanupBasicInfo
+    {
+        public long Creation, LastAccess, LastWrite, Change;
+        public uint Attributes;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CleanupStandardInfo
+    {
+        public long Allocated, Length;
+        public uint Links;
+        public byte DeletePending, Directory;
+    }
+
+    [DllImport("kernel32.dll", EntryPoint = "GetFileInformationByHandleEx", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCleanupBasicInfo(SafeFileHandle file, int informationClass, out CleanupBasicInfo info, uint size);
+
+    [DllImport("kernel32.dll", EntryPoint = "GetFileInformationByHandleEx", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCleanupStandardInfo(SafeFileHandle file, int informationClass, out CleanupStandardInfo info, uint size);
 
     [DllImport("kernel32.dll", EntryPoint = "GetFileInformationByHandleEx", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

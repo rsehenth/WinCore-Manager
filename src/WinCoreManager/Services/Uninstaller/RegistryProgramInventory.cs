@@ -52,7 +52,7 @@ public interface IUninstallRegistryView : IDisposable
 /// <summary>Visualização real do Registro: HKLM e HKCU nas visões 64 e 32 bits. Sem estado entre chamadas.</summary>
 public sealed class WindowsUninstallRegistryView : IUninstallRegistryView
 {
-    private const string UninstallPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+    internal const string UninstallPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
 
     public IReadOnlyList<IUninstallRegistryKey> GetUninstallKeys()
     {
@@ -137,7 +137,7 @@ public sealed class WindowsUninstallRegistryView : IUninstallRegistryView
     {
     }
 
-    private sealed class RegistryUninstallKey : IUninstallRegistryKey
+    internal sealed class RegistryUninstallKey : IUninstallRegistryKey
     {
         private readonly RegistryKey _key;
 
@@ -268,7 +268,7 @@ public sealed class RegistryProgramScanner(IUninstallRegistryView registryView) 
         return result;
     }
 
-    private InstalledProgram? TryCreateFromRegistry(IUninstallRegistryKey key)
+    internal static InstalledProgram? TryCreateFromRegistry(IUninstallRegistryKey key)
     {
         var displayName = key.GetString(RegistryNameDisplayName);
         var publisher = key.GetString(RegistryNamePublisher) ?? string.Empty;

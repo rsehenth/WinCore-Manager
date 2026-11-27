@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WinCoreManager.Services;
 using WinCoreManager.Services.Startup;
+using WinCoreManager.Services.WindowsFeatures;
 using WinCoreManager.Views;
 
 namespace WinCoreManager.ViewModels;
@@ -18,7 +19,7 @@ internal sealed class WindowsStartupConfirmation : IStartupConfirmation
     public bool Confirm(string name, bool enable)
     {
         var owner = System.Windows.Application.Current.MainWindow;
-        var action = enable ? LocalizationService.Source("Message.Restore2") : LocalizationService.Source("Message.Disable");
+        var action = enable ? LocalizationService.Source("Message.Enable") : LocalizationService.Source("Message.Disable");
         var description = enable
             ? LocalizationService.Source("Message.TheOriginalSettingWillBeRestoredIfIt")
             : LocalizationService.Source("Message.TheSettingWillBeSavedSoYouCan");
@@ -50,9 +51,20 @@ public sealed record StartupRow(StartupEntry Entry)
     public string OriginalCommand => Entry.OriginalCommand is { } command
         ? LocalizationService.Source("Message.OriginalCommand") + (command.Length <= 4096 ? command : command[..4096] + "…") : "";
     public string Details => Entry.Protection is null
-        ? LocalizationService.Source("Message.ChangesTakeEffectAtTheNextSignIn")
+        ? Entry.Resolution ?? LocalizationService.Source("Message.ChangesTakeEffectAtTheNextSignIn")
         : Entry.Resolution is null ? Entry.Protection : $"{Entry.Protection} {Entry.Resolution}";
-    public string Action => Entry.CanChange ? Enabled ? LocalizationService.Source("Message.Disable") : LocalizationService.Source("Message.Enable") : LocalizationService.Source("Message.Protected");
+    public bool CanManageInWindows => !Entry.CanChange &&
+        (Entry.Protection == LocalizationService.Source("Startup.MachineWriteRequired") ||
+         Entry.Protection == LocalizationService.Source("Message.RegistryEntriesAreReadOnly") ||
+         Entry.Protection == LocalizationService.Source("Message.StartupEntriesForAllUsersAreReadOnly") ||
+         Entry.Protection == LocalizationService.Source("Message.ScheduledTasksAreReadOnly") ||
+         Entry.Protection == LocalizationService.Source("Message.WindowsManagesThisSettingOutsideTheApp") ||
+         Entry.Protection == LocalizationService.Source("Message.StartupIsDisabledInWindowsOrItsStatus") &&
+            Entry.Status == StartupStatus.Disabled && !Entry.Stored);
+    public string Action => Entry.CanChange
+        ? Enabled ? LocalizationService.Source("Message.Disable") : LocalizationService.Source("Message.Enable")
+        : CanManageInWindows ? LocalizationService.Source("Message.StartupManagedInWindows")
+        : LocalizationService.Source("Message.Protected");
 }
 
 public partial class StartupViewModel : ViewModelBase
@@ -61,6 +73,7 @@ public partial class StartupViewModel : ViewModelBase
     private readonly IStartupChanges _changes;
     private readonly IStartupConfirmation _confirmation;
     private readonly IExternalNavigation _external;
+    private readonly IWindowsTools? _tools;
     private StartupInventoryResult _current = StartupInventoryResult.Empty;
 
     public IReadOnlyList<StartupStatusOption> StatusOptions { get; } =
@@ -91,13 +104,14 @@ public partial class StartupViewModel : ViewModelBase
     private bool _isBusy;
 
     public StartupViewModel(IStartupInventory inventory, IStartupChanges changes,
-        IStartupConfirmation confirmation, IExternalNavigation external)
+        IStartupConfirmation confirmation, IExternalNavigation external, IWindowsTools? tools = null)
     {
         Title = LocalizationService.Source("Message.Startup");
         _inventory = inventory;
         _changes = changes;
         _confirmation = confirmation;
         _external = external;
+        _tools = tools;
         _selectedStatus = StatusOptions[0];
         _selectedSource = SourceOptions[0];
     }
@@ -164,6 +178,18 @@ public partial class StartupViewModel : ViewModelBase
     {
         if (SelectedRow?.Entry.FilePath is { } path && !_external.OpenFileLocation(path))
             Message = LocalizationService.Source("Message.CouldNotOpenTheFileLocationRefreshThe");
+    }
+
+    private static WindowsTool NativeTool(StartupRow row) => row.Entry.Source == StartupSource.ScheduledTask
+        ? WindowsTool.TaskScheduler : WindowsTool.StartupApps;
+
+    private bool CanOpenNative(StartupRow? row) => row?.CanManageInWindows == true &&
+        _tools?.IsAvailable(NativeTool(row)) == true;
+
+    [RelayCommand(CanExecute = nameof(CanOpenNative))]
+    private void OpenNative(StartupRow? row)
+    {
+        if (row is not null && CanOpenNative(row)) Message = _tools!.Open(NativeTool(row)).Message;
     }
 
     private async Task ReadAsync(CancellationToken token)

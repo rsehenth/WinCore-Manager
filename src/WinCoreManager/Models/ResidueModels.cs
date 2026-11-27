@@ -7,6 +7,7 @@ public enum ResidueCategory
     File = 0,
     Folder = 1,
     RegistryKey = 2,
+    RegistryValue = 3,
 }
 
 /// <summary>
@@ -41,12 +42,20 @@ public sealed class ResidueItem
     /// <summary>Identidade e conteúdo observados na detecção; a execução exige exatamente o mesmo valor.</summary>
     public string? Fingerprint { get; init; }
 
-    public bool IsEligibleForCleanup => Confidence == ResidueConfidence.High;
+    public string? ValueName { get; init; }
+    public string? ValueType { get; init; }
+
+    public bool IsRegistry => Category is ResidueCategory.RegistryKey or ResidueCategory.RegistryValue;
+    public string ReviewedLocation => IsRegistry
+        ? $"{Location} [{(Is64BitView && !Location.Contains(@"\Wow6432Node\", StringComparison.OrdinalIgnoreCase) ? 64 : 32)}-bit]"
+        : Location;
+    public bool IsEligibleForCleanup => Confidence == ResidueConfidence.High && Category != ResidueCategory.RegistryValue;
 
     public string CategoryLabel => Category switch
     {
         ResidueCategory.File => LocalizationService.Source("Message.File"),
         ResidueCategory.Folder => LocalizationService.Source("Message.Folder"),
+        ResidueCategory.RegistryValue => LocalizationService.Source("ResidueAdvanced.Value"),
         _ => LocalizationService.Source("Message.Registry"),
     };
 
@@ -123,6 +132,7 @@ public sealed class ResidueCleanupPlan
     /// <summary>Itens bloqueados na montagem, com o motivo (nunca são executados).</summary>
     public IReadOnlyList<ResidueCleanupItemResult> Blocked { get; init; } = Array.Empty<ResidueCleanupItemResult>();
 
+    internal bool RegistryConsentGranted { get; set; }
     public bool IsEmpty => Approved.Count == 0;
 }
 

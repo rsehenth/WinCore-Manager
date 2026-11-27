@@ -88,6 +88,8 @@ public class ResidueQuarantineTests : IDisposable
         var child = Path.Combine(Directory.CreateDirectory(Path.Combine(directory, "inside")).FullName, "synthetic.txt");
         File.WriteAllText(child, "fixture");
         File.WriteAllText(child + ":test", "alternate");
+        // An app's own runtime component (WebView2-style .dll) no longer blocks the source-volume store.
+        File.WriteAllText(Path.Combine(directory, "inside", "component.dll"), "synthetic component");
         var fingerprint = ResidueFileGuard.Inspect(directory, 10, CancellationToken.None)!.Fingerprint;
         var evidence = ResidueRecoveryIntegrity.Capture(directory, directory: true, CancellationToken.None);
 

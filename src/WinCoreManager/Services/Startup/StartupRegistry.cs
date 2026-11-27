@@ -84,11 +84,22 @@ internal sealed record StartupApproval(StartupStatus Status, string Token)
         return new(status, Convert.ToHexString(bytes));
     }
 
+    internal static bool TryEnable(string token, out string enabled)
+    {
+        enabled = "";
+        if (token.Length != 26 || !token.EndsWith("/-", StringComparison.Ordinal) ||
+            !token.StartsWith("03000000", StringComparison.Ordinal) ||
+            !token.AsSpan(8, 16).ToArray().All(char.IsAsciiHexDigit))
+            return false;
+        enabled = "020000000000000000000000/-";
+        return true;
+    }
+
     public static IReadOnlyDictionary<string, object> Empty { get; } = new Dictionary<string, object>();
 }
 
 internal sealed class StartupRegistrySource(IStartupRegistry registry, IStartupProductReader products, StartupPolicy policy,
-    StartupRunSource? userRun = null)
+    StartupRunSource? userRun = null, MachineStartupSources? machineRun = null)
     : IStartupSource
 {
     internal const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
@@ -103,9 +114,24 @@ internal sealed class StartupRegistrySource(IStartupRegistry registry, IStartupP
             try { userRun.Read(entries, warnings, token); }
             catch (Exception ex) when (StartupErrors.Expected(ex)) { warnings.Add(LocalizationService.Source("Message.HKCURunIncompleteScan")); }
         }
-        ReadRun(RegistryHive.LocalMachine, native, StartupSource.MachineRun64, "Run");
-        if (registry.HasSeparateMachineViews)
-            ReadRun(RegistryHive.LocalMachine, RegistryView.Registry32, StartupSource.MachineRun32, "Run32");
+        if (machineRun is null)
+        {
+            ReadRun(RegistryHive.LocalMachine, native, StartupSource.MachineRun64, "Run");
+            if (registry.HasSeparateMachineViews)
+                ReadRun(RegistryHive.LocalMachine, RegistryView.Registry32, StartupSource.MachineRun32, "Run32");
+        }
+        else
+        {
+            ReadMachine(machineRun.Native);
+            if (registry.HasSeparateMachineViews) ReadMachine(machineRun.Wow);
+        }
+
+        void ReadMachine(StartupRunSource run)
+        {
+            try { run.Read(entries, warnings, token); }
+            catch (Exception ex) when (StartupErrors.Expected(ex))
+            { warnings.Add(LocalizationService.Source("Message.0IncompleteScan", run.Label)); }
+        }
 
         void ReadRun(RegistryHive hive, RegistryView view, StartupSource source, string approvalKey)
         {
@@ -143,3 +169,5 @@ internal sealed class StartupRegistrySource(IStartupRegistry registry, IStartupP
         }
     }
 }
+
+internal sealed record MachineStartupSources(StartupRunSource Native, StartupRunSource Wow);

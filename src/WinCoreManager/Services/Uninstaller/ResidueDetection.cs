@@ -241,7 +241,9 @@ public sealed class ResidueDetectionEngine(
         foreach (var location in context.ListedLocations)
         {
             ct.ThrowIfCancellationRequested();
-            if (!ResiduePathRules.TryNormalize(location, out var normalized))
+            // The uninstaller already removed it: nothing to show. A dangling link still exists and stays protected.
+            if (!ResiduePathRules.TryNormalize(location, out var normalized) ||
+                !Directory.Exists(normalized) && !File.Exists(normalized))
             {
                 continue;
             }
@@ -332,8 +334,10 @@ public sealed class ResidueDetectionEngine(
         var nameMatches = match.Quality is ResidueNameMatcher.MatchQuality.Perfect or ResidueNameMatcher.MatchQuality.Containment;
         var sharedPublisher = context.Others.Any(other => ResidueNameMatcher.MatchesPublisherName(other.Publisher, directory.Name));
 
-        // Alta exige local registrado, nome compatível e árvore inteira verificada; nome sozinho não basta.
-        var inspection = isRegisteredLocation && match.Quality == ResidueNameMatcher.MatchQuality.Perfect &&
+        // Alta exige local registrado (ou a pasta de dados do usuário com o nome exato do programa removido),
+        // nome compatível e árvore inteira verificada; nome sozinho em outro lugar não basta.
+        var userDataFolder = !isRegisteredLocation && !context.IsStillInstalled && IsUserDataFolder(path);
+        var inspection = (isRegisteredLocation || userDataFolder) && match.Quality == ResidueNameMatcher.MatchQuality.Perfect &&
                          ResidueNameMatcher.IsExactProductName(context.ProductName, directory.Name) && scopeOk && !sharedPublisher
             ? ResidueFileGuard.Inspect(path, MaxEntriesPerFolder, ct)
             : null;
@@ -341,10 +345,14 @@ public sealed class ResidueDetectionEngine(
 
         ResidueConfidence confidence;
         string? fingerprint = null;
-        if (inspection is { Complete: true, HasExecutable: false, HasReparsePoint: false, HasHardLinks: false })
+        // In a removed app's own AppData folder, .dll/.js files are its runtime data (e.g. the WebView2 profile),
+        // not a program another app loads; elsewhere executables still keep the folder at Medium.
+        if (inspection is { Complete: true, HasReparsePoint: false, HasHardLinks: false } &&
+            (!inspection.HasExecutable || userDataFolder))
         {
             confidence = ResidueConfidence.High;
             fingerprint = inspection.Fingerprint;
+            if (userDataFolder) reasons.Add(LocalizationService.Source("Message.Residue.ExactNameUserData"));
         }
         else if (nameMatches || isRegisteredLocation)
         {
@@ -386,6 +394,13 @@ public sealed class ResidueDetectionEngine(
 
         AddItem(items, seen, ResidueCategory.Folder, path, confidence, reasons, MeasureSize(directory, ct), fingerprint: fingerprint);
     }
+
+    // Directly under AppData\Local, AppData\Roaming or AppData\LocalLow: per-user data, never a shared program folder.
+    private bool IsUserDataFolder(string path) =>
+        Path.GetDirectoryName(path) is { } parent &&
+        new[] { rules.AppDataLocal, rules.AppDataRoaming,
+            rules.UserProfile.Length > 0 ? Path.Combine(rules.UserProfile, "AppData", "LocalLow") : string.Empty }
+            .Any(root => root.Length > 0 && string.Equals(Path.TrimEndingDirectorySeparator(root), parent, StringComparison.OrdinalIgnoreCase));
 
     private void ClassifyFile(ResidueDetectionContext context, FileInfo file, List<ResidueItem> items, HashSet<string> seen, CancellationToken ct)
     {
@@ -617,31 +632,26 @@ public sealed class ResidueDetectionEngine(
             }
         }
 
-        // 2. Chaves de nível 1 sob SOFTWARE (e sob Wow6432Node), nas duas colmeias.
-        foreach (var (hive, is64) in new[] { (ResidueRegistryHive.LocalMachine, true), (ResidueRegistryHive.CurrentUser, true) })
+        // HKCU Software is shared by WOW64 outside the explicitly redirected Classes branches.
+        // Preserve the explicit Wow6432Node path for machine keys and RegEdit backup compatibility.
+        foreach (var (hive, root, is64) in new[]
         {
-            ct.ThrowIfCancellationRequested();
-            foreach (var child in registryReader.GetSubKeyNames(hive, "SOFTWARE", is64))
-            {
-                ct.ThrowIfCancellationRequested();
-                if (RegistryScanBlacklist.Contains(child, StringComparer.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
+            (ResidueRegistryHive.CurrentUser, "SOFTWARE", true),
+            (ResidueRegistryHive.LocalMachine, "SOFTWARE", true),
+            (ResidueRegistryHive.LocalMachine, @"SOFTWARE\Wow6432Node", true),
+        })
+        {
+            ScanSoftwareRoot(context, hive, root, is64, items, seen, ct);
+        }
 
-                ClassifyRegistryKey(context, hive, $@"SOFTWARE\{child}", child, is64, items, seen);
-            }
-
-            foreach (var child in registryReader.GetSubKeyNames(hive, @"SOFTWARE\Wow6432Node", is64))
-            {
-                ct.ThrowIfCancellationRequested();
-                if (RegistryScanBlacklist.Contains(child, StringComparer.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                ClassifyRegistryKey(context, hive, $@"SOFTWARE\Wow6432Node\{child}", child, is64, items, seen);
-            }
+        foreach (var (hive, is64) in new[]
+        {
+            (ResidueRegistryHive.CurrentUser, true),
+            (ResidueRegistryHive.LocalMachine, true),
+            (ResidueRegistryHive.LocalMachine, false),
+        })
+        {
+            ScanSharedRegistryValues(context, hive, is64, items, seen, ct);
         }
 
         // 3. Registro do Windows Installer: compartilhado com o serviço MSI, nunca removido diretamente.
@@ -663,6 +673,120 @@ public sealed class ResidueDetectionEngine(
         }
     }
 
+    private void ScanSoftwareRoot(ResidueDetectionContext context, ResidueRegistryHive hive, string root, bool is64,
+        List<ResidueItem> items, HashSet<string> seen, CancellationToken token)
+    {
+        foreach (var child in registryReader.GetSubKeyNames(hive, root, is64).Take(4096))
+        {
+            token.ThrowIfCancellationRequested();
+            if (RegistryScanBlacklist.Contains(child, StringComparer.OrdinalIgnoreCase))
+                continue;
+
+            var branch = $@"{root}\{child}";
+            var publisherBranch = ResidueNameMatcher.MatchesPublisherName(context.Publisher, child);
+            if (!publisherBranch)
+            {
+                ClassifyRegistryKey(context, hive, branch, child, is64, items, seen);
+                continue;
+            }
+
+            var compatibleChildren = registryReader.GetSubKeyNames(hive, branch, is64).Take(1024)
+                .Where(key => ResidueNameMatcher.MatchProduct(context.ProductName, key).Quality
+                    is ResidueNameMatcher.MatchQuality.Perfect or ResidueNameMatcher.MatchQuality.Containment)
+                .ToArray();
+            if (compatibleChildren.Length > 0 ||
+                ResidueNameMatcher.MatchProduct(context.ProductName, child).Quality != ResidueNameMatcher.MatchQuality.None)
+                AddItem(items, seen, ResidueCategory.RegistryKey, HiveName(hive) + "\\" + branch, ResidueConfidence.Protected,
+                    [LocalizationService.Source("ResidueAdvanced.PublisherBranch")], 0, is64);
+
+            foreach (var candidate in compatibleChildren)
+            {
+                token.ThrowIfCancellationRequested();
+                ClassifyRegistryKey(context, hive, $@"{branch}\{candidate}", candidate, is64, items, seen,
+                    underPublisher: true);
+            }
+        }
+    }
+
+    private void ScanSharedRegistryValues(ResidueDetectionContext context, ResidueRegistryHive hive, bool is64,
+        List<ResidueItem> items, HashSet<string> seen, CancellationToken token)
+    {
+        foreach (var path in new[]
+        {
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce",
+            @"SOFTWARE\RegisteredApplications",
+        })
+        {
+            foreach (var name in registryReader.GetValueNames(hive, path, is64).Take(512))
+            {
+                token.ThrowIfCancellationRequested();
+                var nameMatch = ResidueNameMatcher.MatchProduct(context.ProductName, name).Quality
+                    is ResidueNameMatcher.MatchQuality.Perfect or ResidueNameMatcher.MatchQuality.Containment;
+                var command = registryReader.GetStringValue(hive, path, name, is64);
+                var executable = UninstallCommandSplitter.TrySeparate(command, out var parsed) ? parsed.FileName : null;
+                var pathMatch = executable is not null && ResiduePathRules.TryNormalize(executable, out var normalized)
+                    && context.OwnedLocations.Any(location => ResiduePathRules.IsSameOrUnder(normalized, location));
+                if (!nameMatch && !pathMatch)
+                    continue;
+
+                var kind = registryReader.GetValueKind(hive, path, name, is64);
+                AddItem(items, seen, ResidueCategory.RegistryValue, HiveName(hive) + "\\" + path, ResidueConfidence.Protected,
+                    [LocalizationService.Source(pathMatch ? "ResidueAdvanced.ValuePathMatch" : "ResidueAdvanced.ValueNameMatch")],
+                    0, is64, valueName: name, valueType: kind is { } valueKind ? FormatKind(valueKind) : null);
+                if (path == @"SOFTWARE\RegisteredApplications" && nameMatch && command is not null)
+                    ScanRegisteredAssociations(context, hive, command, is64, items, seen, token);
+            }
+        }
+    }
+
+    private void ScanRegisteredAssociations(ResidueDetectionContext context, ResidueRegistryHive hive, string capabilities,
+        bool is64, List<ResidueItem> items, HashSet<string> seen, CancellationToken token)
+    {
+        var segments = capabilities.Split('\\');
+        if (segments.Length is not (3 or 4) || !segments[0].Equals("Software", StringComparison.OrdinalIgnoreCase) ||
+            !segments[^1].Equals("Capabilities", StringComparison.OrdinalIgnoreCase) ||
+            ResidueNameMatcher.MatchProduct(context.ProductName, segments[^2]).Quality != ResidueNameMatcher.MatchQuality.Perfect ||
+            segments.Skip(1).Any(segment => segment.Length == 0 || segment is "." or ".." ||
+                segment.Any(ch => char.IsControl(ch) || ch is '[' or ']')))
+            return;
+
+        foreach (var section in new[] { "FileAssociations", "UrlAssociations" })
+        {
+            var associationKey = $@"{capabilities}\{section}";
+            foreach (var name in registryReader.GetValueNames(hive, associationKey, is64).Take(128))
+            {
+                token.ThrowIfCancellationRequested();
+                var progId = registryReader.GetStringValue(hive, associationKey, name, is64);
+                if (progId is not { Length: > 0 and <= 128 } || !progId.All(ch => char.IsAsciiLetterOrDigit(ch) || ch is '.' or '-'))
+                    continue;
+
+                var classPath = $@"SOFTWARE\Classes\{progId}";
+                if (!registryReader.KeyExists(hive, classPath, is64))
+                    continue;
+
+                var reason = LocalizationService.Source("ResidueAdvanced.Association");
+                AddItem(items, seen, ResidueCategory.RegistryValue, HiveName(hive) + "\\" + associationKey,
+                    ResidueConfidence.Protected, [reason], 0, is64, valueName: name,
+                    valueType: registryReader.GetValueKind(hive, associationKey, name, is64) is { } kind ? FormatKind(kind) : null);
+                AddItem(items, seen, ResidueCategory.RegistryKey, HiveName(hive) + "\\" + classPath,
+                    ResidueConfidence.Protected, [reason], 0, is64);
+            }
+        }
+    }
+
+    private static string FormatKind(Microsoft.Win32.RegistryValueKind kind) => kind switch
+    {
+        Microsoft.Win32.RegistryValueKind.String => "REG_SZ",
+        Microsoft.Win32.RegistryValueKind.ExpandString => "REG_EXPAND_SZ",
+        Microsoft.Win32.RegistryValueKind.MultiString => "REG_MULTI_SZ",
+        Microsoft.Win32.RegistryValueKind.Binary => "REG_BINARY",
+        Microsoft.Win32.RegistryValueKind.DWord => "REG_DWORD",
+        Microsoft.Win32.RegistryValueKind.QWord => "REG_QWORD",
+        Microsoft.Win32.RegistryValueKind.None => "REG_NONE",
+        _ => "—",
+    };
+
     private void ClassifyRegistryKey(
         ResidueDetectionContext context,
         ResidueRegistryHive hive,
@@ -670,7 +794,7 @@ public sealed class ResidueDetectionEngine(
         string keyName,
         bool is64BitView,
         List<ResidueItem> items,
-        HashSet<string> seen)
+        HashSet<string> seen, bool underPublisher = false)
     {
         var fullPath = HiveName(hive) + @"\" + subKeyPath;
         var match = ResidueNameMatcher.MatchProduct(context.ProductName, keyName);
@@ -703,7 +827,11 @@ public sealed class ResidueDetectionEngine(
             return;
         }
 
-        var explicitConnection = TestExplicitConnection(context, hive, subKeyPath, is64BitView);
+        var productCode = context.Program.MsiProductCode;
+        var sourceCode = registryReader.GetStringValue(hive, subKeyPath, "ProductCode", is64BitView);
+        var explicitConnection = productCode != Guid.Empty && Guid.TryParse(sourceCode, out var storedCode) && productCode == storedCode
+            ? LocalizationService.Source("ResidueAdvanced.ProductCode")
+            : TestExplicitConnection(context, hive, subKeyPath, is64BitView);
         if (explicitConnection is not null)
         {
             reasons.Add(explicitConnection);
@@ -712,7 +840,7 @@ public sealed class ResidueDetectionEngine(
         var nameMatches = match.Quality is ResidueNameMatcher.MatchQuality.Perfect or ResidueNameMatcher.MatchQuality.Containment;
         ResidueConfidence confidence;
         string? fingerprint = null;
-        if (explicitConnection is not null && nameMatches)
+        if (explicitConnection is not null && nameMatches && (!underPublisher || match.Quality == ResidueNameMatcher.MatchQuality.Perfect))
         {
             fingerprint = TryFingerprintKey(context, hive, subKeyPath, is64BitView, reasons);
             confidence = fingerprint is null ? ResidueConfidence.Medium : ResidueConfidence.High;
@@ -770,10 +898,10 @@ public sealed class ResidueDetectionEngine(
         string subKeyPath,
         bool is64BitView)
     {
-        if (context.OwnedLocations.Count == 0)
-        {
+        if (context.OwnedLocations.Count == 0 || context.OwnedLocations.Any(location => context.Others.Any(other =>
+                NormalizeProgramPath(other.InstallLocation) is { } otherRoot &&
+                (ResiduePathRules.IsSameOrUnder(location, otherRoot) || ResiduePathRules.IsSameOrUnder(otherRoot, location)))))
             return null;
-        }
 
         string? DescribeConnection(string? value)
         {
@@ -835,9 +963,9 @@ public sealed class ResidueDetectionEngine(
         IReadOnlyList<string> reasons,
         long sizeBytes,
         bool is64BitView = false,
-        string? fingerprint = null)
+        string? fingerprint = null, string? valueName = null, string? valueType = null)
     {
-        var identity = $"{category}|{location}|{is64BitView}";
+        var identity = $"{category}|{location}|{is64BitView}|{valueName}";
         if (!seen.Add(identity))
         {
             return;
@@ -853,6 +981,8 @@ public sealed class ResidueDetectionEngine(
             Justifications = reasons.Where(r => r.Length > 0).ToList(),
             SizeBytes = sizeBytes,
             Fingerprint = fingerprint,
+            ValueName = valueName,
+            ValueType = valueType,
         });
     }
 }

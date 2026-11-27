@@ -308,7 +308,11 @@ public sealed class PortableRecoveryTests
         var error = await Assert.ThrowsAsync<UpdateException>(() =>
             new PortableUpdateCoordinator(unconfigured).PrepareAsync(offer, new Progress<double>(), CancellationToken.None));
         Assert.Equal(Environment.IsPrivilegedProcess ? UpdateState.CannotWrite : UpdateState.NotConfigured, error.State);
-        Assert.False(GitHubReleases.OfficialIdentityConfigured);
+        Assert.True(GitHubReleases.OfficialIdentityConfigured);
+        Assert.Null(ReleaseTrust.PublisherPublicKey);
+        var official = await Assert.ThrowsAsync<UpdateException>(() =>
+            new PortableUpdateCoordinator(GitHubReleases.Create()).PrepareAsync(offer, new Progress<double>(), CancellationToken.None));
+        Assert.Equal(error.State, official.State);
         Assert.Throws<UpdateException>(() => PortableUpdateCoordinator.Launch("unused", offer.Version));
     }
 

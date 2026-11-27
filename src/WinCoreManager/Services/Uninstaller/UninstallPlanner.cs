@@ -67,6 +67,10 @@ public sealed class UninstallPlanner : IUninstallPlanner
             warnings.Add(LocalizationService.Source("Message.ReviewRequiredSharedDependencyOrUnrecognizedApp"));
         }
 
+        if (OptionalWindowsApps.IsApprovedTarget(program))
+            return new UninstallPlan { Program = program, Method = UninstallMethod.CurrentUserAppx, Warnings = warnings };
+
+        var warningCount = warnings.Count;
         var plan = program.Kind == ProgramKind.Msi
             ? TryCreateMsiPlan(program, warnings)
             : TryCreateExecutablePlan(program, silentPreferred, warnings);
@@ -78,7 +82,7 @@ public sealed class UninstallPlanner : IUninstallPlanner
                 Program = program,
                 Method = UninstallMethod.NotSupported,
                 Warnings = warnings,
-                NotExecutableReason = DescribeUnsupportedReason(program),
+                NotExecutableReason = warnings.Count > warningCount ? warnings[^1] : DescribeUnsupportedReason(program),
             };
         }
 

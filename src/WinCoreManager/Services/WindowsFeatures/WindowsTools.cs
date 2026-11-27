@@ -6,7 +6,7 @@ using WinCoreManager.Services.Startup;
 
 namespace WinCoreManager.Services.WindowsFeatures;
 
-public enum WindowsTool { DiskCleanup, Performance, SystemProtection }
+public enum WindowsTool { DiskCleanup, Performance, SystemProtection, StartupApps, TaskScheduler, InstalledApps, RecycleBin }
 
 public sealed record WindowsActionResult(bool Success, string Message);
 
@@ -36,6 +36,8 @@ internal sealed class WindowsTools : IWindowsTools
         try
         {
             using var process = Process.Start(info);
+            if (tool is WindowsTool.StartupApps or WindowsTool.InstalledApps or WindowsTool.RecycleBin)
+                return new(true, LocalizationService.Source("Message.WindowsToolOpened"));
             return process is null ? new(false, LocalizationService.Source("Message.WindowsDidNotConfirmThatTheToolOpened"))
                 : new(true, LocalizationService.Source("Message.WindowsToolOpened"));
         }
@@ -47,11 +49,20 @@ internal sealed class WindowsTools : IWindowsTools
 
     private static string? GetPath(WindowsTool tool)
     {
+        var shellTarget = tool switch
+        {
+            WindowsTool.StartupApps => "ms-settings:startupapps",
+            WindowsTool.InstalledApps => "ms-settings:appsfeatures",
+            WindowsTool.RecycleBin => "shell:RecycleBinFolder",
+            _ => null,
+        };
+        if (shellTarget is not null) return shellTarget;
         var executable = tool switch
         {
             WindowsTool.DiskCleanup => "cleanmgr.exe",
             WindowsTool.Performance => "SystemPropertiesPerformance.exe",
             WindowsTool.SystemProtection => "SystemPropertiesProtection.exe",
+            WindowsTool.TaskScheduler => "taskschd.msc",
             _ => null,
         };
         if (executable is null) return null;

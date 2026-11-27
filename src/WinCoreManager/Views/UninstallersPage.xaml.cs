@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using WinCoreManager.Services.Uninstaller;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
@@ -35,8 +37,18 @@ public partial class UninstallersPage : UserControl
             _viewModel.LogLines.CollectionChanged += OnLogChanged;
             _viewModel.ConfirmHandler = RequestConfirmation;
             _viewModel.ShowResidueScanHandler = ShowResidueScan;
+            _viewModel.OfferResidueScanHandler = name => Window.GetWindow(this) is { } owner && LocalizedDialog.Confirm(owner,
+                Localization.LocalizationService.Source("Message.Uninstaller.OfferResidueTitle"),
+                Localization.LocalizationService.Source("Message.Uninstaller.OfferResidue", name), "Message.Uninstaller.OfferResidueTitle");
             _viewModel.LoadCommand.Execute(null);
         }
+    }
+
+    private void OnOptionalApps(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel is { CanManageOptionalApps: true } model && Window.GetWindow(this) is { } owner &&
+            App.Services?.GetService<OptionalAppInventory>() is { } inventory)
+            new OptionalWindowsAppsWindow(inventory, model) { Owner = owner }.ShowDialog();
     }
 
     private void OnProgramsSorting(object sender, DataGridSortingEventArgs e)
@@ -67,6 +79,19 @@ public partial class UninstallersPage : UserControl
 
         _viewModel.CatalogSort = sort;
         ApplyCatalogSort(sort);
+    }
+
+    private void OnProgramsPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // A tecla Espaço também funciona quando o foco está na célula, antes de entrar no checkbox.
+        if (e.Key == Key.Space && e.KeyboardDevice.Modifiers == ModifierKeys.None &&
+            e.OriginalSource is DataGridCell && ProgramsGrid.CurrentColumn == ProgramsGrid.Columns[0] &&
+            ProgramsGrid.CurrentItem is UninstallerItemRow { CanSelect: true } row)
+        {
+            if (!e.IsRepeat)
+                row.IsSelected = !row.IsSelected;
+            e.Handled = true;
+        }
     }
 
     private void ApplyCatalogSort(IReadOnlyList<SortDescription> columns)

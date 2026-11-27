@@ -9,13 +9,52 @@
         <h:InverseBooleanConverter x:Key="InverseBool" />
         <h:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
         <h:NullToCollapsedConverter x:Key="NullToCollapsed" />
+        <Style x:Key="ProgramSelectionCheckBox" TargetType="CheckBox">
+            <Setter Property="Focusable" Value="True" />
+            <Setter Property="IsTabStop" Value="True" />
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Border x:Name="Box" Width="18" Height="18" BorderThickness="1.5" CornerRadius="3"
+                                    Background="{DynamicResource InsetBgBrush}"
+                                    BorderBrush="{DynamicResource TextSecondaryBrush}" />
+                            <Path x:Name="Tick" Data="M 0,4 L 4,8 L 11,0" StrokeThickness="2"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Stroke="{DynamicResource AccentTextBrush}" Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AccentTextBrush}" />
+                                <Setter TargetName="Box" Property="Background" Value="{DynamicResource RowSelectedBrush}" />
+                                <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Margin="{StaticResource PagePadding}">
+    <ScrollViewer x:Name="PageScroll" Margin="{StaticResource PagePadding}"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  Focusable="False">
+    <Grid Height="{Binding ViewportHeight, ElementName=PageScroll}" MinHeight="510">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="2*" MinHeight="110" />
+            <RowDefinition Height="2*" MinHeight="172" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition MaxHeight="170">
@@ -38,10 +77,20 @@
             <TextBlock Text="{loc:Localized StatusText}"
                        Style="{StaticResource PageSubtitleText}"
                        Margin="0,4,0,0" />
+            <Border x:Name="UninstallRecoveryNotice" Style="{StaticResource CardBorder}" Padding="14,10" Margin="0,8,0,0"
+                    Visibility="{Binding PendingRecoveryNotice, Converter={StaticResource NullToCollapsed}}">
+                <StackPanel>
+                    <TextBlock Text="{loc:Loc UpdateOperation.RecoveryUninstallBlocked}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{loc:Localized PendingRecoveryNotice}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                    <Button Content="{loc:Loc UpdateOperation.OpenRecovery}" Command="{Binding OpenPackageRecoveryCommand}"
+                            HorizontalAlignment="Left" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
         </StackPanel>
 
         <!-- Barra de ferramentas -->
-        <WrapPanel Grid.Row="1" Margin="0,0,0,10" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}">
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+        <WrapPanel IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}">
             <StackPanel Orientation="Horizontal" Margin="0,0,8,6">
                 <Grid Width="140">
                     <TextBox x:Name="SearchBox"
@@ -89,12 +138,16 @@
                 </ComboBox>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <CheckBox Content="{loc:Loc UI.SelectAll}"
+                <CheckBox Content="{loc:Loc Uninstaller.SelectVisible}"
                           VerticalAlignment="Center"
-                          Margin="0,0,8,0"
+                          Margin="0,0,12,6"
+                          IsEnabled="{Binding CanSelectAll}"
+                          ToolTip="{loc:Loc Uninstaller.SelectionScope}"
+                          AutomationProperties.HelpText="{loc:Loc Uninstaller.SelectionScope}"
                           IsChecked="{Binding AllSelected, Mode=TwoWay}" />
 
+            <Button Content="{loc:Loc Optional.Open}" Click="OnOptionalApps" Margin="0,0,8,6" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                 <Button Padding="12,0"
                         AutomationProperties.Name="{loc:Loc UI.RefreshList}"
                         Command="{Binding RefreshCommand}"
@@ -107,9 +160,10 @@
 
                 <Button Padding="12,0"
                         AutomationProperties.Name="{loc:Loc UI.UninstallSelected}"
+                        AutomationProperties.HelpText="{loc:Localized UninstallSelectedDisabledReason}"
                         Style="{StaticResource PrimaryButton}"
                         Command="{Binding UninstallSelectedCommand}"
-                        ToolTip="{Binding DataContext.Updates.PackageChangeBlockReason, RelativeSource={RelativeSource AncestorType=Window}}"
+                        ToolTip="{loc:Localized UninstallSelectedDisabledReason, NullText={x:Null}}"
                         ToolTipService.ShowOnDisabled="True"
                         VerticalAlignment="Center"
                         Margin="8,0,0,0">
@@ -120,6 +174,11 @@
                 </Button>
             </StackPanel>
         </WrapPanel>
+        <TextBlock x:Name="UninstallAvailability" Text="{loc:Localized UninstallSelectedDisabledReason}"
+                   Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,0,0,4"
+                   AutomationProperties.LiveSetting="Polite"
+                   Visibility="{Binding UninstallSelectedDisabledReason, Converter={StaticResource NullToCollapsed}}" />
+        </StackPanel>
 
         <!-- Lista de programas + estado vazio -->
         <Grid Grid.Row="2">
@@ -134,22 +193,29 @@
                               VerticalScrollBarVisibility="Visible"
                               Margin="6,0"
                               ItemsSource="{Binding Catalog}"
-                              IsReadOnly="False"
+                              IsReadOnly="True"
+                              FrozenColumnCount="1"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
                               SelectionMode="Single"
+                              IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
+                              PreviewKeyDown="OnProgramsPreviewKeyDown"
                               Sorting="OnProgramsSorting"
                               SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
                               RowHeight="40"
                               HeadersVisibility="Column"
                               AutomationProperties.Name="{loc:Loc UI.InstalledProgramsList}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="44" CanUserResize="False" CanUserSort="False">
+                            <DataGridTemplateColumn Header="{loc:Loc Uninstaller.MarkColumn}" Width="84" MinWidth="84"
+                                                    CanUserResize="False" CanUserSort="False" CanUserReorder="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                        <CheckBox Style="{StaticResource ProgramSelectionCheckBox}"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   IsEnabled="{Binding CanSelect}"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  AutomationProperties.Name="{loc:Loc UI.SelectProgram}" />
+                                                  ToolTip="{loc:Localized SelectionHelp, NullText={x:Null}}"
+                                                  ToolTipService.ShowOnDisabled="True"
+                                                  AutomationProperties.HelpText="{loc:Localized SelectionHelp}"
+                                                  AutomationProperties.Name="{loc:Localized Name, FormatKey=Uninstaller.MarkProgram, Translate=False}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -271,15 +337,19 @@
                             BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="0,1,0,0"
                             CornerRadius="0,0,11,11"
-                            Padding="18,0"
-                            Height="36">
+                            Padding="12,6"
+                            MinHeight="36">
                         <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <TextBlock Text="{loc:Localized SummaryText}"
                                        Style="{StaticResource CaptionText}"
                                        VerticalAlignment="Center"
-                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap" Margin="0,0,12,0"
                                        ToolTip="{loc:Localized InventoryText}" />
-                            <TextBlock Text="{loc:Localized SelectedCount, FormatKey=Common.SelectedCount}"
+                            <TextBlock Grid.Column="1" Text="{loc:Localized SelectedCount, FormatKey=Common.SelectedCount}"
                                        Style="{StaticResource CaptionText}"
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Right" />
@@ -329,9 +399,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="{Binding SelectedRow.Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                            <TextBlock Style="{StaticResource CaptionText}" Foreground="{DynamicResource TextMutedBrush}">
+                        <TextBlock Text="{Binding SelectedRow.Name}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                            <TextBlock Margin="0,4,0,0" TextWrapping="Wrap"
+                                       Style="{StaticResource CaptionText}" Foreground="{DynamicResource TextMutedBrush}">
                                 <Run Text="{Binding SelectedRow.DisplayVersion, Mode=OneWay}" /><Run Text="  ·  " />
                                 <Run Text="{Binding SelectedRow.Publisher, Mode=OneWay}" /><Run Text="  ·  " />
                                 <Run Text="{loc:Localized SelectedRow.CategoryLabel}" /><Run Text="  ·  " />
@@ -340,13 +411,19 @@
                                 <Run Text="{loc:Localized SelectedRow.InstallDate, NumberFormat=d, NullText=—}" /><Run Text="  ·  " />
                                 <Run Text="{loc:Localized SelectedRow.EstimatedSizeText, BinarySizes=True}" />
                             </TextBlock>
-                        </StackPanel>
                         <TextBlock Text="{loc:Localized SelectedRow.ProtectionInfo}"
                                    Foreground="{DynamicResource WarningBrush}"
                                    TextWrapping="Wrap"
                                    FontSize="12"
                                    Margin="0,6,0,0"
                                    Visibility="{Binding SelectedRow.ProtectionInfo, Converter={StaticResource NullToCollapsed}}" />
+                        <TextBlock Text="{loc:Localized SelectedRow.UnavailableReason}"
+                                   Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"
+                                   FontSize="12" Margin="0,6,0,0"
+                                   Visibility="{Binding SelectedRow.UnavailableReason, Converter={StaticResource NullToCollapsed}}" />
+                        <Button Content="{loc:Loc Message.Uninstaller.OpenWindowsApps}" HorizontalAlignment="Left" Margin="0,6,0,0"
+                                Command="{Binding OpenWindowsInstalledAppsCommand}"
+                                Visibility="{Binding ShowWindowsUninstall, Converter={StaticResource BoolToVis}}" />
                         <TextBlock Text="{Binding SelectedRow.Program.RegistryPath}"
                                    Style="{StaticResource MonoText}"
                                    FontSize="11.5"
@@ -412,7 +489,7 @@
                              Maximum="100"
                              AutomationProperties.Name="{loc:Loc UI.UninstallProgress}"
                              Value="{Binding UninstallProgress, Mode=OneWay}"
-                             IsIndeterminate="{Binding IsScanning}" />
+                             IsIndeterminate="{Binding IsBusy}" />
             </StackPanel>
         </Border>
 
@@ -444,4 +521,5 @@
             </DockPanel>
         </Border>
     </Grid>
+    </ScrollViewer>
 </UserControl>

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -10,18 +11,18 @@ namespace WinCoreManager.Services.SelfUpdate;
 
 internal enum UpdateState
 {
-    Idle, Checking, NotConfigured, RepositoryUnavailable, ReleaseUnavailable, Current, Available,
+    Idle, Checking, NotConfigured, RepositoryUnavailable, ReleaseUnavailable, Current, Available, LocalBuild, OperationActive,
     RateLimited, Network, Timeout, InvalidResponse, IncompatiblePackage, VerificationFailed,
     Downloading, Canceled, InsufficientSpace, CannotWrite, Ready, Failed,
 }
 
-internal sealed record UpdateOffer(UpdateVersion Version, string Notes, Uri ReleasePage, Uri Download, long Size, string Digest);
+internal sealed record UpdateOffer(UpdateVersion Version, string Notes, Uri ReleasePage, Uri Download, long Size, string Digest, DateTimeOffset? PublishedAt = null);
 internal sealed record UpdateCheck(UpdateState State, UpdateOffer? Offer = null, Uri? ReleasePage = null);
 
-internal sealed partial class GitHubReleases(HttpClient http, string? repository, long? repositoryId, TimeSpan checkTimeout, TimeSpan downloadTimeout)
+internal sealed partial class GitHubReleases(HttpClient http, string? repository, long? repositoryId, TimeSpan checkTimeout, TimeSpan downloadTimeout, bool officialBuild = true)
 {
-    internal static readonly string? OfficialRepository = null;
-    internal static readonly long? OfficialRepositoryId = null;
+    internal static readonly string? OfficialRepository = "rsehenth/WinCore-Manager";
+    internal static readonly long? OfficialRepositoryId = 1472964599;
     internal static bool OfficialIdentityConfigured => OfficialRepository is not null && OfficialRepositoryId is > 0;
     internal const long MaximumZipBytes = 512L * 1024 * 1024;
     private const int MaximumJsonBytes = 1024 * 1024;
@@ -38,11 +39,13 @@ internal sealed partial class GitHubReleases(HttpClient http, string? repository
             },
         };
         client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
-        return new GitHubReleases(client, ReleaseTrust.PublisherPublicKey is null ? null : OfficialRepository,
-            OfficialRepositoryId, TimeSpan.FromSeconds(15), TimeSpan.FromMinutes(10));
+        return new GitHubReleases(client, OfficialRepository,
+            OfficialRepositoryId, TimeSpan.FromSeconds(15), TimeSpan.FromMinutes(10), IsPublishedBuild);
     }
 
     internal static UpdateVersion InstalledVersion { get; } = UpdateVersion.FromAssembly(typeof(GitHubReleases).Assembly);
+    internal static bool IsPublishedBuild { get; } = typeof(GitHubReleases).Assembly
+        .GetCustomAttributes<AssemblyMetadataAttribute>().Any(a => a.Key == "WinCoreBuildChannel" && a.Value == "Published");
     internal bool IsConfigured => repository is not null;
 
     public async Task<UpdateCheck> CheckAsync(UpdateVersion installed, CancellationToken cancellationToken)
@@ -78,7 +81,8 @@ internal sealed partial class GitHubReleases(HttpClient http, string? repository
             if (!string.Equals(JsonString(repoJson.RootElement, "full_name"), repository, StringComparison.OrdinalIgnoreCase) ||
                 !repoJson.RootElement.TryGetProperty("id", out var id) || id.ValueKind != JsonValueKind.Number ||
                 !id.TryGetInt64(out var actualId) || actualId != repositoryId ||
-                !repoJson.RootElement.TryGetProperty("private", out var isPrivate) || isPrivate.ValueKind != JsonValueKind.False)
+                !repoJson.RootElement.TryGetProperty("private", out var isPrivate) || isPrivate.ValueKind != JsonValueKind.False ||
+                repoJson.RootElement.TryGetProperty("fork", out var fork) && fork.ValueKind != JsonValueKind.False)
             {
                 return new(UpdateState.RepositoryUnavailable);
             }
@@ -129,7 +133,7 @@ internal sealed partial class GitHubReleases(HttpClient http, string? repository
 
         if (version.CompareTo(installed) <= 0)
         {
-            return new(UpdateState.Current, ReleasePage: releasesPage);
+            return new(officialBuild ? UpdateState.Current : UpdateState.LocalBuild, ReleasePage: releasesPage);
         }
 
         var tag = Uri.EscapeDataString(JsonString(release, "tag_name")!);
@@ -163,8 +167,12 @@ internal sealed partial class GitHubReleases(HttpClient http, string? repository
             return new(UpdateState.VerificationFailed, ReleasePage: releasePage);
         }
 
+        var notes = JsonString(release, "body") ?? "";
+        var date = release.TryGetProperty("published_at", out var timestamp) &&
+            timestamp.ValueKind == JsonValueKind.String && timestamp.TryGetDateTimeOffset(out var parsed)
+            ? parsed : (DateTimeOffset?)null;
         return new(UpdateState.Available,
-            new UpdateOffer(version, JsonString(release, "body") ?? "", releasePage, download, sizeBytes, digest[7..]),
+            new UpdateOffer(version, notes.Length > 12_000 ? notes[..12_000] : notes, releasePage, download, sizeBytes, digest[7..], date),
             releasePage);
     }
 

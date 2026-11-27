@@ -1,3 +1,5 @@
+using WinCoreManager.Localization;
+
 namespace WinCoreManager.Models;
 
 /// <summary>
@@ -18,8 +20,9 @@ public sealed class UninstallConfirmationRequest
     public required IReadOnlyList<string> Warnings { get; init; }
 
     public required int ItemCount { get; init; }
+    public IReadOnlyList<InstalledProgram> Programs { get; init; } = [];
 
-    public string ConfirmButtonText { get; init; } = "Desinstalar";
+    public string ConfirmButtonText { get; init; } = LocalizationService.Current["Uninstaller.ConfirmAction"];
 
     public bool HasWarnings => Warnings.Count > 0;
 }

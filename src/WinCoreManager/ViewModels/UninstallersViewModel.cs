@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using WinCoreManager.Models;
 using WinCoreManager.Services;
 using WinCoreManager.Services.Uninstaller;
+using WinCoreManager.Services.WindowsFeatures;
 
 namespace WinCoreManager.ViewModels;
 
@@ -18,6 +19,7 @@ public partial class UninstallersViewModel : ViewModelBase
     private readonly IUninstallPlanner _planner;
     private readonly UninstallBatchRunner _batch;
     private readonly IResidueAnalysisService _residues;
+    private readonly IWindowsTools? _windowsTools;
     private readonly SynchronizationContext _ui;
 
     private CancellationTokenSource? _scanCts;
@@ -34,13 +36,15 @@ public partial class UninstallersViewModel : ViewModelBase
         IProgramInventoryService inventory,
         IUninstallPlanner planner,
         UninstallBatchRunner batch,
-        IResidueAnalysisService residues)
+        IResidueAnalysisService residues,
+        IWindowsTools? windowsTools = null)
     {
         Title = LocalizationService.Source("Message.Uninstaller");
         _inventory = inventory;
         _planner = planner;
         _batch = batch;
         _residues = residues;
+        _windowsTools = windowsTools;
         _ui = new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher);
 
         Rows.CollectionChanged += (_, _) => NotifySummaryChanged();
@@ -71,8 +75,10 @@ public partial class UninstallersViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(CanOpenManualResidue))]
     [NotifyCanExecuteChangedFor(nameof(OpenResidueScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(AnalyzeResiduesCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenWindowsInstalledAppsCommand))]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     [NotifyPropertyChangedFor(nameof(CancelButtonText))]
+    [NotifyPropertyChangedFor(nameof(UninstallSelectedDisabledReason))]
     private bool _isScanning;
 
     [ObservableProperty]
@@ -83,13 +89,13 @@ public partial class UninstallersViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(CanOpenManualResidue))]
     [NotifyCanExecuteChangedFor(nameof(OpenResidueScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(AnalyzeResiduesCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenWindowsInstalledAppsCommand))]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     [NotifyPropertyChangedFor(nameof(CancelButtonText))]
+    [NotifyPropertyChangedFor(nameof(UninstallSelectedDisabledReason))]
     private bool _isUninstalling;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(UninstallSelectedCommand))]
-    [NotifyPropertyChangedFor(nameof(AllSelected))]
     private int _selectedCount;
 
     [ObservableProperty]
@@ -103,8 +109,6 @@ public partial class UninstallersViewModel : ViewModelBase
 
     partial void OnSelectedFilterIndexChanged(int value)
     {
-        // Trocar de filtro nunca preserva seleção de itens que deixam de ser visíveis.
-        ClearSelection();
         RebuildCatalog();
     }
 
@@ -119,22 +123,47 @@ public partial class UninstallersViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EmptyStateTitle))]
+    [NotifyPropertyChangedFor(nameof(UninstallSelectedDisabledReason))]
+    [NotifyCanExecuteChangedFor(nameof(UninstallSelectedCommand))]
     private bool _scanFailed;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(UninstallSelectedCommand))]
     [NotifyPropertyChangedFor(nameof(CanOpenManualResidue))]
+    [NotifyPropertyChangedFor(nameof(UninstallSelectedDisabledReason))]
     [NotifyCanExecuteChangedFor(nameof(OpenResidueScanCommand))]
     [NotifyCanExecuteChangedFor(nameof(AnalyzeResiduesCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenWindowsInstalledAppsCommand))]
     private bool _applicationBusy;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UninstallSelectedCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenWindowsInstalledAppsCommand))]
+    [NotifyPropertyChangedFor(nameof(UninstallSelectedDisabledReason))]
+    private bool _maintenanceRunning;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AnalyzeResiduesCommand))]
     [NotifyCanExecuteChangedFor(nameof(OpenResidueScanCommand))]
     [NotifyPropertyChangedFor(nameof(HasSelectedRow))]
+    [NotifyPropertyChangedFor(nameof(UninstallSelectedDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(ShowWindowsUninstall))]
+    [NotifyCanExecuteChangedFor(nameof(OpenWindowsInstalledAppsCommand))]
     private UninstallerItemRow? _selectedRow;
 
     public bool HasSelectedRow => SelectedRow is not null;
+    public bool ShowWindowsUninstall => SelectedRow?.NeedsWindowsUninstall == true;
+
+    private bool CanOpenWindowsInstalledApps() => ShowWindowsUninstall && !IsBusy && !ApplicationBusy && !MaintenanceRunning
+        && PackageChangesBlocked?.Invoke() != true && PendingRecoveryNotice is null && PackageActivityReason?.Invoke() is null
+        && _windowsTools?.IsAvailable(WindowsTool.InstalledApps) == true;
+
+    [RelayCommand(CanExecute = nameof(CanOpenWindowsInstalledApps))]
+    private void OpenWindowsInstalledApps()
+    {
+        if (CanOpenWindowsInstalledApps())
+            StatusText = _windowsTools!.Open(WindowsTool.InstalledApps).Message;
+    }
 
     [ObservableProperty]
     private string _residueReport = string.Empty;
@@ -198,10 +227,9 @@ public partial class UninstallersViewModel : ViewModelBase
     /// <summary>Resumo do que está na tela, sempre medido no catálogo — nunca no inventário.</summary>
     private string DescribeCatalog()
     {
-        var inventário = LocalizationService.Source("Message.TechnicalInventory0Entries", Rows.Count);
         return SelectedFilterIndex == 4
-            ? LocalizationService.Source("Message.TechnicalComponentsInAdvancedView01", Catalog.Count, inventário)
-            : LocalizationService.Source("Message.AppsListed01", Catalog.Count, inventário);
+            ? LocalizationService.Source("Message.TechnicalComponentsInAdvancedView01", Catalog.Count, Rows.Count)
+            : LocalizationService.Source("Message.AppsListed01", Catalog.Count, Rows.Count);
     }
 
     private bool FilterRow(UninstallerItemRow row)
@@ -275,20 +303,11 @@ public partial class UninstallersViewModel : ViewModelBase
         }
     }
 
-    private void ClearSelection()
-    {
-        foreach (var row in Rows)
-        {
-            row.IsSelected = false;
-        }
-
-        RecountSelected();
-    }
-
     private void NotifySummaryChanged()
     {
         OnPropertyChanged(nameof(HasRows));
         OnPropertyChanged(nameof(AllSelected));
+        OnPropertyChanged(nameof(CanSelectAll));
         OnPropertyChanged(nameof(ShowEmptyState));
         OnPropertyChanged(nameof(SummaryText));
         OnPropertyChanged(nameof(InventoryText));
@@ -296,8 +315,14 @@ public partial class UninstallersViewModel : ViewModelBase
 
     private void RecountSelected()
     {
-        SelectedCount = Catalog.Count(r => r.IsSelected && r.CanSelect);
+        SelectedCount = Catalog.Count(IsMarked);
+        OnPropertyChanged(nameof(AllSelected));
+        OnPropertyChanged(nameof(CanSelectAll));
+        OnPropertyChanged(nameof(UninstallSelectedDisabledReason));
+        UninstallSelectedCommand.NotifyCanExecuteChanged();
     }
+
+    private static bool IsMarked(UninstallerItemRow row) => row.IsSelected && row.CanSelect;
 
     partial void OnSelectedRowChanged(UninstallerItemRow? value)
     {
@@ -326,7 +351,7 @@ public partial class UninstallersViewModel : ViewModelBase
 
     public bool AllSelected
     {
-        get => SelectedCount > 0 && SelectedCount == SelectableCount;
+        get => CanSelectAll && Catalog.Where(row => row.IsBatchSelectable).All(IsMarked);
         set
         {
             // "Selecionar todos" atinge apenas as linhas visíveis e efetivamente elegíveis;
@@ -340,102 +365,92 @@ public partial class UninstallersViewModel : ViewModelBase
         }
     }
 
-    private int SelectableCount => Catalog.Count(r => r.IsBatchSelectable);
+    public bool CanSelectAll => Catalog.Any(row => row.IsBatchSelectable);
+
+    private string? GetUnavailableReason(UninstallPlan plan) => plan.IsExecutable
+        ? _batch.GetLaunchRestriction(plan)
+        : plan.NotExecutableReason ?? LocalizationService.Source("Message.Unsupported");
+
+    // Asked after each successful removal; the existing leftover window lists the items before anything moves.
+    public Func<string, bool>? OfferResidueScanHandler { get; set; }
 
     [RelayCommand(CanExecute = nameof(CanUninstallSelected))]
     private async Task UninstallSelectedAsync()
     {
-        // Somente itens do catálogo exibido podem ser desinstalados: nada oculto entra no lote
-        // mesmo que tenha ficado marcado antes de uma troca de filtro.
-        var selected = Rows.Where(r => r.IsSelected && r.CanSelect && Catalog.Contains(r)).ToList();
-        if (selected.Count == 0 || IsRunning)
-        {
-            return;
-        }
+        // The package reservation is released before the leftover window opens.
+        foreach (var program in await RunSelectedUninstallAsync())
+            if (ShowResidueScanHandler is not null && OfferResidueScanHandler?.Invoke(program.Name) == true)
+                await ShowResidueScanHandler(program).ConfigureAwait(true);
+    }
 
-        // Itens de revisão (dependências compartilhadas/não classificados) nunca vão em lote:
-        // a remoção em massa só é permitida para itens com confirmação simples.
-        if (selected.Count > 1)
-        {
-            var reviewItems = selected.Where(r => r.Classification.Policy == RemovalPolicy.RequiresReview).ToList();
-            foreach (var row in reviewItems)
-            {
-                row.IsSelected = false;
-                row.Status = UninstallRowStatus.NotExecutable;
-            }
+    private async Task<IReadOnlyList<InstalledProgram>> RunSelectedUninstallAsync()
+    {
+        IReadOnlyList<InstalledProgram> removed = [];
+        if (!CanUninstallSelected()) return [];
 
-            if (reviewItems.Count > 0)
-            {
-                AppendLog(LocalizationService.Source("Message.ProtectedItemsExcludedFromTheBatch0", reviewItems.Count)
-                          + LocalizationService.Source("Message.SharedDependencyOrUnclassifiedReviewAndUninstallThese"));
-            }
+        var selected = Catalog.Where(IsMarked).ToList();
+        if (selected.Count == 0) return [];
 
-            selected = selected.Except(reviewItems).ToList();
-        }
-
-        if (selected.Count == 0)
-        {
-            return;
-        }
-
-        // Planejamento: mostra avisos e comandos antes de qualquer execução.
         var plans = selected.Select(row => _planner.CreatePlan(row.Program, silentPreferred: false)).ToList();
-        var executable = plans.Where(p => p.IsExecutable).ToList();
-        var warnings = plans.SelectMany(p => p.Warnings).Distinct(StringComparer.Ordinal).ToList();
-
-        if (executable.Count == 0)
+        var unavailable = await _batch.CheckConsentPlansAsync(plans).ConfigureAwait(true);
+        if (unavailable.Count > 0)
         {
-            AppendLog(LocalizationService.Source("Message.ThisVersionCannotSafelyUninstallAnyOfThe"));
-            foreach (var plan in plans.Where(p => !p.IsExecutable))
-            {
-                AppendLog($"· {plan.Program.Name}: {plan.NotExecutableReason}");
-            }
-
-            return;
+            foreach (var entry in unavailable)
+                AppendLog($"{entry.Name}: {entry.Reason}");
+            await ScanAsync();
+            return [];
         }
+
+        var warnings = plans.SelectMany(plan => plan.Warnings).Distinct(StringComparer.Ordinal).ToList();
+        if (plans.Any(plan => MachineUninstallPolicy.IsMachine(plan.Program)))
+            warnings.Add(LocalizationService.Source("Message.Uninstaller.UacWarning"));
 
         var request = new UninstallConfirmationRequest
         {
-            Title = executable.Count == 1
-                ? LocalizationService.Source("Message.Uninstall0", executable[0].Program.Name)
-                : LocalizationService.Source("Message.Uninstall0Apps", executable.Count),
-            Description = executable.Count == 1
+            Title = plans.Count == 1
+                ? LocalizationService.Source("Message.Uninstall0", plans[0].Program.Name)
+                : LocalizationService.Source("Message.Uninstall0Apps", plans.Count),
+            Description = plans.Count == 1
                 ? LocalizationService.Source("Message.TheAppSOfficialUninstallerWillOpenFollow")
                 : LocalizationService.Source("Message.OfficialUninstallersWillRunOneAtATime"),
-            CommandText = executable.Count == 1 ? executable[0].DescribeCommand() : null,
-            Effects = executable.Count == 1
+            CommandText = plans.Count == 1 ? plans[0].DescribeCommand() : null,
+            Effects = plans.Count == 1
                 ? LocalizationService.Source("Message.ThePublisherSUninstallerMayRemoveTheApp")
                 : LocalizationService.Source("Message.OfficialUninstallersRunOneAtATimeApps"),
             Warnings = warnings,
-            ItemCount = executable.Count,
+            ItemCount = plans.Count,
+            Programs = plans.Select(plan => plan.Program).ToList(),
         };
 
         if (ConfirmHandler is null || !await ConfirmHandler(request).ConfigureAwait(true))
         {
             AppendLog(LocalizationService.Source("Message.TheUserCanceledUninstallBeforeConfirming"));
-            return;
+            return [];
         }
 
-        if (!CanUninstallSelected()) return;
+        if (UninstallSelectedDisabledReason is { } disabledReason)
+        {
+            AppendLog(disabledReason);
+            return [];
+        }
+        if (!selected.SequenceEqual(Catalog.Where(IsMarked)))
+        {
+            AppendLog(LocalizationService.Source("Message.Uninstaller.SelectionChanged"));
+            return [];
+        }
+        foreach (var plan in plans) plan.ConsentGranted = true;
         PackageChangeReservation? reservation = null;
         if (TryReservePackageChange is not null && !TryReservePackageChange(PackageChangeKind.Uninstall,
-            executable.Count == 1 ? executable[0].Program.Name : $"Uninstall ({executable.Count})", out reservation))
+            plans.Count == 1 ? plans[0].Program.Name : request.Title, out reservation))
         {
-            AppendLog(LocalizationService.Source("UpdateOperation.PackageConflict"));
-            return;
+            NotifyPackageChangeState();
+            AppendLog(UninstallSelectedDisabledReason ?? LocalizationService.Source("Message.Uninstaller.ReservationUnavailable"));
+            return [];
         }
         using var packageLease = reservation;
 
-        // Marca as linhas que entrarão na fila; as não executáveis ficam documentadas no log e na grade.
-        foreach (var plan in plans.Where(p => !p.IsExecutable))
-        {
-            selected.First(r => r.Program == plan.Program).Status = UninstallRowStatus.NotExecutable;
-        }
-
-        foreach (var plan in executable)
-        {
-            selected.First(r => r.Program == plan.Program).Status = UninstallRowStatus.Queued;
-        }
+        foreach (var row in selected)
+            row.Status = UninstallRowStatus.Queued;
 
         var cancellation = new CancellationTokenSource();
         _uninstallCts = cancellation;
@@ -443,14 +458,14 @@ public partial class UninstallersViewModel : ViewModelBase
 
         IsUninstalling = true;
         UninstallProgress = 0;
-        CurrentOperation = string.Empty;
-        AppendLog(LocalizationService.Source("Message.UninstallStartedApps0", executable.Count));
+        CurrentOperation = LocalizationService.Source("Message.Uninstalling0", selected[0].Name);
+        AppendLog(LocalizationService.Source("Message.UninstallStartedApps0", selected.Count));
 
         try
         {
             var completed = 0;
             var report = await _batch.RunAsync(
-                executable.Select(p => p.Program).ToList(),
+                request.Programs,
                 onLog: line => Post(() => AppendLog(line)),
                 onItemCompleted: result => Post(() =>
                 {
@@ -469,12 +484,12 @@ public partial class UninstallersViewModel : ViewModelBase
                         };
                     }
 
-                    UninstallProgress = completed * 100.0 / executable.Count;
+                    UninstallProgress = completed * 100.0 / selected.Count;
                     CurrentOperation = $"{result.Program.Name}: {result.OutcomeLabel}";
                     RecountSelected();
                 }),
                 cancellationToken: ct,
-                reviewConfirmed: selected.Count == 1, reservation: reservation).ConfigureAwait(true);
+                reviewConfirmed: selected.Count == 1, reservation: reservation, confirmedPlans: plans).ConfigureAwait(true);
 
             if (report.Results.Any(result => result.Outcome == UninstallOutcome.Interrupted))
             {
@@ -487,6 +502,8 @@ public partial class UninstallersViewModel : ViewModelBase
                 if (reservation is not null) await reservation.CompleteAsync();
                 AppendLog(LocalizationService.Source("Message.Complete0Succeeded1Failed2Canceled3",
                     report.SuccessCount, report.FailureCount, report.CancelledCount, report.NotExecutableCount));
+                removed = report.Results.Where(result => result.Outcome is UninstallOutcome.Success
+                    or UninstallOutcome.SuccessRebootRequired).Select(result => result.Program).ToArray();
             }
         }
         catch (Exception ex)
@@ -499,23 +516,68 @@ public partial class UninstallersViewModel : ViewModelBase
         }
         finally
         {
-            IsUninstalling = false;
-            if (ReferenceEquals(_uninstallCts, cancellation))
+            try
             {
-                _uninstallCts = null;
-                cancellation.Dispose();
+                await ScanAsync(selected);
             }
-
-            UninstallProgress = 100;
-            CurrentOperation = string.Empty;
-            RecountSelected();
+            finally
+            {
+                IsUninstalling = false;
+                if (ReferenceEquals(_uninstallCts, cancellation))
+                {
+                    _uninstallCts = null;
+                    cancellation.Dispose();
+                }
+                UninstallProgress = 100;
+                CurrentOperation = string.Empty;
+                RecountSelected();
+            }
         }
+        return removed;
     }
 
     internal Func<bool>? PackageChangesBlocked { get; set; }
+    internal Func<string?>? PendingPackageChangeHint { get; set; }
+    internal Func<string?>? PackageActivityReason { get; set; }
+    internal Action? NavigateToPackageRecovery { get; set; }
     internal TryReserveOperation? TryReservePackageChange { get; set; }
 
-    private bool CanUninstallSelected() => !IsBusy && SelectedCount > 0 && !ApplicationBusy && PackageChangesBlocked?.Invoke() != true;
+    public string? PendingRecoveryNotice => PendingPackageChangeHint?.Invoke();
+
+    [RelayCommand]
+    private void OpenPackageRecovery() => NavigateToPackageRecovery?.Invoke();
+
+    internal void NotifyPackageChangeState()
+    {
+        OnPropertyChanged(nameof(PendingRecoveryNotice));
+        OnPropertyChanged(nameof(UninstallSelectedDisabledReason));
+        UninstallSelectedCommand.NotifyCanExecuteChanged();
+        OpenWindowsInstalledAppsCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanUninstallSelected() => UninstallSelectedDisabledReason is null;
+
+    public string? UninstallSelectedDisabledReason
+    {
+        get
+        {
+            if (PendingRecoveryNotice is { } pending)
+                return pending + "\n" + LocalizationService.Source("Message.PackageAction.OpenUpdates");
+            if (MaintenanceRunning) return LocalizationService.Source("Message.PackageAction.Maintenance");
+            if (IsScanning) return LocalizationService.Source("Message.ScanningInstalledApps");
+            if (IsUninstalling) return LocalizationService.Source("Message.Uninstaller.OperationRunning");
+            if (PackageActivityReason?.Invoke() is { } activity) return activity;
+            if (ApplicationBusy || PackageChangesBlocked?.Invoke() == true)
+                return LocalizationService.Source("Message.PackageAction.Busy");
+            if (ScanFailed) return LocalizationService.Source("Message.PackageAction.InventoryUnavailable");
+            if (SelectedCount > 1 && Catalog.Any(row => IsMarked(row) && !row.IsBatchSelectable))
+                return LocalizationService.Source("Message.Uninstaller.ReviewIndividually");
+            if (SelectedCount > 0) return null;
+            if (SelectedRow?.UnavailableReason is { } reason) return reason;
+            return LocalizationService.Source(SelectedRow?.Classification.Policy == RemovalPolicy.Blocked
+                ? "Message.PackageAction.Protected" : "Message.Uninstaller.NoSelection");
+        }
+    }
 
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private void CancelUninstall()
@@ -618,7 +680,7 @@ public partial class UninstallersViewModel : ViewModelBase
         }
     }
 
-    private async Task ScanAsync()
+    private async Task ScanAsync(IReadOnlyList<UninstallerItemRow>? completedRows = null)
     {
         _scanCts?.Cancel();
         _scanCts?.Dispose();
@@ -635,17 +697,27 @@ public partial class UninstallersViewModel : ViewModelBase
         try
         {
             var programs = await _inventory.GetInstalledProgramsAsync(ct).ConfigureAwait(true);
+            var rows = await Task.Run(() => programs
+                .OrderByDescending(program => program.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(CreateInventoryRow).ToList(), ct).ConfigureAwait(true);
+            ct.ThrowIfCancellationRequested();
 
             _suspendCatalogRebuild = true;
             try
             {
                 Rows.Clear();
-                foreach (var program in programs.OrderByDescending(p => p.Name, StringComparer.OrdinalIgnoreCase))
+                foreach (var row in rows)
                 {
-                    var row = new UninstallerItemRow(program);
+                    var completed = completedRows?.FirstOrDefault(item => SameInventoryEntry(item.Program, row.Program));
+                    if (completed is not null)
+                    {
+                        row.Status = completed.Status;
+                        if (row.Status is UninstallRowStatus.Success or UninstallRowStatus.SuccessRebootRequired)
+                            AppendLog(LocalizationService.Source("Message.Uninstaller.StillListed", row.Name));
+                    }
                     row.PropertyChanged += (_, args) =>
                     {
-                        if (args.PropertyName == nameof(UninstallerItemRow.IsSelected))
+                        if (args.PropertyName is nameof(UninstallerItemRow.IsSelected) or nameof(UninstallerItemRow.CanSelect))
                         {
                             RecountSelected();
                         }
@@ -689,4 +761,23 @@ public partial class UninstallersViewModel : ViewModelBase
             }
         }
     }
+
+    private UninstallerItemRow CreateInventoryRow(InstalledProgram program)
+    {
+        var row = new UninstallerItemRow(program);
+        if (row.Classification.Policy != RemovalPolicy.Blocked)
+        {
+            var plan = _planner.CreatePlan(program, silentPreferred: false);
+            row.UnavailableReason = GetUnavailableReason(plan);
+            row.NeedsWindowsUninstall = row.UnavailableReason is not null && plan.IsExecutable
+                && ProcessUninstallExecutor.IsMachineExecutable(plan);
+        }
+        return row;
+    }
+
+    private static bool SameInventoryEntry(InstalledProgram first, InstalledProgram second) =>
+        ReferenceEquals(first, second) ||
+        (first.RegistryPath.Length > 0 && first.Is64Bit == second.Is64Bit &&
+         string.Equals(first.RegistryPath, second.RegistryPath, StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(first.DisplayVersion, second.DisplayVersion, StringComparison.OrdinalIgnoreCase));
 }

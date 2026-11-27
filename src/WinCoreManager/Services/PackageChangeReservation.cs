@@ -16,14 +16,24 @@ internal sealed class PackageChangeReservation : IDisposable
 
     internal WinGetProcessControl Control { get; }
 
-    internal bool CanAdvance(ProcessRunResult run, bool synchronousTool = false) =>
+    internal void MarkUninstallLaunchPending(string target) => _receipt.MarkUninstallLaunchPending(target);
+
+    internal bool RecordUninstallOutcome(ProcessRunResult run)
+    {
+        try { _receipt.RecordOutcome(run); return true; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
+    }
+
+    // Same generic contract as WinGet updates: the observed tree ended, no known delegate or MSI
+    // transaction remains, and the root identity was persisted. Uninstallers are no longer held
+    // only because an invisible delegate is theoretically possible.
+    internal bool CanAdvance(ProcessRunResult run) =>
         !run.Interrupted && (run.StartFailed && Control.RootIdentity is null ||
-            synchronousTool && run.HasExitCode && run.Observation.ControlledProcesses == ControlledProcessState.Exited &&
-            run.Observation.Delegation != DelegatedProcessState.KnownActive &&
+            run.HasExitCode && run.Observation.IsConclusive && !WinGetNative.WindowsInstallerBusy() &&
             !WingetExitCodes.RequiresReboot(run.ExitCode) && !WingetExitCodes.InstallationInProgress(run.ExitCode) &&
             Control.IdentityPersisted && Control.IdentityPersistenceError is null);
 
-    internal Task CompleteAsync() => Task.Run(_receipt.Clear);
+    internal Task CompleteAsync() => Task.Run(_receipt.Kind == PackageChangeKind.Uninstall ? _receipt.ClearOwned : _receipt.Clear);
 
     public void Dispose()
     {

@@ -71,15 +71,24 @@ public static partial class ProcessRunner
             process.StandardInput.Close();
             using var stdoutReader = process.StandardOutput;
             using var stderrReader = process.StandardError;
-            var stdout = new WinGetPipe(stdoutReader, startInfo.StandardOutputEncoding, output, control is null ? 16_384 : 600);
-            var stderr = new WinGetPipe(stderrReader, startInfo.StandardErrorEncoding, output, 600);
+            var rebootWarning = false;
+            void ObserveOutput(string line)
+            {
+                if (externalInstallerPossible && !rebootWarning) rebootWarning = WingetExitCodes.IsRebootWarning(line);
+                output?.Invoke(line);
+            }
+            var stdout = new WinGetPipe(stdoutReader, startInfo.StandardOutputEncoding, ObserveOutput, control is null ? 16_384 : 600);
+            var stderr = new WinGetPipe(stderrReader, startInfo.StandardErrorEncoding, ObserveOutput, 600);
             if (control is not null) control.State = WinGetControlState.Running;
 
             var cancelSent = false;
             var forced = false;
             var normalCloseSent = false;
             TimeSpan? graceUntil = null;
+            TimeSpan? batchStopUntil = null;
             TimeSpan? drainUntil = null;
+            TimeSpan? settleUntil = null;
+            var settleReported = false;
             var nextSnapshot = TimeSpan.Zero;
             var rootExitObserved = false;
             while (true)
@@ -104,16 +113,19 @@ public static partial class ProcessRunner
                 {
                     if (stdout.Closed && stderr.Closed)
                     {
-                        if (control is not null) delegatedActive = control.ObserveDelegates();
-                        return Result(cancelled: forced || (cancelSent && (normalCloseSent || WingetExitCodes.IsCancelled(exitCode))),
-                            interrupted: control is not null && externalInstallerPossible && (forced || (cancelSent && normalCloseSent)));
+                        if (control is not null && settleUntil is null) delegatedActive = control.ObserveDelegates();
+                        if (!SettlingExternalWork())
+                            return Result(cancelled: forced || (cancelSent && (normalCloseSent || WingetExitCodes.IsCancelled(exitCode))),
+                                interrupted: control is not null && externalInstallerPossible && (forced || (cancelSent && normalCloseSent)));
                     }
-
-                    drainUntil ??= clock.Elapsed + DrainGrace;
-                    if (clock.Elapsed >= drainUntil)
+                    else
                     {
-                        AddDiagnostic("Message.ProcessOutputDrainTimeout");
-                        return Result(cancelled: false, interrupted: true);
+                        drainUntil ??= clock.Elapsed + DrainGrace;
+                        if (clock.Elapsed >= drainUntil)
+                        {
+                            AddDiagnostic("Message.ProcessOutputDrainTimeout");
+                            return Result(cancelled: false, interrupted: true);
+                        }
                     }
                 }
 
@@ -137,6 +149,7 @@ public static partial class ProcessRunner
                     graceUntil = null;
                     if (control is not null) control.State = WinGetControlState.NeedsDecision;
                     else if (externalInstallerPossible) return Result(cancelled: false, interrupted: true);
+                    if (control?.BatchStopRequested == true) batchStopUntil ??= clock.Elapsed + CloseGrace;
                 }
 
                 if (drainUntil is null && control?.DetachRequested == true)
@@ -158,6 +171,7 @@ public static partial class ProcessRunner
                             throw new InvalidOperationException(LocalizationService.Source("UpdateOperation.OwnershipUnconfirmed"));
                         forced = true;
                         graceUntil = clock.Elapsed + CloseGrace;
+                        if (batchStopUntil is not null) batchStopUntil = graceUntil;
                     }
                     catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
                     {
@@ -165,6 +179,31 @@ public static partial class ProcessRunner
                         if (control is null) return Result(cancelled: false, interrupted: true);
                         control.State = WinGetControlState.NeedsDecision;
                         continue;
+                    }
+                }
+
+                if (drainUntil is null && batchStopUntil is { } batchDeadline && clock.Elapsed >= batchDeadline)
+                {
+                    if (forced) return BatchStopUnconfirmed();
+                    delegatedActive = control!.ObserveDelegates();
+                    if ((externalInstallerPossible && delegatedActive) || exited || !OwnsRoot()) return BatchStopUnconfirmed();
+
+                    // An upgrade can delegate outside the job, even while WinGet is printing download
+                    // progress. Automatically stop only the verified root in that case and keep the receipt.
+                    try
+                    {
+                        if (!externalInstallerPossible && job is not null && activeMembers > 0 && WinGetNative.IsMember(handle, job))
+                            WinGetNative.Terminate(job);
+                        else
+                            WinGetNative.TerminateRoot(handle);
+                        forced = true;
+                        control.State = WinGetControlState.Cancelling;
+                        batchStopUntil = clock.Elapsed + CloseGrace;
+                    }
+                    catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+                    {
+                        AddDiagnostic("UpdateOperation.ControlError", ex.Message);
+                        return BatchStopUnconfirmed();
                     }
                 }
 
@@ -177,18 +216,60 @@ public static partial class ProcessRunner
                 else await Task.Delay(20).ConfigureAwait(false);
             }
 
+            // WinGet returned, but a process it started outside the Job (an elevated or relaunched uninstaller,
+            // for example) or a Windows Installer transaction is still working. Supervise it for a bounded
+            // time so a finished attempt is judged on its real outcome. Stop and Detach still apply meanwhile.
+            bool SettlingExternalWork()
+            {
+                if (control is not { DelegateSettleWindow.Ticks: > 0 } || !externalInstallerPossible || cancelSent ||
+                    !delegatedActive && !WinGetNative.WindowsInstallerBusy()) return false;
+                settleUntil ??= clock.Elapsed + control.DelegateSettleWindow;
+                if (clock.Elapsed >= settleUntil) return false;
+                if (!settleReported)
+                {
+                    settleReported = true;
+                    AddDiagnostic("UpdateOperation.WaitingForExternalInstaller");
+                }
+                return true;
+            }
+
+            ProcessRunResult BatchStopUnconfirmed()
+            {
+                AddDiagnostic("UpdateOperation.ExternalMayContinue");
+                return Result(cancelled: false, interrupted: true);
+            }
+
             ProcessRunResult Result(bool cancelled, bool interrupted)
             {
+                var restart = rebootWarning;
+                var cleanExit = externalInstallerPossible && !cancelled && !interrupted && !cancelSent &&
+                    !token.IsCancellationRequested && exited && exitCode == 0 && !restart &&
+                    controlledProcesses == ControlledProcessState.Exited &&
+                    control is { IdentityPersisted: true, IdentityPersistenceError: null };
+                var msi = externalInstallerPossible && exited && !interrupted ? control?.MsiUpgrade?.Observe() : null;
+                restart |= msi == WinGetMsiResult.RestartRequired;
                 // The restricted MSIX command can finish with registration deferred.
                 // Only the exact current-user registration change completes that contract.
-                var msixCompleted = externalInstallerPossible && !delegatedActive && !cancelled && !interrupted &&
-                    !cancelSent && !token.IsCancellationRequested && exited && exitCode == 0 &&
-                    controlledProcesses == ControlledProcessState.Exited &&
-                    control is { IdentityPersisted: true, IdentityPersistenceError: null, MsixUpgrade: { } msix } &&
-                    msix.VerifyRegistration();
-                if (msixCompleted) delegatedActive = control!.ObserveDelegates();
+                var contract = cleanExit && !delegatedActive && !restart
+                    ? msi == WinGetMsiResult.Exited ? WinGetCompletionContract.MsiTransaction
+                        : control!.MsixUpgrade?.VerifyRegistration() == true ? WinGetCompletionContract.MsixRegistration
+                        : WinGetCompletionContract.None
+                    : WinGetCompletionContract.None;
+                if (contract != WinGetCompletionContract.None)
+                {
+                    delegatedActive = control!.ObserveDelegates();
+                    if (delegatedActive || token.IsCancellationRequested || control.IdentityPersistenceError is not null)
+                        contract = WinGetCompletionContract.None;
+                }
+                // A running MSI transaction is concrete installer activity, even when a broker started it outside the tree.
+                if (externalInstallerPossible && control is not null && !delegatedActive && WinGetNative.WindowsInstallerBusy())
+                {
+                    delegatedActive = true;
+                    contract = WinGetCompletionContract.None;
+                    AddDiagnostic("UpdateOperation.WindowsInstallerBusy");
+                }
                 var delegation = delegatedActive ? DelegatedProcessState.KnownActive
-                    : !externalInstallerPossible || msixCompleted && !token.IsCancellationRequested && control!.IdentityPersistenceError is null
+                    : !externalInstallerPossible || contract != WinGetCompletionContract.None
                         ? DelegatedProcessState.CompletionVerified : DelegatedProcessState.Possible;
 
                 var errors = stderr.Lines.ToList();
@@ -199,7 +280,9 @@ public static partial class ProcessRunner
                     Interrupted = interrupted,
                     HasExitCode = exited,
                     ExitCode = exitCode,
-                    Observation = new(controlledProcesses, delegation),
+                    Observation = new(controlledProcesses, delegation, contract),
+                    MsiResult = msi,
+                    RestartRequestedByInstaller = restart,
                     Output = stdout.Lines.ToList(),
                     Errors = errors,
                     DurationMs = clock.ElapsedMilliseconds,

@@ -134,10 +134,19 @@ internal static partial class PresentationText
             }
 
             var arguments = new object?[template.Count];
+            var validArguments = true;
             for (var i = 0; i < arguments.Length; i++)
             {
                 var captured = match.Groups[$"p{i}"].Value;
-                arguments[i] = FormatArgument(template, i, captured, culture, depth);
+                if (!TryFormatArgument(template, i, captured, culture, depth, out arguments[i]))
+                {
+                    validArguments = false;
+                    break;
+                }
+            }
+            if (!validArguments)
+            {
+                continue;
             }
 
             return string.Format(culture, template.Format, arguments);
@@ -154,29 +163,40 @@ internal static partial class PresentationText
         return text;
     }
 
-    private static object FormatArgument(Template template, int index, string text, CultureInfo culture, int depth)
+    private static bool TryFormatArgument(Template template, int index, string text, CultureInfo culture, int depth, out object? formatted)
     {
         if (template.SourceFormats.TryGetValue(index, out var format))
         {
-            if (format is "HH:mm:ss" or "g" &&
-                DateTime.TryParseExact(text, format, LocalizationService.SourceCulture, DateTimeStyles.None, out var time))
+            if (format is "HH:mm:ss" or "g")
             {
-                return time;
+                if (DateTime.TryParseExact(text, format, LocalizationService.SourceCulture, DateTimeStyles.None, out var time))
+                {
+                    formatted = time;
+                    return true;
+                }
+                formatted = null;
+                return false;
             }
-            if (format.StartsWith('N') &&
-                decimal.TryParse(text, NumberStyles.Number, LocalizationService.SourceCulture, out var number))
+            if (format.StartsWith('N'))
             {
-                return number;
+                if (decimal.TryParse(text, NumberStyles.Number, LocalizationService.SourceCulture, out var number))
+                {
+                    formatted = number;
+                    return true;
+                }
+                formatted = null;
+                return false;
             }
         }
 
-        return template.Key is "Message.ThemeChangedTo0" ||
+        formatted = template.Key is "Message.ThemeChangedTo0" ||
             (index == 1 && template.Key == "Message.RestoreFailed01") ||
             (index == 2 && template.Key == "Message.ResidueHistoryDetails" && text == LocalizationService.Source("Message.ResidueHistoryNoBackups")) ||
             (LocalizedMeasurement().IsMatch(text) && template.Key is "Message.Capacity0Used1Free2" or
-                "Message.PotentialSavings0SizesAvailableFor1Of" or "Message.0CategorySelectedEstimatedSize1")
+                "Message.PotentialSavings0SizesAvailableFor1Of" or "Message.0CategorySelectedEstimatedSize1" or "Cleanup.Result")
             ? Translate(text, culture, depth + 1)
             : text;
+        return true;
     }
 
     private static Catalog BuildCatalog(CultureInfo culture)
@@ -193,7 +213,18 @@ internal static partial class PresentationText
             }
 
             if (!key.StartsWith("Message.", StringComparison.Ordinal) && !key.StartsWith("Navigation.", StringComparison.Ordinal) &&
-                !key.StartsWith("UpdateOperation.", StringComparison.Ordinal))
+                !key.StartsWith("UpdateOperation.", StringComparison.Ordinal) && !key.StartsWith("UpdatesList.", StringComparison.Ordinal) &&
+                !key.StartsWith("Cleanup.", StringComparison.Ordinal) &&
+                !key.StartsWith("Essentials.", StringComparison.Ordinal) &&
+                !key.StartsWith("Startup.", StringComparison.Ordinal) &&
+                !key.StartsWith("Maintenance.", StringComparison.Ordinal) &&
+                !key.StartsWith("About.", StringComparison.Ordinal) &&
+                !key.StartsWith("UpdatesDiagnostics.", StringComparison.Ordinal) &&
+                !key.StartsWith("DiskHealth.", StringComparison.Ordinal) &&
+                !key.StartsWith("ResidueAdvanced.", StringComparison.Ordinal) &&
+                !key.StartsWith("Optional.", StringComparison.Ordinal) &&
+                !key.StartsWith("Uninstaller.", StringComparison.Ordinal) &&
+                !key.StartsWith("Updater.", StringComparison.Ordinal))
             {
                 continue;
             }

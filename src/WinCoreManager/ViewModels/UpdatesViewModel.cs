@@ -19,6 +19,7 @@ public partial class UpdatesViewModel : ViewModelBase
     private CancellationTokenSource? _updateCts;
     private bool _initialized;
     private bool _batchSelecting;
+    private bool _scanIncomplete;
     private ICollectionView? _filteredView;
 
     public UpdatesViewModel(IWinGetService winGet, IHistoryService history)
@@ -38,8 +39,15 @@ public partial class UpdatesViewModel : ViewModelBase
     [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelUpdateCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ResumeUpdatesCommand))]
     [NotifyCanExecuteChangedFor(nameof(ResolveInterruptionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ReviewInterruptionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DismissWarningCommand))]
+    [NotifyPropertyChangedFor(nameof(RecoveryActionDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(RefreshDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
+    [NotifyPropertyChangedFor(nameof(CanSelectVisible))]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     [NotifyPropertyChangedFor(nameof(ShowLog))]
     [NotifyPropertyChangedFor(nameof(HasUpdateControls))]
@@ -50,9 +58,17 @@ public partial class UpdatesViewModel : ViewModelBase
     [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelUpdateCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ResumeUpdatesCommand))]
+    [NotifyPropertyChangedFor(nameof(ShowResumeUpdates))]
     [NotifyCanExecuteChangedFor(nameof(ResolveInterruptionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ReviewInterruptionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DismissWarningCommand))]
+    [NotifyPropertyChangedFor(nameof(RecoveryActionDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(RefreshDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
     [NotifyPropertyChangedFor(nameof(BlocksPackageChanges))]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
+    [NotifyPropertyChangedFor(nameof(CanSelectVisible))]
     [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     [NotifyPropertyChangedFor(nameof(ShowLog))]
     [NotifyPropertyChangedFor(nameof(ShowUpdateDetails))]
@@ -61,6 +77,8 @@ public partial class UpdatesViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
     [NotifyPropertyChangedFor(nameof(AllSelected))]
+    [NotifyPropertyChangedFor(nameof(VisibleSelection))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
     private int _selectedCount;
 
     [ObservableProperty]
@@ -73,10 +91,9 @@ public partial class UpdatesViewModel : ViewModelBase
     private string _currentOperation = string.Empty;
 
     [ObservableProperty]
-    private double _updateProgress;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EmptyStateTitle))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
+    [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
     private bool _scanFailed;
 
     /// <summary>Resumo para o dashboard.</summary>
@@ -90,13 +107,21 @@ public partial class UpdatesViewModel : ViewModelBase
 
     public bool ShowEmptyState => !IsScanning && !Rows.Any(FilterRow);
 
-    public bool ShowLog => IsUpdating || LogLines.Count > 0;
+    public bool ShowLog => IsUpdating || LogLines.Count > 0 || ShowAttemptHistory;
     public string EmptyStateTitle => LocalizationService.Source(ScanFailed ? "Message.ScanUnavailable"
         : Rows.Count == 0 ? "Message.UpdatesList.Empty" : Rows.All(IsHidden) ? "Message.UpdatesList.AllHidden" : "Message.UpdatesList.NoMatches");
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(ShowResumeUpdates))]
     private bool _maintenanceRunning;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(ShowResumeUpdates))]
+    private bool _uninstallRunning;
 
     partial void OnSearchTextChanged(string value)
     {
@@ -147,6 +172,8 @@ public partial class UpdatesViewModel : ViewModelBase
     {
         SelectedCount = VisibleSelectableRows.Count(row => row.IsSelected);
         OnPropertyChanged(nameof(AllSelected));
+        OnPropertyChanged(nameof(VisibleSelection));
+        OnPropertyChanged(nameof(CanSelectVisible));
     }
 
     private bool IsVisible(UpdateItemRow row) => _filteredView?.Filter?.Invoke(row) ?? FilterRow(row);
@@ -169,10 +196,20 @@ public partial class UpdatesViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanRefresh))]
     private async Task RefreshAsync()
     {
-        await DetectAndScanAsync().ConfigureAwait(true);
+        await DetectAndScanAsync(preserveSelection: true).ConfigureAwait(true);
     }
 
-    private bool CanRefresh() => !IsBusy && !IsCheckingInterruption;
+    private bool CanRefresh() => RefreshDisabledReason is null;
+
+    public string? RefreshDisabledReason => IsBusy || IsCheckingInterruption || IsPreparingResume
+        ? L("Message.PackageAction.Busy") : null;
+
+    public bool? VisibleSelection
+    {
+        get => SelectedCount == 0 ? false : AllSelected ? true : null;
+        set { if (CanSelectVisible) AllSelected = value == true; }
+    }
+    public bool CanSelectVisible => !IsBusy && VisibleSelectableRows.Any();
 
     public bool AllSelected
     {
@@ -205,7 +242,24 @@ public partial class UpdatesViewModel : ViewModelBase
             return;
         }
 
-        var selected = VisibleSelectableRows.Where(row => row.IsSelected).ToList();
+        var selected = VisibleSelectableRows.Where(row => row.IsSelected).ToArray();
+        if (!ConfirmBatch(selected)) return;
+        RefreshInterruptionState();
+        if (!CanUpdateSelected() ||
+            !VisibleSelectableRows.Where(row => row.IsSelected).SequenceEqual(selected))
+            return;
+
+        if (HasSuspendedQueue && !TryConsumeSuspendedQueue())
+        {
+            RefreshInterruptionState();
+            StatusText = L("UpdateOperation.SuspendedQueueUnavailable");
+            return;
+        }
+        await RunBatchAsync(selected);
+    }
+
+    private async Task RunBatchAsync(IReadOnlyList<UpdateItemRow> selected)
+    {
         if (selected.Count == 0)
         {
             return;
@@ -215,8 +269,11 @@ public partial class UpdatesViewModel : ViewModelBase
         _updateCts = cancellation;
         var ct = cancellation.Token;
 
-        IsUpdating = true;
-        UpdateProgress = 0;
+        SetSuspendedQueue([]);
+        IsCancelRequested = false;
+        PrepareBatchPanel(selected.Count);
+        Results.Clear();
+        PendingBatch = selected.Select(row => row.Package).ToArray();
 
         AppendLog(LocalizationService.Source("Message.UpdateStartedSelectedApps0", selected.Count));
 
@@ -225,29 +282,37 @@ public partial class UpdatesViewModel : ViewModelBase
         var cancelled = 0;
         var inconclusive = 0;
         var processed = 0;
-        IsCancelRequested = false;
-
+        Guid? suspendedReceiptId = null;
+        Guid? handoffReceiptId = null;
         try
         {
-            foreach (var (row, index) in selected.Select((r, i) => (r, i)))
+            StatusText = L("Message.Updating");
+            IsUpdating = true;
+            for (var index = 0; index < selected.Count; index++)
             {
-                if (ct.IsCancellationRequested)
-                {
-                    break;
-                }
+                if (ct.IsCancellationRequested) break;
 
+                var row = selected[index];
+                PendingBatch = selected.Skip(index + 1).Select(item => item.Package).ToArray();
+                var previousStatus = row.Status;
                 row.Status = UpdateRowStatus.Running;
                 using var itemCancellation = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                _itemCts = itemCancellation;
                 var operation = StartOperation(row, index + 1, selected.Count);
-                UpdateProgress = index * 100.0 / selected.Count;
 
                 ProcessRunResult result;
                 string? installedVersion = null;
                 WinGetAttemptDecision decision;
+                var historyHandled = false;
+                if (ct.IsCancellationRequested)
+                {
+                    row.Status = previousStatus;
+                    break;
+                }
                 if (_winGet is IControlledWinGetService controlled)
                 {
-                    (result, installedVersion, decision) = await RunControlledItemAsync(controlled, row.Package, operation, itemCancellation.Token);
+                    (result, installedVersion, decision, historyHandled) =
+                        await RunControlledItemAsync(controlled, row, operation, PendingBatch, itemCancellation.Token);
+                    handoffReceiptId = operation.ReceiptId ?? handoffReceiptId;
                 }
                 else
                 {
@@ -258,12 +323,22 @@ public partial class UpdatesViewModel : ViewModelBase
                     decision = WinGetAttemptDecision.Evaluate(result, null, row.AvailableVersion, verifyInventory: false);
                 }
 
-                _itemCts = null;
+                if (itemCancellation.IsCancellationRequested && result.Cancelled && !decision.KeepReceipt &&
+                    WinGetAttemptDecision.ProvesNoLaunch(result, operation.Control))
+                {
+                    row.Status = previousStatus;
+                    break;
+                }
 
                 var outcome = MapOutcome(row, result, installedVersion, decision);
-                FinishOperation(outcome.status, outcome.message);
+                Results.Add(new(row.Name, row.Id, decision.RestartRequired ? L("UpdateOperation.RestartPending") : row.StatusText,
+                    outcome.message, PackageLog(result), row.InstalledVersion, row.AvailableVersion,
+                    result.StartFailed || !result.HasExitCode ? null : result.ExitCode, DateTimeOffset.Now,
+                    LogTruncated: result.Output.Count + result.Errors.Count > 120 ||
+                        result.Output.Concat(result.Errors).Append(result.StartError ?? "").Any(line => line.Length > 1024)));
                 processed++;
-                UpdateProgress = processed * 100.0 / selected.Count;
+                RemainingUpdates = selected.Count - processed;
+                FinishOperation(outcome.status, outcome.message);
                 switch (outcome.status)
                 {
                     case UpdateRowStatus.Success:
@@ -289,10 +364,13 @@ public partial class UpdatesViewModel : ViewModelBase
                     NotifySummaryChanged();
                 }
 
-                await RecordHistoryAsync(row, result, outcome.status, outcome.message, installedVersion).ConfigureAwait(true);
+                if (!historyHandled)
+                    await RecordHistoryAsync(row, result, outcome.status, outcome.message, installedVersion).ConfigureAwait(true);
 
-                if (!decision.CanAdvance || (decision.Status == WinGetAttemptStatus.Cancelled && !itemCancellation.IsCancellationRequested))
+                if (!decision.CanAdvance || (decision.Status == WinGetAttemptStatus.Cancelled &&
+                    !itemCancellation.IsCancellationRequested && !WingetExitCodes.ReportsWindowsCancellation(result)))
                 {
+                    suspendedReceiptId = operation.ReceiptId;
                     break;
                 }
             }
@@ -300,21 +378,47 @@ public partial class UpdatesViewModel : ViewModelBase
         finally
         {
             _updateCts = null;
-            _itemCts = null;
             EndOperationMonitoring();
-            IsUpdating = false;
             CurrentOperation = string.Empty;
             var remaining = selected.Count - processed;
+            PendingBatch = selected.Skip(processed).Select(row => row.Package).ToArray();
+            var needsReview = OperationInterrupted || HasInterruptedUpdate;
+            if ((ct.IsCancellationRequested || needsReview) && OperationStatus != L("UpdateOperation.RestartPending"))
+                OperationStatus = LocalizationService.Source(needsReview ? "UpdateOperation.QueueNeedsReview" : "UpdateOperation.QueueStopped");
+            if (!ct.IsCancellationRequested && HasInterruptedUpdate)
+                SaveSuspendedQueue(suspendedReceiptId, selected.Skip(processed).Select(row => row.Package).ToArray());
+            else if (handoffReceiptId is { } handoff)
+            {
+                // The batch ended in this session without suspending: drop the crash checkpoint it handed over.
+                try { _interruptionStore?.ConsumeSuspendedQueue(handoff); }
+                catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+                { AppendLog(L("UpdateOperation.SuspendedQueueUnavailable")); }
+            }
+            RemainingUpdates = remaining;
             var summary = LocalizationService.Source("UpdateOperation.BatchTotals", successes, failures, cancelled, inconclusive, remaining);
-            AppendLog(LocalizationService.Source("Message.Done0", summary));
-            StatusText = ct.IsCancellationRequested || remaining > 0 || OperationInterrupted || HasInterruptedUpdate
-                ? LocalizationService.Source("Message.BatchInterrupted0", summary) : LocalizationService.Source("Message.Complete0", summary);
+            BatchSummary = summary;
+            AppendLog(summary);
+            StatusText = summary;
+            IsUpdating = false;
+            RefreshInterruptionState();
             _closeCompletion?.TrySetResult();
             _closeCompletion = null;
         }
     }
 
-    private bool CanUpdateSelected() => !IsBusy && !HasInterruptedUpdate && _interruptionStore?.HasReceipt != true && !IsCheckingInterruption && !MaintenanceRunning && SelectedCount > 0;
+    private bool CanUpdateSelected() => UpdateSelectedDisabledReason is null;
+
+    public string? UpdateSelectedDisabledReason
+    {
+        get
+        {
+            if (PendingPackageChangeHint is { } pending) return pending;
+            if (MaintenanceRunning) return L("Message.PackageAction.Maintenance");
+            if (IsBusy || IsCheckingInterruption || IsPreparingResume || UninstallRunning) return L("Message.PackageAction.Busy");
+            if (ScanFailed) return L("Message.PackageAction.InventoryUnavailable");
+            return SelectedCount == 0 ? L("Message.PackageAction.NoSelection") : null;
+        }
+    }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CancelUpdateCommand))]
@@ -324,12 +428,20 @@ public partial class UpdatesViewModel : ViewModelBase
     private void CancelUpdate()
     {
         if (!CanCancelUpdate()) return;
+        var cancellation = _updateCts ?? _scanCts!;
+        _operation?.Control.RequestBatchStop();
+        cancellation.Cancel();
         IsCancelRequested = true;
-        (_updateCts ?? _scanCts)?.Cancel();
+        if (_updateCts is not null)
+        {
+            OperationStatus = LocalizationService.Source("UpdateOperation.QueueStopping");
+            ShowDownloadProgress = false;
+        }
         UpdateOperationPanel();
     }
 
-    private bool CanCancelUpdate() => IsBusy && !IsCancelRequested;
+    private bool CanCancelUpdate() => !IsCancelRequested &&
+        (_updateCts is { IsCancellationRequested: false } && IsUpdating || _scanCts is { IsCancellationRequested: false } && IsScanning);
 
     private (UpdateRowStatus status, string message) MapOutcome(UpdateItemRow row, ProcessRunResult result,
         string? installedVersion, WinGetAttemptDecision decision)
@@ -338,6 +450,7 @@ public partial class UpdatesViewModel : ViewModelBase
         {
             WinGetAttemptStatus.Succeeded when decision.KeepReceipt => UpdateRowStatus.Interrupted,
             WinGetAttemptStatus.Succeeded => UpdateRowStatus.Success,
+            WinGetAttemptStatus.Cancelled when decision.KeepReceipt && IsCancelRequested => UpdateRowStatus.Interrupted,
             WinGetAttemptStatus.Cancelled => UpdateRowStatus.Cancelled,
             WinGetAttemptStatus.Inconclusive => UpdateRowStatus.Interrupted,
             _ => UpdateRowStatus.Failed,
@@ -349,6 +462,7 @@ public partial class UpdatesViewModel : ViewModelBase
                 WinGetAttemptStatus.Succeeded when decision.KeepReceipt => LocalizationService.Source("UpdateOperation.AttemptOnly"),
                 WinGetAttemptStatus.Succeeded when installedVersion is not null => LocalizationService.Source("UpdateOperation.VerifiedVersion", installedVersion),
                 WinGetAttemptStatus.Succeeded => LocalizationService.Source("Message.UpdatedSuccessfully"),
+                WinGetAttemptStatus.Cancelled when decision.KeepReceipt && IsCancelRequested => LocalizationService.Source("UpdateOperation.ExternalMayContinue"),
                 WinGetAttemptStatus.Cancelled => LocalizationService.Source("Message.CanceledByTheUser"),
                 WinGetAttemptStatus.Inconclusive when result.Interrupted => LocalizationService.Source("UpdateOperation.ExternalMayContinue"),
                 WinGetAttemptStatus.Inconclusive => LocalizationService.Source("UpdateOperation.VersionUnconfirmed", row.AvailableVersion, installedVersion ?? "\u2014"),
@@ -362,12 +476,19 @@ public partial class UpdatesViewModel : ViewModelBase
             details.Add(LocalizationService.Source("UpdateOperation.InstalledVersion", row.Name, installedVersion));
         if (!result.StartFailed && result.HasExitCode && (result.ExitCode != 0 || decision.Status == WinGetAttemptStatus.Inconclusive))
             details.Add(WingetExitCodes.Describe(result.ExitCode));
+        if (decision.Status == WinGetAttemptStatus.Cancelled && !WingetExitCodes.IsWindowsCancellation(result.ExitCode) &&
+            WingetExitCodes.ReportsWindowsCancellation(result))
+            details.Add(L("UpdateOperation.WindowsCancelled"));
         if (!result.StartFailed && result.StartError is { } diagnostic)
             details.Add(diagnostic);
+        if (decision.Status == WinGetAttemptStatus.Failed && result.InstallerFailureDetail is { } installerDetail)
+            details.Add(installerDetail);
+        else if (decision.Status == WinGetAttemptStatus.Failed && WingetExitCodes.ReportsWrappedInstallerCode(result, 1603))
+            details.Add(L("UpdateOperation.MsiFatalError"));
         if (!result.Interrupted && result.Observation.Delegation == DelegatedProcessState.KnownActive)
             details.Add(LocalizationService.Source("UpdateOperation.ExternalMayContinue"));
         if (decision.KeepReceipt)
-            details.Add(LocalizationService.Source(decision.RestartRequired ? "UpdateOperation.RecoveryRestart" : "UpdateOperation.RecoveryReview"));
+            details.Add(LocalizationService.Source(WinGetAttemptDecision.RecoveryNote(decision.PendingReason)));
 
         row.Status = status;
         var message = string.Join(Environment.NewLine, details);
@@ -375,7 +496,7 @@ public partial class UpdatesViewModel : ViewModelBase
         return (status, message);
     }
 
-    private async Task RecordHistoryAsync(UpdateItemRow row, ProcessRunResult result, UpdateRowStatus status, string message, string? installedVersion)
+    private async Task<bool> RecordHistoryAsync(UpdateItemRow row, ProcessRunResult result, UpdateRowStatus status, string message, string? installedVersion)
     {
         try
         {
@@ -383,7 +504,8 @@ public partial class UpdatesViewModel : ViewModelBase
             {
                 Type = HistoryType.Update,
                 Target = row.Name,
-                Details = $"{row.Id} — origem: {(row.Source.Length > 0 ? row.Source : "—")}",
+                Details = $"{row.Id} — origem: {(row.Source.Length > 0 ? row.Source : "—")}" +
+                    $"{Environment.NewLine}TargetVersion: {row.AvailableVersion}",
                 Status = status switch
                 {
                     UpdateRowStatus.Success or UpdateRowStatus.SuccessRebootRequired => HistoryStatus.Success,
@@ -397,18 +519,20 @@ public partial class UpdatesViewModel : ViewModelBase
                 VersionFrom = row.InstalledVersion,
                 VersionTo = installedVersion ?? (_winGet is IControlledWinGetService ? string.Empty : row.AvailableVersion),
             }).ConfigureAwait(true);
+            return true;
         }
         catch
         {
             AppendLog(LocalizationService.Source("Message.ErrorCouldNotSaveTheResultFor0", row.Name));
+            return false;
         }
     }
 
-    private async Task DetectAndScanAsync()
+    private async Task<bool> DetectAndScanAsync(bool preserveSelection = false)
     {
-        if (IsScanning || IsUpdating || IsCheckingInterruption)
+        if (IsScanning || IsUpdating || (IsCheckingInterruption && !preserveSelection))
         {
-            return;
+            return false;
         }
 
         using var cancellation = new CancellationTokenSource();
@@ -423,29 +547,37 @@ public partial class UpdatesViewModel : ViewModelBase
         try
         {
             var availability = await _winGet.DetectAsync(ct).ConfigureAwait(true);
+            ct.ThrowIfCancellationRequested();
             if (!availability.IsInstalled)
             {
                 SetScanError(availability.Error ?? LocalizationService.Source("Message.WinGetIsUnavailable"));
-                return;
+                return false;
             }
 
             StatusText = LocalizationService.Source("Message.CheckingForAvailableUpdates");
             CurrentOperation = StatusText;
 
             var scan = await _winGet.ListUpdatesAsync(ct).ConfigureAwait(true);
+            ct.ThrowIfCancellationRequested();
 
             if (scan.Failed)
             {
                 SetScanError(scan.Error ?? LocalizationService.Source("Message.CouldNotCheckWinGet2"));
                 AppendScanOutput(scan.RawOutput);
-                return;
+                return false;
             }
 
+            var selected = preserveSelection
+                ? VisibleSelectableRows.Where(row => row.IsSelected).Select(row => (row.Source, row.Id)).ToHashSet()
+                : null;
             ScanFailed = false;
+            _scanIncomplete = scan.Error is not null || scan.UnreadableRows > 0;
             ClearRows();
             foreach (var package in scan.Packages)
             {
                 var row = new UpdateItemRow(package);
+                if (selected?.Contains((row.Source, row.Id)) == true && row.CanSelect && IsVisible(row))
+                    row.IsSelected = true;
                 row.PropertyChanged += OnRowPropertyChanged;
                 Rows.Add(row);
             }
@@ -456,28 +588,35 @@ public partial class UpdatesViewModel : ViewModelBase
             StatusText = LocalizationService.Source("Message.UpdatesList.CheckedAt", LastScanTime.Value);
 
             AppendScanOutput(scan.RawOutput);
-            if (scan.Error is { } catalogWarning) AppendLog(catalogWarning);
+            if (scan.Error is { } catalogWarning)
+            {
+                StatusText = L("UpdatesList.PartialScan");
+                AppendLog(catalogWarning);
+            }
             if (scan.UnreadableRows > 0)
             {
                 StatusText += LocalizationService.Source("Message.RowsSkippedDueToIncompleteData0", scan.UnreadableRows);
             }
 
             AppendLog(LocalizationService.Source("Message.UpdatesList.ScanDetected", AvailableCount));
+            return true;
         }
         catch (OperationCanceledException)
         {
             StatusText = LocalizationService.Source("Message.ScanCanceled");
+            return false;
         }
         catch (Exception ex)
         {
             SetScanError(ex.Message);
+            return false;
         }
         finally
         {
             _scanCts = null;
+            RecountSelected();
             IsScanning = false;
             CurrentOperation = string.Empty;
-            RecountSelected();
         }
     }
 
@@ -486,6 +625,7 @@ public partial class UpdatesViewModel : ViewModelBase
         ClearRows();
         LastScanTime = DateTimeOffset.Now;
         ScanFailed = true;
+        _scanIncomplete = true;
         StatusText = message;
         AppendLog(LocalizationService.Source("Message.Error") + message);
     }

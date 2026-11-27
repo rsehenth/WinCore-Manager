@@ -19,7 +19,14 @@ internal static class WinGetInstallerRequirements
         AllowAutoRedirect = false, UseCookies = false,
     });
 
-    internal static async Task<bool?> ReadLocationRequirementAsync(WinGetPackage package, CancellationToken token)
+    internal static Task<bool?> ReadLocationRequirementAsync(WinGetPackage package, CancellationToken token) =>
+        ReadRequirementAsync(package, token, requireAuditedMsi: false);
+
+    internal static async Task<bool> ReadAuditedMsiAsync(WinGetPackage package, CancellationToken token) =>
+        WinGetMsiUpgrade.IsExactTarget(package) &&
+        await ReadRequirementAsync(package, token, requireAuditedMsi: true).ConfigureAwait(false) == false;
+
+    private static async Task<bool?> ReadRequirementAsync(WinGetPackage package, CancellationToken token, bool requireAuditedMsi)
     {
         // Store packages use the Store installer contract and expose no custom install directory.
         if (package.Source == "msstore") return false;
@@ -38,11 +45,11 @@ internal static class WinGetInstallerRequirements
             using var installer = await Client.GetAsync(prefix + ".installer.yaml", HttpCompletionOption.ResponseHeadersRead,
                 deadline.Token).ConfigureAwait(false);
             if (installer.StatusCode != HttpStatusCode.NotFound)
-                return await ReadManifestAsync(installer, package, "installer", deadline.Token).ConfigureAwait(false);
+                return await ReadManifestAsync(installer, package, "installer", deadline.Token, requireAuditedMsi).ConfigureAwait(false);
 
             using var singleton = await Client.GetAsync(prefix + ".yaml", HttpCompletionOption.ResponseHeadersRead,
                 deadline.Token).ConfigureAwait(false);
-            return await ReadManifestAsync(singleton, package, "singleton", deadline.Token).ConfigureAwait(false);
+            return await ReadManifestAsync(singleton, package, "singleton", deadline.Token, requireAuditedMsi).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException ||
                                    ex is OperationCanceledException && !token.IsCancellationRequested)
@@ -54,7 +61,7 @@ internal static class WinGetInstallerRequirements
         value.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_' or '+');
 
     private static async Task<bool?> ReadManifestAsync(HttpResponseMessage response, WinGetPackage package,
-        string type, CancellationToken token)
+        string type, CancellationToken token, bool requireAuditedMsi)
     {
         if (response.StatusCode != HttpStatusCode.OK || response.Content.Headers.ContentLength > MaxManifestBytes)
             return null;
@@ -62,10 +69,10 @@ internal static class WinGetInstallerRequirements
         var bytes = new byte[MaxManifestBytes + 1];
         var length = await stream.ReadAtLeastAsync(bytes, bytes.Length, false, token).ConfigureAwait(false);
         if (length > MaxManifestBytes) return null;
-        return ParseLocationRequirement(Encoding.UTF8.GetString(bytes, 0, length).TrimStart('\uFEFF'), package, type);
+        return ParseLocationRequirement(Encoding.UTF8.GetString(bytes, 0, length).TrimStart('\uFEFF'), package, type, requireAuditedMsi);
     }
 
-    internal static bool? ParseLocationRequirement(string content, WinGetPackage package, string type = "installer")
+    internal static bool? ParseLocationRequirement(string content, WinGetPackage package, string type = "installer", bool requireAuditedMsi = false)
     {
         if (content.Length > MaxManifestBytes) return null;
         try
@@ -90,6 +97,8 @@ internal static class WinGetInstallerRequirements
                 node is not YamlSequenceNode sequence || sequence.Children.Count == 0)
                 return null;
 
+            if (requireAuditedMsi && (!WinGetMsiUpgrade.IsExactTarget(package) || !MatchesAuditedMsi(root, sequence))) return null;
+
             var inherited = ReadRequirement(root, false);
             var required = false;
             var verifyBattleNet = WinGetBattleNetInstallation.IsExactTarget(package) &&
@@ -113,6 +122,19 @@ internal static class WinGetInstallerRequirements
 
     private static YamlNode? Value(YamlMappingNode map, string key) =>
         map.Children.TryGetValue(new YamlScalarNode(key), out var node) ? node : null;
+
+    private static bool MatchesAuditedMsi(YamlMappingNode root, YamlSequenceNode installers)
+    {
+        string? Effective(YamlMappingNode installer, string key) => Scalar(installer, key) ?? Scalar(root, key);
+        var matches = installers.Children.OfType<YamlMappingNode>().Where(installer =>
+            Scalar(installer, "Architecture") == "x64" && Effective(installer, "InstallerType") == "wix").ToArray();
+        return matches is [var msi] && Effective(msi, "Scope") == "machine" && Effective(msi, "UpgradeBehavior") == "install" &&
+            Scalar(msi, "InstallerUrl") == "https://github.com/cli/cli/releases/download/v2.106.0/gh_2.106.0_windows_amd64.msi" &&
+            string.Equals(Scalar(msi, "InstallerSha256"), WinGetMsiUpgrade.TargetSha256, StringComparison.OrdinalIgnoreCase) &&
+            Effective(msi, "ProductCode") == WinGetMsiUpgrade.TargetProduct &&
+            new[] { "Dependencies", "InstallerSuccessCodes", "ExpectedReturnCodes", "NestedInstallerType" }
+                .All(key => Value(root, key) is null && Value(msi, key) is null);
+    }
 
     private static bool MatchesBattleNetInstaller(YamlMappingNode root, YamlMappingNode installer)
     {

@@ -1,5 +1,5 @@
 using WinCoreManager.Localization;
-using System.Globalization;
+using System.Diagnostics;
 using WinCoreManager.Models;
 using WinCoreManager.Services.Startup;
 
@@ -13,7 +13,10 @@ public sealed record WindowsVolume(string Root, string Identity, long Capacity, 
 }
 
 public sealed record CleanupCategory(string Id, string Name, string Description, long? Bytes,
-    string Attention, string Elevation, bool Selectable, string Availability, long? Items = null);
+    string Attention, string Elevation, bool Selectable, string Availability, long? Items = null)
+{
+    internal CleanupFileScan? FileScan { get; init; }
+}
 
 public sealed record CleanupSnapshot(WindowsVolume? Volume, IReadOnlyList<CleanupCategory> Categories,
     bool NativeAvailable, string StatusKey)
@@ -24,6 +27,7 @@ public sealed record CleanupSnapshot(WindowsVolume? Volume, IReadOnlyList<Cleanu
 }
 
 public sealed record RecycleEstimate(long Bytes, long Items);
+internal sealed record CleanupExecution(string Message, string Details = "");
 
 public interface ICleanupPlatform
 {
@@ -37,18 +41,24 @@ public sealed class CleanupService(ICleanupPlatform platform, IWindowsTools tool
 {
     internal const string RecycleBin = "Recycle Bin";
     private readonly SemaphoreSlim _gate = new(1, 1);
+    internal CleanupFiles? DirectFiles { get; init; }
 
-    public Task<CleanupSnapshot> ReadAsync() => Task.Run(Read);
+    public Task<CleanupSnapshot> ReadAsync(CancellationToken token = default) => ReadAsync(token, null);
 
-    private CleanupSnapshot Read()
+    internal Task<CleanupSnapshot> ReadAsync(CancellationToken token, IProgress<CleanupProgress>? progress) =>
+        Task.Run(() => Read(token, progress), token);
+
+    private CleanupSnapshot Read(CancellationToken token, IProgress<CleanupProgress>? progress)
     {
-        WindowsVolume volume;
+        WindowsVolume? volume = null;
+        var status = "";
         try { volume = platform.ReadWindowsVolume(); }
         catch (Exception ex) when (StartupErrors.Expected(ex) || ex is EntryPointNotFoundException or OverflowException)
-        { return new(null, [], false, "Message.TheWindowsVolumeCouldNotBeIdentified"); }
+        { status = "Message.TheWindowsVolumeCouldNotBeIdentified"; }
+        var direct = DirectFiles?.Scan(token, progress) ?? [];
+        if (volume is null) return new(null, direct, false, status);
 
         IReadOnlyList<CleanupCategory> catalog;
-        var status = "";
         try { catalog = platform.ReadCatalog(); }
         catch (Exception ex) when (StartupErrors.Expected(ex))
         {
@@ -56,9 +66,15 @@ public sealed class CleanupService(ICleanupPlatform platform, IWindowsTools tool
             status = "Message.TheDiskCleanupCatalogIsUnavailable";
         }
 
+        if (DirectFiles is not null && !catalog.Any(category => category.Id.Equals(RecycleBin, StringComparison.OrdinalIgnoreCase)))
+            catalog = [new(RecycleBin, LocalizationService.Source("Message.RecycleBin"),
+                LocalizationService.Source("Message.EmptyingTheRecycleBinPermanentlyDeletesFilesYou"), null,
+                "Alta", LocalizationService.Source("Message.AdministratorApprovalNotRequired"), false, ""), .. catalog];
+
         var rows = catalog.Select(category =>
         {
-            if (!category.Id.Equals(RecycleBin, StringComparison.OrdinalIgnoreCase)) return category;
+            if (!category.Id.Equals(RecycleBin, StringComparison.OrdinalIgnoreCase))
+                return category with { Bytes = null, Items = null, Selectable = false, Availability = LocalizationService.Source("Message.CleanupDelegated") };
             var estimate = QueryRecycleBin(volume.Root);
             return category with
             {
@@ -74,7 +90,7 @@ public sealed class CleanupService(ICleanupPlatform platform, IWindowsTools tool
             };
         }).ToArray();
         if (status.Length == 0 && rows.Length == 0) status = "Message.NoRegisteredCategoriesWereFound";
-        return new(volume, rows, tools.IsAvailable(WindowsTool.DiskCleanup), status);
+        return new(volume, [.. direct, .. rows], tools.IsAvailable(WindowsTool.DiskCleanup), status);
     }
 
     public WindowsActionResult OpenNative(WindowsVolume? expected)
@@ -87,6 +103,8 @@ public sealed class CleanupService(ICleanupPlatform platform, IWindowsTools tool
         }
         catch (Exception ex) when (StartupErrors.Expected(ex)) { return InvalidVolume(); }
     }
+
+    internal WindowsActionResult OpenRecycleBin() => tools.Open(WindowsTool.RecycleBin);
 
     public async Task<WindowsActionResult> EmptyAsync(CleanupSnapshot snapshot, CleanupCategory selection,
         bool confirmed, nint owner)
@@ -113,7 +131,7 @@ public sealed class CleanupService(ICleanupPlatform platform, IWindowsTools tool
                     var action = platform.EmptyRecycleBin(live.Root, owner);
                     if (!action.Success) return action;
                     return QueryRecycleBin(live.Root) is { Items: 0 }
-                        ? new(true, LocalizationService.Source("Message.TheRecycleBinOn0WasEmptiedAnd", live.Root))
+                        ? new(true, LocalizationService.Source("Message.CleanupRecycleVerified", live.Root, before.Items, FormatBytes(before.Bytes)))
                         : new(false, LocalizationService.Source("Message.WindowsCompletedTheOperationButTheRecycleBin"));
                 }
                 catch (Exception ex) when (StartupErrors.Expected(ex))
@@ -130,6 +148,53 @@ public sealed class CleanupService(ICleanupPlatform platform, IWindowsTools tool
             catch (Exception ex) when (StartupErrors.Expected(ex) || ex is Microsoft.Data.Sqlite.SqliteException)
             { return result with { Message = result.Message + LocalizationService.Source("Message.HistoryUnavailable") }; }
             return result;
+        }
+        finally { _gate.Release(); }
+    }
+
+    internal async Task<CleanupExecution> CleanFilesAsync(CleanupSnapshot snapshot,
+        IReadOnlyList<CleanupCategory> selection, bool confirmed, CancellationToken token,
+        IProgress<CleanupProgress>? progress = null)
+    {
+        if (!confirmed) return new(LocalizationService.Source("Message.CleanupCanceled"));
+        var cleaner = DirectFiles;
+        if (cleaner is null || selection.Count == 0 || selection.Any(item => !item.Selectable || item.FileScan?.Owner != cleaner
+            || !snapshot.Categories.Any(analyzed => ReferenceEquals(analyzed, item))))
+            return new(LocalizationService.Source("Message.CleanupAnalyzeFirst"));
+
+        await _gate.WaitAsync();
+        try
+        {
+            if (selection.Any(item => item.FileScan!.Targets.Count != item.FileScan.Count))
+                return new(LocalizationService.Source("Message.CleanupAnalyzeFirst"));
+
+            var elapsed = Stopwatch.StartNew();
+            var result = await Task.Run(() => cleaner.Delete(selection.Distinct().ToArray(), token, progress));
+            var message = LocalizationService.Source("Cleanup.Result", result.Removed, result.Skipped, result.Failed, FormatBytes(result.Recovered));
+            if (result.Cancelled)
+                message += " " + LocalizationService.Source("Cleanup.Remaining", result.Remaining);
+            var status = result.Cancelled ? HistoryStatus.Cancelled
+                : result.Skipped == 0 && result.Failed == 0 ? HistoryStatus.Success : HistoryStatus.Failure;
+            var details = string.Join(Environment.NewLine, result.Categories.SelectMany(item =>
+                new[] { LocalizationService.Source("Cleanup.CategoryResult",
+                    PresentationText.Translate(item.Category, LocalizationService.Current.Culture),
+                    item.Removed, item.Skipped, item.Failed, item.Remaining, FormatBytes(item.Recovered), item.Recovered) }
+                .Concat(item.Details.Select(line => PresentationText.Translate(line, LocalizationService.Current.Culture)))));
+            try
+            {
+                await history.AddAsync(new HistoryRecord
+                {
+                    Type = HistoryType.Cleanup,
+                    Target = string.Join(", ", selection.Select(item => PresentationText.Translate(item.Name, LocalizationService.Current.Culture))),
+                    Status = status,
+                    Message = message,
+                    Details = details,
+                    DurationMs = elapsed.ElapsedMilliseconds,
+                });
+            }
+            catch (Exception ex) when (StartupErrors.Expected(ex) || ex is Microsoft.Data.Sqlite.SqliteException)
+            { message += LocalizationService.Source("Message.HistoryUnavailable"); }
+            return new(message, details);
         }
         finally { _gate.Release(); }
     }

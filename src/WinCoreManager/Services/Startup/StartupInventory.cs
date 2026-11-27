@@ -11,7 +11,7 @@ public sealed record StartupEntry(
     string Location, string? FilePath, string? Arguments, string? Resolution, bool Recognized = false,
     string? Protection = null, string? Fingerprint = null, bool Stored = false, string? OriginalCommand = null)
 {
-    public bool CanChange => Source is StartupSource.UserFolder or StartupSource.UserRun && Fingerprint is not null
+    public bool CanChange => Source is StartupSource.UserFolder or StartupSource.UserRun or StartupSource.MachineRun32 or StartupSource.MachineRun64 && Fingerprint is not null
         && Protection is null && Status != StartupStatus.Unknown;
 }
 

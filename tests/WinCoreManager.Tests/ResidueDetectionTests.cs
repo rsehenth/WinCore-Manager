@@ -279,6 +279,35 @@ public class ResidueDetectionTests : IDisposable
         result.Items.FirstOrDefault(i => i.Location.Contains(locationPart, StringComparison.OrdinalIgnoreCase));
 
     [Fact]
+    public void Auditoria_dados_do_usuario_com_nome_exato_do_programa_removido_sao_elegiveis_e_local_apagado_some()
+    {
+        // FMSuperScout version 1.7.3 (Inno): Program Files already removed, data left in AppData\Local,
+        // including its WebView2 profile with component .dll and extension .js files.
+        var data = Path.Combine(_env.Local, "FMSuperScout");
+        Directory.CreateDirectory(Path.Combine(data, "history"));
+        Directory.CreateDirectory(Path.Combine(data, "window", "Domain Actions"));
+        File.WriteAllText(Path.Combine(data, "dump.json"), "{}");
+        File.WriteAllText(Path.Combine(data, "window", "Domain Actions", "domain_actions.dll"), "componente simulado");
+        // Same exact name outside the AppData roots (ProgramData) still needs manual review.
+        var withExecutable = Path.Combine(_env.ProgramData, "FMSuperScout");
+        Directory.CreateDirectory(withExecutable);
+        File.WriteAllText(Path.Combine(withExecutable, "helper.exe"), "binário simulado");
+        var removedInstall = Path.Combine(_env.ProgramFiles, "FMSuperScout");
+
+        var result = _engine.Detect(Program("FMSuperScout version 1.7.3", removedInstall), [], CancellationToken.None);
+
+        var eligible = Assert.Single(result.Items, i => i.Location.Equals(data, StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(ResidueConfidence.High, eligible.Confidence);
+        Assert.True(eligible.IsEligibleForCleanup);
+        Assert.NotNull(eligible.Fingerprint);
+        Assert.Equal(ResidueConfidence.Medium,
+            Assert.Single(result.Items, i => i.Location.Equals(withExecutable, StringComparison.OrdinalIgnoreCase)).Confidence);
+        Assert.DoesNotContain(result.Items, i => i.Location.StartsWith(removedInstall, StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("TraceDraw", ResidueNameMatcher.TrimProductName("TraceDraw versão 0.51.1"));
+        Assert.Equal("Ollama", ResidueNameMatcher.TrimProductName("Ollama version 0.40.18"));
+    }
+
+    [Fact]
     public void PastaComNomeExatoSemRegistroNaoEhElegivel()
     {
         var directory = Path.Combine(_env.ProgramFiles, "Exemplo App");

@@ -17,7 +17,6 @@ public partial class UpdatesViewModel
     private readonly WinGetInterruptionStore? _interruptionStore;
     private UpdateOperation? _operation;
     private DispatcherTimer? _operationTimer;
-    private CancellationTokenSource? _itemCts;
     private TaskCompletionSource? _closeCompletion;
     private bool _unpersistedInterruption;
     internal Func<WinGetPackage, CancellationToken, Task<string?>>? ChooseUpdateLocation { get; set; }
@@ -31,7 +30,11 @@ public partial class UpdatesViewModel
     internal bool TryReservePackageChange(PackageChangeKind kind, string target, out PackageChangeReservation? reservation)
     {
         reservation = null;
-        if (PackageChangesBlockedNow) return false;
+        if (PackageChangesBlockedNow)
+        {
+            RefreshInterruptionState();
+            return false;
+        }
         if (_interruptionStore is null) return true;
         try
         {
@@ -41,6 +44,7 @@ public partial class UpdatesViewModel
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            RefreshInterruptionState();
             AppendLog(LocalizationService.Source("UpdateOperation.ReceiptError", ex.Message));
         }
         return false;
@@ -48,7 +52,7 @@ public partial class UpdatesViewModel
 
     internal void RefreshInterruptionState()
     {
-        if (IsUpdating || IsCheckingInterruption) return;
+        if (IsUpdating || IsCheckingInterruption || UninstallRunning || MaintenanceRunning) return;
         var hasReceipt = _unpersistedInterruption || _interruptionStore?.HasReceipt == true;
         if (hasReceipt && !HasInterruptedUpdate)
             SetInterruptionNote("UpdateOperation.RecoveryReview");
@@ -56,7 +60,7 @@ public partial class UpdatesViewModel
         {
             _presentedReview = null;
             ObservedVersionForReview = null;
-            InterruptionTarget = InterruptionDetails = string.Empty;
+            InterruptionTarget = InterruptionState = InterruptionDetails = string.Empty;
         }
         HasInterruptedUpdate = hasReceipt;
     }
@@ -70,6 +74,7 @@ public partial class UpdatesViewModel
         _interruptionStore = store;
         HasInterruptedUpdate = store.HasReceipt;
         if (HasInterruptedUpdate) SetInterruptionNote("UpdateOperation.RecoveryReview");
+        RestoreSuspendedQueue();
     }
 
     [ObservableProperty] private string _operationTitle = string.Empty;
@@ -85,7 +90,23 @@ public partial class UpdatesViewModel
     [ObservableProperty] private bool _operationInterrupted;
     [ObservableProperty] private bool _showForce;
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowUnmeasuredProgress))]
+    private bool _showDownloadProgress;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowUnmeasuredProgress))]
+    private bool _showActiveProgress;
+    public bool ShowUnmeasuredProgress => ShowActiveProgress && !ShowDownloadProgress;
+    [ObservableProperty] private bool _downloadIndeterminate = true;
+    [ObservableProperty] private double _downloadPercent;
+    [ObservableProperty] private string _downloadPercentage = string.Empty;
+    [ObservableProperty] private string _downloadSize = string.Empty;
+    [ObservableProperty] private string _downloadRate = string.Empty;
+    [ObservableProperty] private string _downloadEta = string.Empty;
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PackageChangeBlockReason))]
+    [NotifyPropertyChangedFor(nameof(PendingPackageChangeHint))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(RecoveryActionStatus))]
     private string _interruptionNote = string.Empty;
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReviewInterruptionCommand))]
@@ -96,25 +117,49 @@ public partial class UpdatesViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BlocksPackageChanges))]
-    [NotifyPropertyChangedFor(nameof(HasUpdateControls))]
-    [NotifyPropertyChangedFor(nameof(ShowUpdateDetails))]
     [NotifyPropertyChangedFor(nameof(PackageChangeBlockReason))]
+    [NotifyPropertyChangedFor(nameof(PendingPackageChangeHint))]
+    [NotifyPropertyChangedFor(nameof(RecoveryActionDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(RecoveryCompletion))]
+    [NotifyPropertyChangedFor(nameof(ShowResumeUpdates))]
+    [NotifyPropertyChangedFor(nameof(RefreshDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
     [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(ResolveInterruptionCommand))]
     [NotifyCanExecuteChangedFor(nameof(ReviewInterruptionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DismissWarningCommand))]
     private bool _hasInterruptedUpdate;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BlocksPackageChanges))]
+    [NotifyPropertyChangedFor(nameof(UpdateSelectedDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(RecoveryActionDisabledReason))]
+    [NotifyPropertyChangedFor(nameof(RecoveryCompletion))]
+    [NotifyPropertyChangedFor(nameof(ShowResumeUpdates))]
     [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
     [NotifyCanExecuteChangedFor(nameof(ResolveInterruptionCommand))]
     [NotifyCanExecuteChangedFor(nameof(ReviewInterruptionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DismissWarningCommand))]
     private bool _isCheckingInterruption;
 
-    public bool BlocksPackageChanges => IsUpdating || HasInterruptedUpdate;
+    public bool BlocksPackageChanges => IsUpdating || HasInterruptedUpdate || IsCheckingInterruption;
     internal bool CanCloseWithoutWaiting => _operation?.Control.State == WinGetControlState.NeedsDecision && _interruptionStore is not null;
     internal bool CanCancelQueueForClose => IsUpdating && CanCancelUpdate();
     internal bool CanForceForClose => CanForceUpdate();
+
+    private void PrepareBatchPanel(int total)
+    {
+        RemainingUpdates = total;
+        BatchSummary = ResumeReview = string.Empty;
+        ResumeDifferences = [];
+        OperationTitle = OperationResult = OperationLastMessage = string.Empty;
+        OperationElapsed = "00:00:00";
+        OperationStalled = OperationInterrupted = false;
+        OperationStatus = LocalizationService.Source("UpdateOperation.Waiting");
+        SetDownloadProgress(false, null);
+        HasOperation = true;
+    }
 
     private UpdateOperation StartOperation(UpdateItemRow row, int position, int total)
     {
@@ -128,12 +173,14 @@ public partial class UpdatesViewModel
                     DispatcherPriority.Normal, token).Task,
         });
         _operation = operation;
+        RemainingUpdates = total - position;
         CurrentOperation = OperationTitle = LocalizationService.Source("UpdateOperation.QueuePosition", row.Name, position, total);
         OperationStatus = LocalizationService.Source("UpdateOperation.Waiting");
         OperationElapsed = "00:00:00";
         OperationLastMessage = string.Empty;
         OperationResult = string.Empty;
         OperationStalled = OperationInterrupted = false;
+        SetDownloadProgress(false, null);
         HasOperation = true;
         RefreshOperationActions();
         _operationTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(250), DispatcherPriority.Background,
@@ -145,17 +192,23 @@ public partial class UpdatesViewModel
     private void UpdateOperationPanel()
     {
         if (_operation is not { } operation) return;
-        var (lines, message, activity, phase) = operation.Output.Drain();
+        var (lines, message, activity, phase, sample) = operation.Output.Drain();
         foreach (var line in lines) AppendLogOnUi(line);
         if (message is not null) OperationLastMessage = message;
 
         var elapsed = operation.Clock.Elapsed;
         OperationElapsed = $"{(int)elapsed.TotalHours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
         var state = operation.Control.State;
-        if (state != WinGetControlState.Finished)
+        ShowActiveProgress = IsUpdating && state != WinGetControlState.Finished;
+        var downloading = !IsCancelRequested && ShowActiveProgress && phase == "UpdateOperation.Downloading";
+        SetDownloadProgress(downloading, downloading ? sample : null);
+        if (IsCancelRequested)
         {
-            OperationStatus = LocalizationService.Source(state is WinGetControlState.Cancelling or WinGetControlState.NeedsDecision ||
-                _itemCts?.IsCancellationRequested == true ? "UpdateOperation.Cancelling" : phase);
+            OperationStatus = LocalizationService.Source("UpdateOperation.QueueStopping");
+        }
+        else if (state != WinGetControlState.Finished)
+        {
+            OperationStatus = LocalizationService.Source(downloading && sample is null ? "UpdateOperation.DownloadIndeterminate" : phase);
         }
         var inactivitySeconds = Math.Clamp(_settings?.Settings.WinGetInactivitySeconds ?? 120, 1, 600);
         OperationStalled = state is WinGetControlState.Waiting or WinGetControlState.Running &&
@@ -163,30 +216,59 @@ public partial class UpdatesViewModel
         RefreshOperationActions();
     }
 
-    private async Task<(ProcessRunResult Result, string? InstalledVersion, WinGetAttemptDecision Decision)> RunControlledItemAsync(
-        IControlledWinGetService controlled, WinGetPackage package, UpdateOperation operation, CancellationToken token)
+    private void SetDownloadProgress(bool visible, WinGetDownloadSample? sample)
     {
+        DownloadIndeterminate = sample is null;
+        DownloadPercent = sample?.Percent ?? 0;
+        DownloadPercentage = sample is null ? string.Empty : LocalizationService.Source("UpdateOperation.DownloadPercentage", Math.Floor(DownloadPercent));
+        const double megabyte = 1 << 20;
+        const double gigabyte = 1 << 30;
+        var scale = sample?.Total >= gigabyte ? gigabyte : megabyte;
+        var unit = scale == gigabyte ? "GB" : "MB";
+        DownloadSize = sample is { } progress
+            ? LocalizationService.Source("UpdateOperation.DownloadAmount", progress.Downloaded / scale, unit, progress.Total / scale, unit)
+            : string.Empty;
+        DownloadRate = sample?.BytesPerSecond is { } rate && rate >= megabyte / 100
+            ? LocalizationService.Source("UpdateOperation.DownloadRate", rate / megabyte) : string.Empty;
+        DownloadEta = DownloadRate.Length > 0 && sample?.RemainingSeconds is { } seconds && seconds is > 0 and <= 86_400
+            ? LocalizationService.Source("UpdateOperation.DownloadEta", Math.Ceiling(seconds)) : string.Empty;
+        ShowDownloadProgress = visible;
+    }
+
+    private async Task<(ProcessRunResult Result, string? InstalledVersion, WinGetAttemptDecision Decision, bool HistoryHandled)> RunControlledItemAsync(
+        IControlledWinGetService controlled, UpdateItemRow row, UpdateOperation operation,
+        IReadOnlyList<WinGetPackage> pending, CancellationToken token)
+    {
+        var package = row.Package;
         WinGetInterruptionStore.Receipt? receipt = null;
         var launchRequested = false;
+        var historyHandled = false;
         ProcessRunResult result;
         string? installed = null;
         try
         {
             token.ThrowIfCancellationRequested();
-            if (await controlled.PrepareUpgradeAsync(package, operation.Control, token) is { } refusal)
-                return (refusal, null, WinGetAttemptDecision.Evaluate(refusal, null, package.AvailableVersion, verifyInventory: true));
+            var refusal = await controlled.PrepareUpgradeAsync(package, operation.Control, token);
+            token.ThrowIfCancellationRequested();
+            if (refusal is not null)
+                return (refusal, null, WinGetAttemptDecision.Evaluate(refusal, null, package.AvailableVersion, verifyInventory: true), false);
             if (_interruptionStore is not null)
             {
                 receipt = await Task.Run(() => _interruptionStore.BeginPrepared(package));
+                operation.ReceiptId = receipt.OperationId;
                 receipt.Bind(operation.Control);
+                try { await Task.Run(() => _interruptionStore.SaveSuspendedQueue(receipt, pending.ToArray())); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                { AppendLog(L("UpdateOperation.SuspendedQueueNotSaved")); }
             }
             token.ThrowIfCancellationRequested();
             launchRequested = true;
             result = await controlled.UpgradeControlledAsync(package, operation.Output.Write, operation.Control, token);
             operation.Control.State = WinGetControlState.Finished;
-            if (!result.StartFailed && !operation.Control.DetachRequested)
+            if (!result.StartFailed && !(result.Interrupted && operation.Control.BatchStopRequested) && !operation.Control.DetachRequested)
             {
-                OperationStatus = LocalizationService.Source("UpdateOperation.Verifying");
+                SetDownloadProgress(false, null);
+                if (!IsCancelRequested) OperationStatus = LocalizationService.Source("UpdateOperation.Confirming");
                 RefreshOperationActions();
                 installed = await ReadVersionAsync(controlled, package);
             }
@@ -202,22 +284,48 @@ public partial class UpdatesViewModel
 
         operation.Control.State = WinGetControlState.Finished;
         var decision = WinGetAttemptDecision.Evaluate(result, installed, package.AvailableVersion, verifyInventory: true,
-            identityPersisted: _interruptionStore is null || operation.Control.IdentityPersisted);
+            identityPersisted: _interruptionStore is null || operation.Control.IdentityPersisted,
+            cancelledWhileVerifying: !result.StartFailed && token.IsCancellationRequested && result.Observation.IsConclusive);
         var noLaunch = WinGetAttemptDecision.ProvesNoLaunch(result, operation.Control);
         if (result.StartFailed && !noLaunch) decision = decision.WithUnresolvedReceipt();
+        var identityHealthy = operation.Control.IdentityPersisted && operation.Control.IdentityPersistenceError is null;
         if (operation.Control.IdentityPersistenceError is { } identityError)
         {
             AppendLog(LocalizationService.Source("UpdateOperation.ReceiptError", identityError));
             decision = decision.WithUnresolvedReceipt();
         }
 
-        using (receipt)
+        if (receipt is not null)
         {
+            using var lease = receipt;
             try
             {
-                if (receipt is not null && noLaunch) await Task.Run(receipt.MarkNotStarted);
-                if (receipt is not null && !decision.KeepReceipt) await Task.Run(receipt.Clear);
-                else if (receipt is not null && !noLaunch) await Task.Run(() => receipt.RecordOutcome(result));
+                if (noLaunch) await Task.Run(receipt.MarkNotStarted);
+                else await Task.Run(() => receipt.RecordOutcome(result, decision.PendingReason,
+                    certifyCompletion: identityHealthy && !token.IsCancellationRequested));
+
+                if (!decision.KeepReceipt && decision.Status == WinGetAttemptStatus.Succeeded)
+                {
+                    historyHandled = true;
+                    if (!await RecordHistoryAsync(row, result, UpdateRowStatus.Success,
+                            LocalizationService.Source("UpdateOperation.VerifiedVersion", installed), installed))
+                    {
+                        decision = decision.WithUnresolvedReceipt(WinGetPendingReason.HistoryUnavailable);
+                        await Task.Run(() => receipt.RecordOutcome(result, decision.PendingReason,
+                            certifyCompletion: identityHealthy && !token.IsCancellationRequested));
+                    }
+                }
+                if (operation.ReceiptId is { } id && (!decision.KeepReceipt || operation.Control.BatchStopRequested))
+                {
+                    try
+                    {
+                        if (operation.Control.BatchStopRequested) await Task.Run(() => _interruptionStore!.DiscardQueueCheckpoint(id));
+                        else await Task.Run(() => _interruptionStore!.MarkSuspendedQueueReviewed(receipt));
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    { AppendLog(L("UpdateOperation.SuspendedQueueUnavailable")); }
+                }
+                if (!decision.KeepReceipt) await Task.Run(receipt.ClearOwned);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -234,9 +342,9 @@ public partial class UpdatesViewModel
         {
             InterruptionTarget = receipt is null ? string.Empty : RecoveryTarget(package.Name, package.Id);
             InterruptionDetails = string.Empty;
-            SetInterruptionNote(decision.RestartRequired ? "UpdateOperation.RecoveryRestart" : "UpdateOperation.RecoveryReview");
+            SetInterruptionNote(WinGetAttemptDecision.RecoveryNote(decision.PendingReason));
         }
-        return (result, installed, decision);
+        return (result, installed, decision, historyHandled);
     }
 
     private async Task<string?> ReadVersionAsync(IControlledWinGetService service, WinGetPackage package, bool forReview = false)
@@ -254,9 +362,11 @@ public partial class UpdatesViewModel
         if (_operation is { } operation) operation.Control.State = WinGetControlState.Finished;
         UpdateOperationPanel();
         OperationInterrupted = status == UpdateRowStatus.Interrupted || status == UpdateRowStatus.Cancelled && HasInterruptedUpdate;
-        OperationStatus = LocalizationService.Source(status switch
+        if (!IsCancelRequested) OperationStatus = LocalizationService.Source(HasInterruptedUpdate &&
+            InterruptionNote == L("UpdateOperation.RecoveryInstallerRestart") ? "UpdateOperation.RestartPending" : status switch
         {
-            UpdateRowStatus.Success or UpdateRowStatus.SuccessRebootRequired => "UpdateOperation.Completed",
+            UpdateRowStatus.Success => "UpdateOperation.Completed",
+            UpdateRowStatus.SuccessRebootRequired => "Message.SuccessRestartPending",
             UpdateRowStatus.Cancelled => OperationInterrupted ? "UpdateOperation.Interrupted" : "UpdateOperation.Cancelled",
             UpdateRowStatus.Interrupted => "UpdateOperation.Interrupted",
             _ => "UpdateOperation.Failed",
@@ -270,6 +380,7 @@ public partial class UpdatesViewModel
         _operationTimer?.Stop();
         _operation = null;
         OperationStalled = false;
+        ShowActiveProgress = false;
         RefreshOperationActions();
     }
 
@@ -281,17 +392,6 @@ public partial class UpdatesViewModel
             ShowForce = showForce;
             ForceUpdateCommand.NotifyCanExecuteChanged();
         }
-        CancelCurrentUpdateCommand.NotifyCanExecuteChanged();
-    }
-
-    private bool CanCancelCurrentUpdate() => _itemCts is { IsCancellationRequested: false } &&
-        _operation?.Control.State != WinGetControlState.Finished;
-
-    [RelayCommand(CanExecute = nameof(CanCancelCurrentUpdate))]
-    private void CancelCurrentUpdate()
-    {
-        if (!CanCancelCurrentUpdate()) return;
-        CancelUpdate();
     }
 
     private bool CanForceUpdate() => _operation?.Control.State == WinGetControlState.NeedsDecision;
@@ -320,9 +420,21 @@ public partial class UpdatesViewModel
     {
         if (status is UpdateRowStatus.Success or UpdateRowStatus.SuccessRebootRequired) return string.Empty;
         var excerpt = string.Join(Environment.NewLine, result.Output.Concat(result.Errors).Append(result.StartError ?? string.Empty)
-            .Where(line => !IsProgressNoise(line) && line != LocalizationService.Source("UpdateOperation.ExternalMayContinue")).TakeLast(6)
+            .Select(WinGetDownloadProgress.StripControls)
+            .Where(line => !IsProgressNoise(line) && !WinGetDownloadProgress.IsByteProgress(line) &&
+                line != LocalizationService.Source("UpdateOperation.ExternalMayContinue")).TakeLast(6)
             .Select(line => line[..Math.Min(line.Length, 300)]));
         return excerpt.Length == 0 ? string.Empty : Environment.NewLine + excerpt;
+    }
+
+    private static string PackageLog(ProcessRunResult result)
+    {
+        var lines = result.Output.Concat(result.Errors).Append(result.StartError ?? string.Empty)
+            .Select(WinGetDownloadProgress.StripControls)
+            .Where(line => !IsProgressNoise(line) && !WinGetDownloadProgress.IsByteProgress(line))
+            .Select(line => line[..Math.Min(line.Length, 1024)])
+            .TakeLast(120).ToArray();
+        return lines.Length == 0 ? L("UpdateOperation.NoPackageOutput") : string.Join(Environment.NewLine, lines);
     }
 
     private string? ConfirmBattleNetLocation(WinGetPackage package, BattleNetInstallation installation, CancellationToken token)
@@ -356,6 +468,7 @@ public partial class UpdatesViewModel
     {
         internal Stopwatch Clock { get; } = Stopwatch.StartNew();
         internal WinGetProcessControl Control { get; } = control;
+        internal Guid? ReceiptId { get; set; }
         internal UpdateOutput Output { get; } = new();
     }
 
@@ -366,26 +479,34 @@ public partial class UpdatesViewModel
         private long _activity = Stopwatch.GetTimestamp();
         private string? _latest;
         private string _phase = "UpdateOperation.Waiting";
+        private readonly WinGetDownloadProgress _download = new();
 
         internal void Write(string line)
         {
             if (string.IsNullOrWhiteSpace(line)) return;
             lock (_lock)
             {
+                line = WinGetDownloadProgress.StripControls(line);
                 _activity = Stopwatch.GetTimestamp();
+                if (_phase == "UpdateOperation.Downloading" && _download.Observe(line, _activity)) return;
+                if (WinGetDownloadProgress.IsByteProgress(line)) return;
                 if (IsProgressNoise(line)) return;
                 _latest = line;
                 if (_lines.Count == 80) _lines.Dequeue();
                 _lines.Enqueue(line);
-                _phase = WinGetService.FindProgressPhase(line) ?? _phase;
+                if (WinGetService.FindProgressPhase(line) is { } phase && phase != _phase)
+                {
+                    _phase = phase;
+                    _download.Reset();
+                }
             }
         }
 
-        internal (string[] Lines, string? Latest, long Activity, string Phase) Drain()
+        internal (string[] Lines, string? Latest, long Activity, string Phase, WinGetDownloadSample? Sample) Drain()
         {
             lock (_lock)
             {
-                var snapshot = (_lines.ToArray(), _latest, _activity, _phase);
+                var snapshot = (_lines.ToArray(), _latest, _activity, _phase, _download.Read(Stopwatch.GetTimestamp()));
                 _lines.Clear();
                 return snapshot;
             }

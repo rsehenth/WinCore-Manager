@@ -31,6 +31,14 @@ internal static class StartupPaths
             return Executable(command[1..end], command[(end + 1)..].Trim(), expand);
         }
 
+        // A full existing executable ending in .exe is useful as a display candidate.
+        // Never execute this interpretation of an unquoted Run command.
+        if (command.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+        {
+            var candidate = Executable(command, null, expand);
+            if (candidate.Path is not null && candidate.Problem is null) return candidate;
+        }
+
         var separator = command.IndexOfAny([' ', '\t']);
         if (separator < 0) return Executable(command, null, expand);
 
@@ -129,34 +137,31 @@ internal sealed class StartupPolicy(IStartupProductReader products)
         "carbon black", "palo alto", "trellix", "symantec", "anyconnect", "duo", "protection",
         "proteção", "totalav", "panda dome", "webshield", "authenticator", "remote management",
     ];
-    private static readonly HashSet<string> ConsumerPublishers = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Google LLC", "Mozilla Corporation", "Valve Corp.", "Valve Corporation", "Discord Inc.", "Spotify AB",
-        "VideoLAN", "SumatraPDF", "Notepad++", "7-Zip", "Zoom Video Communications, Inc.",
-        "Zoom Communications, Inc.", "Slack Technologies, LLC", "Obsidian", "Figma, Inc.",
-    };
-    private static readonly HashSet<string> StartupArguments = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "-silent", "--silent", "/background", "--background", "--autostart", "--auto-start", "--minimized",
-        "/minimized", "-minimized", "--start-minimized", "--start-in-tray", "--startup", "-startup",
-    };
-    private static readonly (string Exe, string Product, string Signer, string? Argument)[] Allowed =
-    [
-        ("steam.exe", "Steam", "Valve Corp.", "-silent"),
-        ("steam.exe", "Steam", "Valve Corporation", "-silent"),
-        ("OneDrive.exe", "Microsoft OneDrive", "Microsoft Corporation", "/background"),
-        ("Discord.exe", "Discord", "Discord Inc.", null),
-        ("Spotify.exe", "Spotify", "Spotify AB", null),
-        ("chrome.exe", "Google Chrome", "Google LLC", "--no-startup-window /prefetch:5"),
-        ("chrome.exe", "Google Chrome", "Google LLC", "--no-startup-window"),
-    ];
-
     public bool Recognized(string name, StartupProduct? product)
     {
         string[] popular = ["OneDrive", "Teams", "Discord", "Steam", "Spotify"];
         return popular.Any(app => name.Contains(app, StringComparison.OrdinalIgnoreCase)
             || product?.Name?.Contains(app, StringComparison.OrdinalIgnoreCase) == true);
     }
+
+    public string? RegistryProtection(StartupProduct? product, string name, string? command)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+            return LocalizationService.Source("Message.TheValueTypeOrDataIsUnsupported");
+        var windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        var expanded = Environment.ExpandEnvironmentVariables(command);
+        if (ContainsProtectedTerms(name, product?.Name, product?.Publisher, product?.OriginalName) ||
+            (!string.IsNullOrEmpty(windows) && expanded.Contains(windows + "\\", StringComparison.OrdinalIgnoreCase)) ||
+            SensitiveExecutables.Any(exe => expanded.Contains(exe, StringComparison.OrdinalIgnoreCase)))
+            return LocalizationService.Source("Message.TheEntryIsAssociatedWithSecurityAuthenticationOr");
+        return null;
+    }
+
+    private static bool ContainsProtectedTerms(params string?[] values) => values
+        .Any(value => value is not null && ProtectedTerms.Any(term => value.Contains(term, StringComparison.OrdinalIgnoreCase)));
+
+    private static readonly string[] SensitiveExecutables =
+        ["SecurityHealthSystray.exe", "MsMpEng.exe", "MpCmdRun.exe", "smartscreen.exe", "LsaIso.exe", "Winlogon.exe"];
 
     public string? PersonalShortcutProtection(StartupTarget target, StartupProduct? product, string? entryName = null)
     {
@@ -167,22 +172,8 @@ internal sealed class StartupPolicy(IStartupProductReader products)
 
         var exe = Path.GetFileName(path);
         var signer = products.VerifiedPublisher(path);
-        if (string.IsNullOrWhiteSpace(signer)) return LocalizationService.Source("Message.TheApplicationSSignatureCouldNotBeVerified");
-        if (new[] { exe, product.OriginalName, product.Name, product.Publisher, signer, entryName }
-            .Any(value => value is not null && ProtectedTerms.Any(term => value.Contains(term, StringComparison.OrdinalIgnoreCase))))
-            return LocalizationService.Source("Message.TheEntryIsAssociatedWithSecurityAuthenticationOr");
-
-        var known = Allowed.Any(item => item.Exe.Equals(exe, StringComparison.OrdinalIgnoreCase)
-            && item.Exe.Equals(product.OriginalName, StringComparison.OrdinalIgnoreCase)
-            && item.Product.Equals(product.Name, StringComparison.OrdinalIgnoreCase)
-            && item.Signer.Equals(signer, StringComparison.OrdinalIgnoreCase)
-            && (target.Arguments is null || item.Argument?.Equals(target.Arguments, StringComparison.OrdinalIgnoreCase) == true));
-        // Only identified consumer publishers qualify outside the product-specific exceptions.
-        var consumer = ConsumerPublishers.Contains(signer)
-            && signer.Equals(product.Publisher, StringComparison.OrdinalIgnoreCase)
-            && exe.Equals(product.OriginalName, StringComparison.OrdinalIgnoreCase)
-            && !string.IsNullOrWhiteSpace(product.Name)
-            && (target.Arguments is null || StartupArguments.Contains(target.Arguments));
-        return known || consumer ? null : "Finalidade, fabricante ou argumentos fora do controle permitido.";
+        // Publisher metadata can identify protected entries. Signature availability is not a write prerequisite.
+        return ContainsProtectedTerms(exe, product.OriginalName, product.Name, product.Publisher, signer, entryName)
+            ? LocalizationService.Source("Message.TheEntryIsAssociatedWithSecurityAuthenticationOr") : null;
     }
 }

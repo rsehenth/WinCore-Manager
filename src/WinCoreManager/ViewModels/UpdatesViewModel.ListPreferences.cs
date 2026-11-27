@@ -18,8 +18,11 @@ public partial class UpdatesViewModel
         get
         {
             var visible = VisibleSelectableRows.Count();
+            var unverified = Rows.Count(row => IsVisible(row) && !row.CanSelect && row.VersionWarning is not null);
             var hidden = HiddenUpdates.Count;
-            return LocalizationService.Source(hidden == 1 ? "Message.UpdatesList.SummaryOneHidden" : "Message.UpdatesList.Summary", visible, hidden);
+            return unverified == 0
+                ? LocalizationService.Source(hidden == 1 ? "Message.UpdatesList.SummaryOneHidden" : "Message.UpdatesList.Summary", visible, hidden)
+                : LocalizationService.Source("UpdatesList.SummaryWithUnknown", visible, unverified, hidden);
         }
     }
 
@@ -31,7 +34,7 @@ public partial class UpdatesViewModel
     private string _listPreferenceMessage = string.Empty;
 
     public bool ShowHiddenEmptyState => ManagingHiddenUpdates && HiddenUpdates.Count == 0;
-    public bool HasUpdateControls => IsScanning || HasOperation || HasInterruptedUpdate;
+    public bool HasUpdateControls => IsScanning || HasOperation;
     public bool ShowUpdateDetails => HasUpdateControls || ShowLog;
 
     partial void OnIsUpdatingChanged(bool value)

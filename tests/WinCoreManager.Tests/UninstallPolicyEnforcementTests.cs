@@ -111,7 +111,7 @@ public class UninstallPolicyEnforcementTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecutorBloqueiaElevacaoDeDesinstaladorDeMaquina()
+    public async Task ExecutorBloqueiaPlanoDeMaquinaSemConsentimento()
     {
         var program = new InstalledProgram
         {

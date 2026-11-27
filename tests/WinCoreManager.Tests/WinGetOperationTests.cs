@@ -61,7 +61,7 @@ public class WinGetOperationTests
     });
 
     [Fact]
-    public Task Audit12H02_manual_review_requires_restart_a_current_version_and_history() => WpfTestThread.Run(async () =>
+    public Task Audit12H02_manual_review_requires_a_current_version_and_history() => WpfTestThread.Run(async () =>
     {
         var settings = new TestSettings();
         var boot = BootBefore;
@@ -73,8 +73,10 @@ public class WinGetOperationTests
         var vm = new UpdatesViewModel(service, history, settings, store);
 
         await vm.RecheckInterruptionAsync("1.0");
+        // The recorded root is verifiably gone in this boot, so the review is offered without a restart,
+        // but a version the owner never saw presented cannot release the receipt.
         Assert.True(store.HasReceipt);
-        Assert.False(vm.ReviewInterruptionCommand.CanExecute(null));
+        Assert.True(vm.ReviewInterruptionCommand.CanExecute(null));
         boot = BootAfter;
         await vm.RecheckInterruptionAsync();
         Assert.True(store.HasReceipt && vm.ReviewInterruptionCommand.CanExecute(null));
@@ -252,10 +254,8 @@ public class WinGetOperationTests
         Assert.Equal(new[] { "Fixture.1", "Fixture.2", "Fixture.3", "Fixture.1" }, service.Launched);
     });
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public Task Cancelling_item_or_queue_during_a_batch_handles_unstarted_rows_and_repeated_clicks(bool cancelQueue) => WpfTestThread.Run(async () =>
+    [Fact]
+    public Task Cancelling_the_queue_during_a_batch_handles_unstarted_rows_and_repeated_clicks() => WpfTestThread.Run(async () =>
     {
         var service = new WinGetOperationFixture(2);
         service.Run = async (package, _, ct) =>
@@ -273,7 +273,7 @@ public class WinGetOperationTests
         var run = vm.UpdateSelectedCommand.ExecuteAsync(null);
         await vm.UpdateSelectedCommand.ExecuteAsync(null);
         Assert.Single(service.Launched);
-        var cancel = cancelQueue ? vm.CancelUpdateCommand : vm.CancelCurrentUpdateCommand;
+        var cancel = vm.CancelUpdateCommand;
         Assert.True(cancel.CanExecute(null));
         cancel.Execute(null);
         cancel.Execute(null);
@@ -312,17 +312,17 @@ public class WinGetOperationTests
         reopened.AllSelected = true;
         Assert.True(reopened.HasInterruptedUpdate && reopened.BlocksPackageChanges);
         Assert.False(reopened.UpdateSelectedCommand.CanExecute(null));
+        var readsBeforeRestart = service.InventoryReads;
+        // Same boot: the recorded root is verifiably gone, so the review reads inventory without a restart.
         await reopened.RecheckInterruptionAsync();
         Assert.True(reopened.HasInterruptedUpdate && store.HasReceipt);
-        boot = BootAfter;
-        await reopened.RecheckInterruptionAsync();
-        Assert.True(reopened.HasInterruptedUpdate && store.HasReceipt);
+        Assert.Equal(readsBeforeRestart + 1, service.InventoryReads);
         service.Version = _ => "2.0";
         await reopened.RecheckInterruptionAsync();
         Assert.True(store.HasReceipt && reopened.ReviewInterruptionCommand.CanExecute(null));
         await reopened.RecheckInterruptionAsync("2.0");
         Assert.False(reopened.HasInterruptedUpdate || store.HasReceipt);
-        Assert.Equal(5, service.InventoryReads);
+        Assert.Equal(readsBeforeRestart + 3, service.InventoryReads);
         reopened.AllSelected = true;
         Assert.True(reopened.UpdateSelectedCommand.CanExecute(null));
     });
@@ -390,7 +390,7 @@ public class WinGetOperationTests
             await WinGetCancellationTests.WaitUntilAsync(() => vm.OperationStalled);
             Assert.False(run.IsCompleted || vm.ShowForce);
             await Dispatcher.Yield(DispatcherPriority.Input);
-            Assert.True(vm.IsUpdating && vm.CancelCurrentUpdateCommand.CanExecute(null));
+            Assert.True(vm.IsUpdating && vm.CancelUpdateCommand.CanExecute(null));
         }
         finally
         {
@@ -411,16 +411,29 @@ internal sealed class WinGetOperationFixture(int count) : IControlledWinGetServi
     public List<string> Launched { get; } = [];
     public Action<string>? Output { get; private set; }
     public int InventoryReads { get; private set; }
+    public IReadOnlyList<WinGetPackage>? Packages { get; set; }
+    public Func<Task>? BeforeListUpdates { get; set; }
+    public Func<Task>? BeforeReviewVersion { get; set; }
+    public Action<WinGetPackage>? BeforePrepare { get; set; }
+    public Task<ProcessRunResult?> PrepareUpgradeAsync(WinGetPackage package, WinGetProcessControl control, CancellationToken token)
+    {
+        BeforePrepare?.Invoke(package);
+        return Task.FromResult<ProcessRunResult?>(null);
+    }
     public string? ExecutablePath => null;
     public WinGetAvailability? LastDetection => null;
     public Task<WinGetAvailability> DetectAsync(CancellationToken cancellationToken = default) => Task.FromResult(new WinGetAvailability { IsInstalled = true });
-    public Task<WinGetScanResult> ListUpdatesAsync(CancellationToken cancellationToken = default) => Task.FromResult(new WinGetScanResult
+    public async Task<WinGetScanResult> ListUpdatesAsync(CancellationToken cancellationToken = default)
     {
-        Packages = Enumerable.Range(1, count).Select(index => new WinGetPackage
+        if (BeforeListUpdates is { } beforeListUpdates) await beforeListUpdates();
+        return new WinGetScanResult
         {
-            Id = $"Fixture.{index}", Name = $"Fixture {index}", InstalledVersion = "1.0", AvailableVersion = "2.0",
-        }).ToArray(),
-    });
+            Packages = Packages ?? Enumerable.Range(1, count).Select(index => new WinGetPackage
+            {
+                Id = $"Fixture.{index}", Name = $"Fixture {index}", InstalledVersion = "1.0", AvailableVersion = "2.0",
+            }).ToArray(),
+        };
+    }
     public Task<ProcessRunResult> UpgradePackageAsync(WinGetPackage package, Action<string>? onOutputLine, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
     public Task<ProcessRunResult> UpgradeControlledAsync(WinGetPackage package, Action<string> onOutputLine, WinGetProcessControl control, CancellationToken cancellationToken)
@@ -433,5 +446,11 @@ internal sealed class WinGetOperationFixture(int count) : IControlledWinGetServi
     {
         InventoryReads++;
         return Task.FromResult(Version(package));
+    }
+
+    public async Task<string?> ReadReviewVersionAsync(WinGetPackage package)
+    {
+        if (BeforeReviewVersion is { } beforeReview) await beforeReview();
+        return await ReadInstalledVersionAsync(package);
     }
 }

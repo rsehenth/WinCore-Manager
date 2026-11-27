@@ -33,7 +33,6 @@ public partial class TweaksViewModel : ViewModelBase
     private TweakSnapshot? _snapshot;
 
     [ObservableProperty] private IReadOnlyList<TweakRow> _power = [];
-    [ObservableProperty] private IReadOnlyList<TweakRow> _effects = [];
     [ObservableProperty] private IReadOnlyList<TweakRow> _folderOptions = [];
     [ObservableProperty] private LocalizedMessages _status = new();
     [ObservableProperty] private string _message = "";
@@ -51,8 +50,6 @@ public partial class TweaksViewModel : ViewModelBase
     private bool _isBusy;
 
     public bool CanInteract => !IsBusy;
-    public IReadOnlyList<string> VisualProfiles { get; } =
-        [LocalizationService.Source("Message.LetWindowsChoose"), LocalizationService.Source("Message.AdjustForBestAppearance"), LocalizationService.Source("Message.AdjustForBestPerformance"), LocalizationService.Source("Message.Custom")];
 
     public TweaksViewModel(TweakService service, RestorePointService restore, IWindowsFeatureConfirmation confirmation)
     {
@@ -132,9 +129,8 @@ public partial class TweaksViewModel : ViewModelBase
         foreach (var row in Rows()) row.PropertyChanged -= OnChoiceChanged;
         var rows = _snapshot.Settings.Select(reading => new TweakRow(reading)).ToArray();
         Power = rows.Where(row => row.Reading.Address.Setting <= TweakSetting.SleepDc).ToArray();
-        Effects = rows.Where(row => row.Reading.Address.Setting is >= TweakSetting.WindowAnimation and <= TweakSetting.Thumbnails).ToArray();
         FolderOptions = rows.Where(row => row.Reading.Address.Setting >= TweakSetting.FileExtensions).ToArray();
-        foreach (var row in rows) row.PropertyChanged += OnChoiceChanged;
+        foreach (var row in Rows()) row.PropertyChanged += OnChoiceChanged;
         List<string> warnings = [_snapshot.StatusKey];
         if (!_snapshot.PerformanceAvailable) warnings.Add("Message.PerformanceOptionsUnavailable");
         if (!_snapshot.ProtectionAvailable) warnings.Add("Message.SystemProtectionUnavailable");
@@ -142,7 +138,7 @@ public partial class TweaksViewModel : ViewModelBase
         UndoText = _snapshot.Undo is { } undo ? TweakService.Label(undo.Address.Setting) : LocalizationService.Source("Message.NoChangeToUndo");
     }
 
-    private IEnumerable<TweakRow> Rows() => Power.Concat(Effects).Concat(FolderOptions);
+    private IEnumerable<TweakRow> Rows() => Power.Concat(FolderOptions);
 
     private void OnChoiceChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args)
     {

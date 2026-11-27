@@ -265,7 +265,7 @@ public class LocalizationTests
             {
                 var dialog = (Window)Activator.CreateInstance(typeof(LocalizedDialog),
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic, null,
-                    [null, "Fixture", "Fixture", "Common.OK", confirmation], null)!;
+                    [null, "Fixture", "Fixture", "Common.OK", confirmation, "Updater.Later"], null)!;
                 try
                 {
                     dialog.Measure(new Size(1024, 720));
@@ -365,8 +365,8 @@ public class LocalizationTests
             var texts = Descendants<TextBlock>(page).Select(t => t.Text).ToArray();
             Assert.Contains(language == "en-US" ? "Settings" : "Configurações", texts);
             Assert.Contains(language == "en-US" ? "WinCore Manager Updates" : "Atualizações do WinCore Manager", texts);
-            Assert.Contains(language == "en-US" ? "Online updates are not configured for this version yet."
-                : "As atualizações online ainda não estão configuradas para esta versão.", texts);
+            Assert.Contains(loc["Message.Updater.Idle"], texts);
+            Assert.Null(page.FindName("WinGetInactivitySelector"));
             Assert.Equal(theme, themes.Current);
             Assert.Equal(language, loc.CultureName);
             themes.Select(theme == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark);

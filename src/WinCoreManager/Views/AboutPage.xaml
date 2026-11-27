@@ -20,7 +20,7 @@
                        Style="{StaticResource PageSubtitleText}" Margin="0,4,0,18" />
 
             <!-- Identidade -->
-            <Border Style="{StaticResource CardBorder}" Padding="22,20">
+            <Border Style="{StaticResource CardBorder}" Padding="16,12">
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -35,10 +35,17 @@
                                        Style="{StaticResource CaptionText}" Margin="0,3,0,0" />
                         </StackPanel>
                     </Grid>
-                    <TextBlock TextWrapping="Wrap" Margin="0,18,0,0" FontSize="15"
-                               Text="{loc:Loc UI.OnePlaceToMaintainYourWindowsPCKeep}" />
-                    <TextBlock TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource TextSecondaryBrush}"
-                               Text="{loc:Loc UI.WinCoreManagerBringsWindowsToolsTogetherInOne}" />
+                    <TextBlock Text="{loc:Loc About.Description}" TextWrapping="Wrap" Margin="0,10,0,0" />
+                    <WrapPanel Margin="0,6,0,0">
+                        <TextBlock Text="{Binding Platform}" Style="{StaticResource CaptionText}" Margin="0,0,12,0" />
+                        <TextBlock Text="{loc:Localized BuildChannel}" Style="{StaticResource CaptionText}" Margin="0,0,12,0" />
+                        <TextBlock Text="{loc:Loc About.Technologies}" Style="{StaticResource CaptionText}" />
+                    </WrapPanel>
+                    <TextBlock TextWrapping="Wrap" Margin="0,6,0,0">
+                        <Hyperlink Command="{Binding OpenRepositoryCommand}" Foreground="{DynamicResource AccentTextBrush}">
+                            <Run Text="{Binding RepositoryText, Mode=OneWay}" />
+                        </Hyperlink>
+                    </TextBlock>
                 </StackPanel>
             </Border>
 
@@ -79,6 +86,22 @@
                         <StackPanel>
                             <TextBlock Text="{loc:Loc UI.History}" Style="{StaticResource ModuleName}" />
                             <TextBlock Text="{loc:Loc UI.KeepALocalRecordOfOperationsAndTheir}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="{loc:Loc About.FeatureDashboard}" Style="{StaticResource ModuleName}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc About.FeatureDashboardDetails}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="{loc:Loc About.FeatureEssentials}" Style="{StaticResource ModuleName}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc About.FeatureEssentialsDetails}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="{loc:Loc About.FeatureSettings}" Style="{StaticResource ModuleName}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc About.FeatureSettingsDetails}" Style="{StaticResource ModuleText}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,12,10">
+                            <TextBlock Text="{loc:Loc About.FeatureUpdater}" Style="{StaticResource ModuleName}" TextWrapping="Wrap" />
+                            <TextBlock Text="{loc:Loc About.FeatureUpdaterDetails}" Style="{StaticResource ModuleText}" />
                         </StackPanel>
                     </UniformGrid>
                 </StackPanel>
@@ -126,10 +149,43 @@
                     <TextBlock Text="{loc:Loc UI.LicensesAndCredits}" Style="{StaticResource CardTitleText}" />
                     <TextBlock x:Name="AboutLicense" TextWrapping="Wrap" Margin="0,10,0,0"
                                Text="{loc:Loc UI.MitLicenseAndCopyright}" />
+                    <TextBlock Text="{loc:Loc Cleanup.OpenSourceComponents}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,12,0,0" />
                     <TextBlock TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{DynamicResource TextSecondaryBrush}"
                                Text="{loc:Loc UI.IncludesCodeAdaptedFromBulkCrapUninstallerBy}" />
                     <TextBlock Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,8,0,0"
                                Text="{loc:Loc UI.SeeNOTICEBCUninstallerMdLICENSEBCUninstallerTxtAnd}" />
+                    <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                        <Hyperlink Command="{Binding OpenBcuCommand}" Foreground="{DynamicResource AccentTextBrush}">
+                            <Run Text="{loc:Loc About.BcuRepository}" />
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <TextBlock Text="{loc:Loc Cleanup.BitBroomName}" FontWeight="SemiBold" Margin="0,12,0,0" />
+                    <TextBlock Text="{loc:Loc Cleanup.BitBroomCredit}" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    <TextBlock Text="{loc:Loc Cleanup.MitLicense}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                    <TextBlock TextWrapping="Wrap" Margin="0,5,0,0">
+                        <Hyperlink Command="{Binding OpenBitBroomCommand}" Foreground="{DynamicResource AccentTextBrush}">
+                            <Run Text="{loc:Loc Cleanup.BitBroomRepository}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Text="{loc:Loc About.UniGetUIName}" FontWeight="SemiBold" Margin="0,12,0,0" />
+                    <TextBlock Text="{loc:Loc About.UniGetUICredit}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    <TextBlock Text="{loc:Loc Cleanup.MitLicense}" Style="{StaticResource CaptionText}" Margin="0,4,0,0" />
+                    <TextBlock TextWrapping="Wrap" Margin="0,5,0,0">
+                        <Hyperlink Command="{Binding OpenUniGetUICommand}" Foreground="{DynamicResource AccentTextBrush}">
+                            <Run Text="{loc:Loc About.UniGetUIRepository}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Text="{loc:Loc About.DiskScopeCredit}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,12,0,0" />
+                    <TextBlock TextWrapping="Wrap" Margin="0,5,0,0">
+                        <Hyperlink Command="{Binding OpenDiskScopeCommand}" Foreground="{DynamicResource AccentTextBrush}">
+                            <Run Text="{loc:Loc About.DiskScopeRepository}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock Text="{loc:Loc About.OtherComponents}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,12,0,0" />
+
                     <Border Style="{StaticResource Divider}" Margin="0,14,0,12" />
                     <TextBlock Text="{loc:Loc UI.BuiltWithCAndWPFOnNET10}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
                 </StackPanel>

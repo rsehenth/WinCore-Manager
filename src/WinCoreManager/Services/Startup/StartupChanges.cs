@@ -14,7 +14,7 @@ public interface IStartupChanges
 }
 
 internal sealed class StartupChanges(StartupFolderSource folders, StartupBackupStore backups,
-    IStartupFileMove files, IHistoryService history, StartupRunSource? run = null) : IStartupChanges
+    IStartupFileMove files, IHistoryService history, StartupRunSource? run = null, MachineStartupSources? machine = null) : IStartupChanges
 {
     public async Task<StartupChangeResult> SetEnabledAsync(StartupEntry expected, bool enabled, CancellationToken token)
     {
@@ -58,8 +58,14 @@ internal sealed class StartupChanges(StartupFolderSource folders, StartupBackupS
     private StartupChangeResult Apply(StartupEntry expected, bool enabled, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (expected.Source == StartupSource.UserRun && run is not null)
-            return run.SetEnabled(expected, enabled, token);
+        var registry = expected.Source switch
+        {
+            StartupSource.UserRun => run,
+            StartupSource.MachineRun64 => machine?.Native,
+            StartupSource.MachineRun32 => machine?.Wow,
+            _ => null,
+        };
+        if (registry is not null) return registry.SetEnabled(expected, enabled, token);
         if (expected.Source != StartupSource.UserFolder || !folders.IsPersonalShortcut(expected.Location)
             || !expected.CanChange || expected.Fingerprint is null || !MatchesId(expected))
             return new(StartupChangeStatus.Protected, LocalizationService.Source("Message.ThisEntryIsProtectedAgainstChanges"));

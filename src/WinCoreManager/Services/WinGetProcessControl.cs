@@ -10,12 +10,18 @@ internal enum WinGetControlState { Waiting, Running, Cancelling, NeedsDecision, 
 
 internal enum ControlledProcessState { NotObserved, Active, Exited }
 internal enum DelegatedProcessState { Possible, KnownActive, CompletionVerified }
+internal enum WinGetCompletionContract { None, MsiTransaction, MsixRegistration }
 
 internal readonly record struct ExternalProcessObservation(
-    ControlledProcessState ControlledProcesses, DelegatedProcessState Delegation)
+    ControlledProcessState ControlledProcesses, DelegatedProcessState Delegation,
+    WinGetCompletionContract Contract = WinGetCompletionContract.None)
 {
+    // Generic completion contract: every process the supervisor could observe (Job Object members
+    // and known delegates) has ended and no Windows Installer transaction remains. Invisible delegation
+    // cannot be excluded for a generic installer; it is a documented residual risk, not proof of activity.
+    // CompletionVerified only labels the stronger per-technology evidence (MSI log, MSIX registration).
     internal bool IsConclusive => ControlledProcesses == ControlledProcessState.Exited &&
-        Delegation == DelegatedProcessState.CompletionVerified;
+        Delegation != DelegatedProcessState.KnownActive;
 }
 
 // The caller can request actions. Only the worker holds process and job handles.
@@ -24,6 +30,7 @@ internal sealed class WinGetProcessControl
     private int _state;
     private int _force;
     private int _detach;
+    private int _batchStop;
     private WinGetProcessIdentity? _rootIdentity;
     internal Func<WinGetPackage, CancellationToken, Task<string?>>? ChooseInstallLocation { get; init; }
     internal Func<WinGetPackage, BattleNetInstallation, CancellationToken, Task<string?>>? ConfirmBattleNetLocation { get; init; }
@@ -34,6 +41,10 @@ internal sealed class WinGetProcessControl
     internal Action<WinGetProcessIdentity>? PersistRoot { get; set; }
     internal Action<WinGetProcessIdentity[]>? PersistDelegates { get; set; }
     internal WinGetMsixUpgrade? MsixUpgrade { get; set; }
+    internal WinGetMsiUpgrade? MsiUpgrade { get; set; }
+    // How long a known delegate or MSI transaction may keep working after WinGet exits before the attempt is
+    // reported as "installer still active". Zero disables the wait.
+    internal TimeSpan DelegateSettleWindow { get; set; } = TimeSpan.FromMinutes(2);
     internal string? IdentityPersistenceError { get; private set; }
     internal bool IdentityPersisted { get; private set; }
     private readonly HashSet<WinGetProcessIdentity> _delegates = [];
@@ -94,6 +105,8 @@ internal sealed class WinGetProcessControl
 
     internal bool TakeForceRequest() => Interlocked.Exchange(ref _force, 0) != 0;
     internal bool DetachRequested => Volatile.Read(ref _detach) != 0;
+    internal void RequestBatchStop() => Volatile.Write(ref _batchStop, 1);
+    internal bool BatchStopRequested => Volatile.Read(ref _batchStop) != 0;
 }
 
 internal sealed record WinGetProcessIdentity(uint Pid, long Created);

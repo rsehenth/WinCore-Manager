@@ -12,13 +12,18 @@
     <AssemblyName>WinCoreManager</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>0.1.0</Version>
+    <Version Condition="'$(Version)' == ''">0.2.0-rc.3</Version>
+    <WinCoreBuildChannel Condition="'$(WinCoreBuildChannel)' == ''">Candidate</WinCoreBuildChannel>
     <Product>WinCore Manager</Product>
     <Description>Gerenciador de atualizações (WinGet) e ferramentas de manutenção do Windows</Description>
     <NeutralLanguage>pt-BR</NeutralLanguage>
     <SatelliteResourceLanguages>en;en-US</SatelliteResourceLanguages>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="WinCoreBuildChannel" Value="$(WinCoreBuildChannel)" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />

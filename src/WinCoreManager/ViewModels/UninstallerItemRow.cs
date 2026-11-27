@@ -65,12 +65,18 @@ public partial class UninstallerItemRow : ObservableObject
         ? string.Empty
         : string.Join(" ", Classification.Reasons);
 
-    /// <summary>Checkbox: itens bloqueados nunca são selecionáveis (nem individualmente).</summary>
+    public string? UnavailableReason { get; internal set; }
+    internal bool NeedsWindowsUninstall { get; set; }
+    public string? SelectionHelp => UnavailableReason
+        ?? (Classification.Policy == RemovalPolicy.Blocked ? ProtectionInfo : null);
+
+    /// <summary>Elegibilidade individual, independente do foco da grade e da trava global.</summary>
     public bool CanSelect => Classification.Policy is not RemovalPolicy.Blocked
+                             && UnavailableReason is null
                              && Status is not (UninstallRowStatus.Success or UninstallRowStatus.SuccessRebootRequired);
 
     /// <summary>Entrada em lote: somente itens com remoção permitida por confirmação simples.</summary>
-    public bool IsBatchSelectable => Classification.Policy is RemovalPolicy.AllowedWithConfirmation && CanSelect;
+    public bool IsBatchSelectable => !IsTechnical && Classification.Policy is RemovalPolicy.AllowedWithConfirmation && CanSelect;
 
     /// <summary>Nunca executável nesta versão (listado apenas como referência).</summary>
     public bool IsUnsupportedKind => Program.Kind is

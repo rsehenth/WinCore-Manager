@@ -66,9 +66,12 @@ public sealed class WinGetService : IControlledWinGetService
     private readonly Func<bool> _isElevated;
     private readonly Func<string, IReadOnlyList<string>> _readRegisteredPackages;
     private readonly Func<WinGetPackage, CancellationToken, Task<bool?>> _readLocationRequirement;
+    private readonly Func<WinGetPackage, CancellationToken, Task<bool>> _readMsiMetadata;
+    private readonly Func<string, MsiProductRegistration?> _readMsiRegistration;
+    private readonly Func<WinGetPackage, bool> _readMachineScope;
     private readonly WinGetBattleNetInstallation? _battleNetInstallation;
     private readonly WinGetInterruptionStore? _directUpgradeStore;
-    private static readonly Version MinimumBoundedMsixClient = new(1, 12, 470);
+    private static readonly Version MinimumBoundedUpgradeClient = new(1, 12, 470);
 
     public WinGetService() : this(new WinGetInterruptionStore(Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WinCoreManager"))) { }
@@ -76,14 +79,19 @@ public sealed class WinGetService : IControlledWinGetService
     internal WinGetService(WinGetInterruptionStore store) :
         this(ResolveExecutablePath, RunVerifiedAsync, MaintenanceService.IsCurrentProcessElevated,
              WinGetTrust.ReadRegisteredPackageNames, WinGetInstallerRequirements.ReadLocationRequirementAsync,
-             WinGetBattleNetInstallation.Windows) => _directUpgradeStore = store;
+             WinGetBattleNetInstallation.Windows, WinGetInstallerRequirements.ReadAuditedMsiAsync,
+             WinGetMsiInventory.Read, IsMachineOnlyInstall) => _directUpgradeStore = store;
 
     internal WinGetService(Func<string?> resolveExecutable,
         Func<ProcessStartInfo, Action<string>?, CancellationToken, WinGetProcessControl?, bool, Task<ProcessRunResult>> run,
         Func<bool> isElevated, Func<string, IReadOnlyList<string>>? readRegisteredPackages = null,
         Func<WinGetPackage, CancellationToken, Task<bool?>>? readLocationRequirement = null,
-        WinGetBattleNetInstallation? battleNetInstallation = null)
+        WinGetBattleNetInstallation? battleNetInstallation = null,
+        Func<WinGetPackage, CancellationToken, Task<bool>>? readMsiMetadata = null,
+        Func<string, MsiProductRegistration?>? readMsiRegistration = null,
+        Func<WinGetPackage, bool>? readMachineScope = null)
     {
+        _readMachineScope = readMachineScope ?? (_ => false);
         _resolveExecutable = resolveExecutable;
         _run = run;
         _isElevated = isElevated;
@@ -91,6 +99,8 @@ public sealed class WinGetService : IControlledWinGetService
         _readLocationRequirement = readLocationRequirement ??
             ((package, _) => Task.FromResult<bool?>(WinGetInstallerRequirements.IsBattleNet(package)));
         _battleNetInstallation = battleNetInstallation;
+        _readMsiMetadata = readMsiMetadata ?? ((_, _) => Task.FromResult(false));
+        _readMsiRegistration = readMsiRegistration ?? (_ => null);
     }
 
     private static Task<ProcessRunResult> RunVerifiedAsync(ProcessStartInfo startInfo, Action<string>? output,
@@ -112,6 +122,11 @@ public sealed class WinGetService : IControlledWinGetService
 
     internal static string? FindProgressPhase(string line)
     {
+        if (line.StartsWith("Successfully verified installer hash", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Installer hash does not match", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Hash do instalador verificado", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("O hash do instalador não corresponde", StringComparison.OrdinalIgnoreCase))
+            return "UpdateOperation.Verifying";
         if (Contains(InteractionTerms)) return "UpdateOperation.Interaction";
         if (Contains(InstallingTerms)) return "UpdateOperation.Installing";
         if (Contains(DownloadingTerms)) return "UpdateOperation.Downloading";
@@ -206,7 +221,7 @@ public sealed class WinGetService : IControlledWinGetService
         var logs = new List<string>();
         var unreadable = 0;
         long duration = 0;
-        string? error = null;
+        var failures = new List<string>();
         var successfulCatalogs = 0;
         int failedCode = 0;
         foreach (var source in WinGetTrust.AllowedSources)
@@ -216,26 +231,53 @@ public sealed class WinGetService : IControlledWinGetService
             var run = await RunScopedAsync(start, source, null, deadline.Token, null, false).ConfigureAwait(false);
             logs.Add(run.FullOutput);
             duration += run.DurationMs;
-            if (run.StartFailed || run.Cancelled || run.Interrupted || !run.HasExitCode || run.ExitCode != 0)
+            var sourceWarning = FindSourceWarning(run);
+            if (run.StartFailed || run.Cancelled || run.Interrupted || !run.HasExitCode ||
+                run.ExitCode != 0 && !IsEmptyCatalog(run.ExitCode))
             {
                 failedCode = run.ExitCode;
-                error = run.StartError ?? LocalizationService.Source("Message.WinGetReturnedCode0", WingetExitCodes.Describe(run.ExitCode));
+                failures.Add(LocalizationService.Source("UpdatesList.CatalogError", source, sourceWarning ??
+                    run.StartError ?? LocalizationService.Source("Message.WinGetReturnedCode0", WingetExitCodes.Describe(run.ExitCode))));
                 continue;
             }
-            var parsed = ParseScopedUpdates(string.Join(Environment.NewLine, run.Output), source, out var rejected);
-            packages.AddRange(parsed);
+            var rejected = 0;
+            var parsed = run.ExitCode == 0
+                ? ParseScopedUpdates(string.Join(Environment.NewLine, run.Output), source, out rejected) : [];
+            if (sourceWarning is not null)
+                failures.Add(LocalizationService.Source("UpdatesList.CatalogError", source, sourceWarning));
+            if (sourceWarning is null || parsed.Count > 0)
+            {
+                packages.AddRange(parsed);
+                successfulCatalogs++;
+            }
             unreadable += rejected;
-            successfulCatalogs++;
         }
         cancellationToken.ThrowIfCancellationRequested();
         return new()
         {
             Packages = packages, DurationMs = duration, UnreadableRows = unreadable, ExitCode = failedCode,
             Failed = successfulCatalogs == 0,
-            Error = deadline.IsCancellationRequested ? LocalizationService.Source("UpdateOperation.ScanTimeout") : error,
+            Error = deadline.IsCancellationRequested ? LocalizationService.Source("UpdateOperation.ScanTimeout")
+                : failures.Count == 0 ? null : string.Join(Environment.NewLine, failures),
             RawOutput = string.Join(Environment.NewLine, logs),
         };
     }
+
+    // Adapted from UniGetUI's WinGetCliHelper.IsListingFailure and ThrowIfListingFailed.
+    // Copyright (c) 2025 Martí Climent. MIT, see Licencas/UniGetUI.LICENSE.txt.
+    private static bool IsEmptyCatalog(int exitCode) =>
+        (uint)exitCode is 0x8A150014 or 0x8A15002B;
+
+    private static string? FindSourceWarning(ProcessRunResult run) =>
+        run.Output.Concat(run.Errors).Select(WinGetDownloadProgress.StripControls).FirstOrDefault(line =>
+            line.StartsWith("Failed when searching source", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Failed when opening source", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Failed in attempting to update the source", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Falha ao pesquisar origem", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Falha na pesquisa da origem", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Falha ao abrir a origem", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Falha ao abrir origem", StringComparison.OrdinalIgnoreCase) ||
+            line.StartsWith("Falha ao tentar atualizar a origem", StringComparison.OrdinalIgnoreCase));
 
     internal static IReadOnlyList<WinGetPackage> ParseScopedUpdates(string output, string source, out int unreadable)
     {
@@ -256,11 +298,19 @@ public sealed class WinGetService : IControlledWinGetService
             }
             accepted.Add(new()
             {
-                Name = package.Name, Id = package.Id, InstalledVersion = package.InstalledVersion,
+                Name = package.Name, Id = package.Id,
+                InstalledVersion = WingetTableParser.IsCompleteField(package.InstalledVersion) ? package.InstalledVersion : "Unknown",
                 AvailableVersion = package.AvailableVersion, Source = source
             });
         }
-        return accepted;
+        var unique = new List<WinGetPackage>();
+        foreach (var group in accepted.GroupBy(package => package.Id, StringComparer.OrdinalIgnoreCase))
+        {
+            var targets = group.DistinctBy(package => (package.InstalledVersion, package.AvailableVersion)).ToArray();
+            if (targets is [var target]) unique.Add(target);
+            else unreadable += targets.Length;
+        }
+        return unique;
     }
 
     private async Task<bool> SourceIsTrustedAsync(string path, string source, CancellationToken cancellationToken)
@@ -307,17 +357,20 @@ public sealed class WinGetService : IControlledWinGetService
             if (WinGetAttemptDecision.ProvesNoLaunch(result, control))
             {
                 receipt.MarkNotStarted();
-                receipt.Clear();
+                receipt.ClearOwned();
             }
-            else if (result.Observation.IsConclusive && control.IdentityPersisted && control.IdentityPersistenceError is null)
+            else
             {
-                var installed = await ((IControlledWinGetService)this).ReadInstalledVersionAsync(package).ConfigureAwait(false);
+                var identityHealthy = control.IdentityPersisted && control.IdentityPersistenceError is null;
+                var installed = result.Observation.IsConclusive && identityHealthy
+                    ? await ((IControlledWinGetService)this).ReadInstalledVersionAsync(package).ConfigureAwait(false) : null;
                 var decision = WinGetAttemptDecision.Evaluate(result, installed, package.AvailableVersion,
-                    verifyInventory: true, identityPersisted: true);
-                if (decision.CanAdvance) receipt.Clear();
+                    verifyInventory: true, identityPersisted: identityHealthy,
+                    cancelledWhileVerifying: !result.StartFailed && cancellationToken.IsCancellationRequested && result.Observation.IsConclusive);
+                if (result.StartFailed || control.IdentityPersistenceError is not null) decision = decision.WithUnresolvedReceipt();
+                receipt.RecordOutcome(result, decision.PendingReason, certifyCompletion: identityHealthy && !cancellationToken.IsCancellationRequested);
+                if (decision.CanAdvance) receipt.ClearOwned();
             }
-            if (result is { StartFailed: false } || result.Interrupted)
-                if (_directUpgradeStore.HasReceipt) receipt.RecordOutcome(result);
             return result;
         }
     }
@@ -341,6 +394,7 @@ public sealed class WinGetService : IControlledWinGetService
             token.ThrowIfCancellationRequested();
             if (_isElevated()) return PreflightFailure("UpdateOperation.UntrustedAppInstaller");
             var required = await _readLocationRequirement(package, token).ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
             if (required is null || unknown && !required.Value)
                 return PreflightFailure("UpdateOperation.InstallerMetadataUnavailable");
             if (unknown)
@@ -412,8 +466,30 @@ public sealed class WinGetService : IControlledWinGetService
         var startInfo = BuildUpgradeStartInfo(path, package, control.InstallLocation, authorization);
         if (startInfo is null) return PreflightFailure("UpdateOperation.UnknownInstalledVersion");
 
-        if (control.InstallLocation is null && WinGetMsixUpgrade.TryCreate(package, _readRegisteredPackages) is { } msix &&
-            await SupportsBoundedMsixAsync(path, cancellationToken).ConfigureAwait(false))
+        control.MsixUpgrade = null;
+        control.MsiUpgrade = null;
+        using var msi = control.InstallLocation is null && WinGetMsiUpgrade.IsExactTarget(package) &&
+            await _readMsiMetadata(package, cancellationToken).ConfigureAwait(false) &&
+            await SupportsBoundedUpgradeAsync(path, cancellationToken).ConfigureAwait(false)
+            ? WinGetMsiUpgrade.TryCreate(package, _readMsiRegistration) : null;
+        if (msi is not null)
+        {
+            // Keep the machine MSI's default passive UI/elevation behavior and capture the full
+            // installer result, including reboot codes that WinGet can normalize to success.
+            foreach (var option in new[] { "--installer-type", "wix", "--architecture", "x64", "--skip-dependencies",
+                         "--override", $"/passive /norestart /l*v \"{msi.LogPath}\"" })
+                startInfo.ArgumentList.Add(option);
+            control.MsiUpgrade = msi;
+        }
+        else if (control.InstallLocation is null && _readMachineScope(package))
+        {
+            // Keep the installed scope. Otherwise WinGet may pick the per-user installer and an existing
+            // all-users MSI fails with 1603 (DeckCraft, WordCraft). This is not a global ALLUSERS override.
+            startInfo.ArgumentList.Add("--scope");
+            startInfo.ArgumentList.Add("machine");
+        }
+        else if (control.InstallLocation is null && WinGetMsixUpgrade.TryCreate(package, _readRegisteredPackages) is { } msix &&
+            await SupportsBoundedUpgradeAsync(path, cancellationToken).ConfigureAwait(false))
         {
             // WinGet processes catalog dependencies separately, and those can be EXE installers.
             // The bounded path is only selected when the known frameworks are already registered.
@@ -422,12 +498,18 @@ public sealed class WinGetService : IControlledWinGetService
             control.MsixUpgrade = msix;
         }
 
-        return await RunScopedAsync(startInfo, package.Source, onOutputLine, cancellationToken, control, true,
+        var startedUtc = DateTime.UtcNow;
+        var result = await RunScopedAsync(startInfo, package.Source, onOutputLine, cancellationToken, control, true,
             authorization is null ? null : () => _battleNetInstallation?.TryConfirmLocation(package,
                 authorization.Installation, authorization.Location, out _) == true).ConfigureAwait(false);
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (local.Length > 0)
+            result.InstallerFailureDetail = WinGetFailureDiagnostics.Read(package, result, startedUtc,
+                Path.Combine(local, "Packages", WinGetTrust.AppInstallerFamily, "LocalState", "DiagOutputDir"));
+        return result;
     }
 
-    private async Task<bool> SupportsBoundedMsixAsync(string path, CancellationToken token)
+    private async Task<bool> SupportsBoundedUpgradeAsync(string path, CancellationToken token)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromSeconds(5));
@@ -435,17 +517,19 @@ public sealed class WinGetService : IControlledWinGetService
         return !deadline.IsCancellationRequested && !result.StartFailed && !result.Interrupted && !result.Cancelled &&
             result.HasExitCode && result.ExitCode == 0 && result.Output is [var line] &&
             line.AsSpan().Trim() is ['v', .. var number] && Version.TryParse(number, out var version) &&
-            version >= MinimumBoundedMsixClient;
+            version >= MinimumBoundedUpgradeClient;
     }
 
     Task<string?> IControlledWinGetService.ReadInstalledVersionAsync(WinGetPackage package) =>
-        ReadInstalledVersionAsync(package, includeUnknown: false);
+        ReadInstalledVersionAsync(package, includeUnknown: false, requireUniqueRow: true);
 
     Task<string?> IControlledWinGetService.ReadReviewVersionAsync(WinGetPackage package) =>
-        ReadInstalledVersionAsync(package, includeUnknown: true);
+        ReadInstalledVersionAsync(package, includeUnknown: true, requireUniqueRow: true, reportUncorrelated: true);
 
+    // reportUncorrelated: a trusted listing that completed without one row for the ID (none, or side-by-side
+    // duplicates) returns an empty string, so recovery can tell that fact apart from a failed read (null).
     private async Task<string?> ReadInstalledVersionAsync(WinGetPackage package, bool includeUnknown, bool requireUniqueRow = false,
-        CancellationToken token = default)
+        CancellationToken token = default, bool reportUncorrelated = false)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromSeconds(12));
@@ -455,12 +539,41 @@ public sealed class WinGetService : IControlledWinGetService
         var startInfo = WinGetTrust.StartInfo(path, "list", "--id", package.Id, "--exact",
             "--disable-interactivity", "--accept-source-agreements", "--source", package.Source);
         var result = await RunScopedAsync(startInfo, package.Source, null, deadline.Token, null, false).ConfigureAwait(false);
-        return !deadline.IsCancellationRequested && !result.StartFailed && !result.Interrupted && !result.Cancelled && result.HasExitCode && result.ExitCode == 0
-            ? WingetTableParser.FindInstalledVersion(string.Join('\n', result.Output), package.Id, includeUnknown, requireUniqueRow) : null;
+        var completed = !deadline.IsCancellationRequested && !result.StartFailed && !result.Interrupted && !result.Cancelled &&
+            result.HasExitCode && FindSourceWarning(result) is null;
+        if (completed && result.ExitCode == 0)
+            return WingetTableParser.FindInstalledVersion(string.Join('\n', result.Output), package.Id, includeUnknown, requireUniqueRow)
+                ?? (reportUncorrelated ? string.Empty : null);
+        return completed && reportUncorrelated && (uint)result.ExitCode == 0x8A150014 ? string.Empty : null; // NO_APPLICATIONS_FOUND
+    }
+
+    // An entry with WinGet's displayed name and installed version exists only for all users (HKLM, either view).
+    internal static bool IsMachineOnlyInstall(WinGetPackage package)
+    {
+        bool Found(Microsoft.Win32.RegistryHive hive, Microsoft.Win32.RegistryView view)
+        {
+            using var baseKey = Microsoft.Win32.RegistryKey.OpenBaseKey(hive, view);
+            using var root = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+            return root?.GetSubKeyNames().Any(name =>
+            {
+                using var entry = root.OpenSubKey(name);
+                return entry?.GetValue("DisplayName") as string == package.Name &&
+                    entry.GetValue("DisplayVersion") as string == package.InstalledVersion;
+            }) == true;
+        }
+        try
+        {
+            return (Found(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64) ||
+                    Found(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry32)) &&
+                !Found(Microsoft.Win32.RegistryHive.CurrentUser, Microsoft.Win32.RegistryView.Registry64);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
+        { return false; }
     }
 
     private static bool HasValidPackageTarget(WinGetPackage package) =>
         WingetTableParser.IsActionableId(package.Id) && WingetTableParser.IsCompleteField(package.AvailableVersion) &&
+        !WingetTableParser.IsUnknownVersion(package.AvailableVersion) &&
         WinGetTrust.IsAllowedSource(package.Source);
 
     internal static ProcessStartInfo? BuildUpgradeStartInfo(string path, WinGetPackage package, string? location = null,
@@ -513,9 +626,30 @@ public static class WingetExitCodes
     private const int RebootInitiated = unchecked((int)0x8A15010B);
     private const int CancelledByUser = unchecked((int)0x8A15010C);
 
-    public static bool IsCancelled(int exitCode) => exitCode is 1602 or CancelledByUser;
+    public static bool IsCancelled(int exitCode) => exitCode is 1602 or CancelledByUser || IsWindowsCancellation(exitCode);
+
+    internal static bool IsWindowsCancellation(int exitCode) => exitCode is 1223 or unchecked((int)0x800704C7);
+
+    internal static bool ReportsWindowsCancellation(ProcessRunResult run) => run.HasExitCode && !run.StartFailed &&
+        (IsWindowsCancellation(run.ExitCode) || ReportsWrappedInstallerCode(run, 1223));
+
+    internal static bool ReportsWrappedInstallerCode(ProcessRunResult run, int installerCode)
+    {
+        if (run.StartFailed || !run.HasExitCode || (uint)run.ExitCode is not (0x8A150006 or 0x8A150064))
+            return false;
+        var code = installerCode.ToString(CultureInfo.InvariantCulture);
+        return run.Output.Concat(run.Errors).Select(WinGetDownloadProgress.StripControls).Any(line =>
+            line == $"Installer failed with exit code: {code}" ||
+            line == $"O instalador falhou com o código de saída: {code}");
+    }
 
     public static bool RequiresReboot(int exitCode) => exitCode is 1641 or 3010 or RebootToFinish or RebootBeforeInstall or RebootInitiated;
+
+    internal static bool IsRebootWarning(string line) => WinGetDownloadProgress.StripControls(line).Trim() is
+        "Restart your PC to finish installation." or "Your PC will be restarted to finish installation." or
+        "Installation failed. Restart the computer and try again." or
+        "Reiniciar seu PC para terminar a instalação." or "Seu PC será reiniciado para terminar a instalação." or
+        "Falha na instalação. Reinicie o computador e tente novamente.";
 
     internal static bool FailedBeforeRestart(int exitCode) => exitCode == RebootBeforeInstall;
 
@@ -529,6 +663,8 @@ public static class WingetExitCodes
             1641 or RebootInitiated => LocalizationService.Source("Message.0TheInstallerInitiatedAWindowsRestart", FormatCode(exitCode)),
             3010 or RebootToFinish => LocalizationService.Source("Message.0AWindowsRestartIsRequired", FormatCode(exitCode)),
             1602 or CancelledByUser => LocalizationService.Source("Message.0InstallationCanceledByTheUser", FormatCode(exitCode)),
+            1223 or unchecked((int)0x800704C7) => LocalizationService.Source("UpdateOperation.WindowsCancelled"),
+            1603 => LocalizationService.Source("UpdateOperation.MsiFatalError"),
             1618 or unchecked((int)0x8A150102) => LocalizationService.Source("Message.0AnotherInstallationWasInProgress", FormatCode(exitCode)),
             1605 => LocalizationService.Source("Message.1605ThePackageIsNotInstalledForThis"),
             unchecked((int)0x8A15002B) => LocalizationService.Source("Message.0x8A15002BNoApplicablePackageUpdate"),
@@ -568,7 +704,7 @@ public static partial class WingetTableParser
         }
 
         var lines = AnsiEscape().Replace(output, "").Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-        var seen = new HashSet<(string Id, string Source)>();
+        var seen = new HashSet<(string Id, string Source, string Installed, string Available)>();
         for (var i = 1; i < lines.Length; i++)
         {
             var separator = lines[i].Trim();
@@ -585,6 +721,12 @@ public static partial class WingetTableParser
             }
 
             if (columns.Count is not (4 or 5))
+            {
+                unreadableRows++;
+                continue;
+            }
+            if (columns.Count == 4 && (columns[3].Value.Equals("Source", StringComparison.OrdinalIgnoreCase) ||
+                columns[3].Value.Equals("Origem", StringComparison.OrdinalIgnoreCase)))
             {
                 unreadableRows++;
                 continue;
@@ -622,7 +764,7 @@ public static partial class WingetTableParser
                     continue;
                 }
 
-                if (seen.Add((id, source)))
+                if (seen.Add((id, source, fields[2], available)))
                 {
                     packages.Add(new WinGetPackage
                     {
@@ -718,8 +860,11 @@ public static partial class WingetTableParser
 
     internal static bool IsActionableId(string value) => PackageId().IsMatch(value);
 
+    // "< 4.0.2" and "> 4.0.2" are ranges WinGet shows when it cannot map the installed version. Its own
+    // upgrade then needs --include-unknown and the target is ambiguous (Unity Hub vs. the Unity Editor).
     internal static bool IsUnknownVersion(string value) => value.Equals("Unknown", StringComparison.OrdinalIgnoreCase) ||
-        value.Equals("Desconhecido", StringComparison.OrdinalIgnoreCase);
+        value.Equals("Desconhecido", StringComparison.OrdinalIgnoreCase) || value.StartsWith("< ", StringComparison.Ordinal) ||
+        value.StartsWith("> ", StringComparison.Ordinal);
 
     internal static bool IsCompleteField(string value) =>
         !string.IsNullOrWhiteSpace(value) && !value.StartsWith('-') && !value.Contains('…') &&

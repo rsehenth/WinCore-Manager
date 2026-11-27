@@ -75,25 +75,12 @@
                             <TextBlock Text="&#xE950;" Style="{StaticResource IconText}" Foreground="{DynamicResource AccentTextBrush}" HorizontalAlignment="Center" />
                         </Border>
                         <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="{loc:Loc UI.Performance}" Style="{StaticResource CardTitleText}" />
-                            <TextBlock Text="{loc:Loc UI.AdjustTheseEffectsIndividuallyReducingAnimationsMayMake}"
+                            <TextBlock Text="{loc:Loc Tweaks.VisualTitle}" Style="{StaticResource CardTitleText}" />
+                            <TextBlock Text="{loc:Loc Tweaks.VisualDescription}"
                                        Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,3,0,0" />
                         </StackPanel>
                     </Grid>
-                    <ItemsControl x:Name="EffectRows" ItemsSource="{Binding Effects}" ItemTemplate="{StaticResource TweakRowTemplate}"
-                                  IsEnabled="{Binding CanInteract}" />
-                    <Border Style="{StaticResource Divider}" Margin="0,4,0,14" />
-                    <TextBlock Text="{loc:Loc UI.ProfilesAdditionalEffectsAndAdvancedOptions}" FontWeight="SemiBold" Margin="0,0,0,4" />
-                    <ItemsControl ItemsSource="{Binding VisualProfiles}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{loc:Localized .}" Style="{StaticResource CaptionText}" Margin="0,0,0,2" TextWrapping="Wrap" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <TextBlock Text="{loc:Loc UI.OpenWindowsPerformanceOptionsToViewTheActive}"
-                               Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,6,0,10" />
-                    <Button x:Name="OpenPerformanceButton" Content="{loc:Loc UI.OpenWindowsPerformanceOptions}" HorizontalAlignment="Left"
+                    <Button x:Name="OpenPerformanceButton" Content="{loc:Loc Tweaks.VisualOpen}" HorizontalAlignment="Left"
                             Command="{Binding OpenPerformanceCommand}" />
                 </StackPanel>
             </Border>

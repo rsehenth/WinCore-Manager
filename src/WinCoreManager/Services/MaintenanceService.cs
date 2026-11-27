@@ -190,7 +190,7 @@ public sealed class MaintenanceService
 
             // Fixed Windows maintenance commands have a synchronous tool-result contract.
             // A surviving observed descendant or an unverified launch overrides that result.
-            outcome = reservation is not null && !reservation.CanAdvance(result, synchronousTool: true)
+            outcome = reservation is not null && !reservation.CanAdvance(result)
                 ? new MaintenanceOutcome { Tool = tool, Status = MaintenanceStatus.Interrupted,
                     ExitCode = result.HasExitCode && !result.StartFailed ? result.ExitCode : null,
                     DurationMs = result.DurationMs, Message = LocalizationService.Source("UpdateOperation.PendingEvidence") }

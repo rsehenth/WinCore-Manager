@@ -30,6 +30,8 @@ public interface IResidueRegistryReader : IDisposable
     /// <summary>Valor bruto (string, int, long, byte[], string[]); null quando ausente.</summary>
     object? GetRawValue(ResidueRegistryHive hive, string subKeyPath, string valueName, bool is64BitView);
 
+    RegistryValueKind? GetValueKind(ResidueRegistryHive hive, string subKeyPath, string valueName, bool is64BitView) => null;
+
     bool KeyExists(ResidueRegistryHive hive, string subKeyPath, bool is64BitView);
 
     /// <summary>Leitura estrita para backup: tipos e dados sem expansão. Lança InvalidOperationException se algo não puder ser lido.</summary>
@@ -49,6 +51,7 @@ public sealed record RegistryKeyContents(IReadOnlyList<RegistryRawValue> Values,
 public interface IResidueRegistryWriter
 {
     bool SupportsMutation => true;
+    bool CanWriteKey(ResidueRegistryHive hive, string subKeyPath) => SupportsMutation;
     /// <summary>Exclui somente uma chave sem subchaves; uma subchave não vista na prévia faz a operação falhar.</summary>
     bool DeleteEmptySubKey(ResidueRegistryHive hive, string parentSubKeyPath, string keyName, bool is64BitView, out string error);
 
@@ -60,9 +63,24 @@ public interface IResidueRegistryWriter
 }
 
 /// <summary>Implementação real (HKCU/HKLM, visões 64/32). Nenhuma outra operação é exposta.</summary>
-public sealed class WindowsResidueRegistry : IResidueRegistryReader, IResidueRegistryWriter
+public sealed class WindowsResidueRegistry : IResidueRegistryReader, IResidueRegistryWriter, IAtomicResidueRegistryWriter
 {
-    public bool SupportsMutation => false;
+    private readonly ResidueRegistryMutation? mutation;
+    public WindowsResidueRegistry() { }
+    internal WindowsResidueRegistry(ResiduePathRules rules) => mutation = new(rules);
+    public bool SupportsMutation => mutation is not null;
+    public bool CanWriteKey(ResidueRegistryHive hive, string subKeyPath) => mutation?.CanWrite(hive, subKeyPath) == true;
+
+    RegistryDeleteOutcome IAtomicResidueRegistryWriter.DeleteVerifiedOutcome(ResidueRegistryHive hive, string path, bool is64Bit,
+        RegistryKeyData snapshot, CancellationToken token) => mutation is null
+        ? new(false, RegistryMutationMode.None, 0, 1, LocalizationService.Source("Message.Safety.RegistryMutationUnavailable"))
+        : mutation.DeleteVerified(hive, path, is64Bit, snapshot, token);
+
+    RegistryRestoreOutcome IAtomicResidueRegistryWriter.RestoreVerifiedOutcome(ResidueRegistryHive hive, string path, bool is64Bit,
+        RegistryKeyData snapshot) => mutation is null
+        ? new(false, RegistryMutationMode.None, false, LocalizationService.Source("Message.Safety.RegistryMutationUnavailable"))
+        : mutation.RestoreVerified(hive, path, is64Bit, snapshot);
+
     public IReadOnlyList<string> GetSubKeyNames(ResidueRegistryHive hive, string subKeyPath, bool is64BitView)
     {
         using var key = OpenKey(hive, subKeyPath, is64BitView, writable: false);
@@ -135,6 +153,13 @@ public sealed class WindowsResidueRegistry : IResidueRegistryReader, IResidueReg
         }
     }
 
+    public RegistryValueKind? GetValueKind(ResidueRegistryHive hive, string subKeyPath, string valueName, bool is64BitView)
+    {
+        using var key = OpenKey(hive, subKeyPath, is64BitView, writable: false);
+        try { return key?.GetValueKind(valueName); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException) { return null; }
+    }
+
     public bool KeyExists(ResidueRegistryHive hive, string subKeyPath, bool is64BitView)
     {
         using var key = OpenKey(hive, subKeyPath, is64BitView, writable: false);
@@ -162,7 +187,7 @@ public sealed class WindowsResidueRegistry : IResidueRegistryReader, IResidueReg
         }
     }
 
-    private static RegistryRawValue ReadNativeValue(SafeRegistryHandle key, string name)
+    internal static RegistryRawValue ReadNativeValue(SafeRegistryHandle key, string name)
     {
         const int MaxValueBytes = 1024 * 1024;
         var size = 0;

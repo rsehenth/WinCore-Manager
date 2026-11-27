@@ -83,6 +83,9 @@ public static class ProgramClassifier
     /// <summary>Classifica um programa e calcula a política de remoção correspondente.</summary>
     public static ProgramClassification Evaluate(InstalledProgram program)
     {
+        if (OptionalWindowsApps.IsApprovedTarget(program))
+            return new(ProgramCategory.UserApplication, RemovalPolicy.AllowedWithConfirmation, []);
+
         var reasons = new List<string>();
         var category = Classify(program, reasons);
         var policy = DerivePolicy(program, category, reasons);

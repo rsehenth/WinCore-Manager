@@ -16,7 +16,7 @@ using WinCoreManager.Views;
 
 namespace WinCoreManager.Tests;
 
-public sealed class StartupPresentationTests
+public sealed partial class StartupPresentationTests
 {
     [Fact]
     public async Task Pesquisa_por_nome_fabricante_e_caminho_combina_com_filtros()
@@ -111,7 +111,7 @@ public sealed class StartupPresentationTests
     {
         var state = new ScreenFixture();
         var assembly = typeof(App).Assembly;
-        Assert.Equal(assembly.GetName().Version!.ToString(3), state.About.AppVersion);
+        Assert.Equal(WinCoreManager.Services.SelfUpdate.UpdateVersion.FromAssembly(assembly).ToString(), state.About.AppVersion);
         Assert.Equal(assembly.GetCustomAttribute<AssemblyProductAttribute>()!.Product, state.About.AppName);
     }
 
@@ -338,12 +338,12 @@ public sealed class StartupPresentationTests
             run = vm.Updates.UpdateSelectedCommand.ExecuteAsync(null);
             await WinGetCancellationTests.WaitUntilAsync(() => vm.Updates.OperationLastMessage.Length > 0);
             var page = Assert.Single(Descendants<UpdatesPage>(window));
-            var cancel = Assert.IsType<Button>(page.FindName("CancelCurrentUpdateButton"));
-            Assert.Equal(language == "pt-BR" ? "Cancelar atualização" : "Cancel update", cancel.Content);
+            var cancel = Assert.IsType<Button>(page.FindName("StopAllUpdatesButton"));
+            Assert.Equal(language == "pt-BR" ? "Parar todas as atualizações" : "Stop all updates", cancel.Content);
             Assert.True(cancel.IsEnabled && cancel.IsTabStop);
             var operationPanel = Assert.IsType<Border>(page.FindName("UpdateOperationPanel"));
             Assert.True(operationPanel.IsVisible && operationPanel.ActualHeight > 0);
-            Assert.Equal(language == "pt-BR" ? "Baixando" : "Downloading",
+            Assert.Equal(language == "pt-BR" ? "Baixando instalador — progresso detalhado indisponível." : "Downloading installer — detailed progress unavailable.",
                 Assert.IsType<TextBlock>(page.FindName("UpdateOperationStatus")).Text);
             Assert.Contains(language == "pt-BR" ? "1 de 2" : "1 of 2", locale.Format("UpdateOperation.QueuePosition", "Fixture 1", 1, 2));
 
@@ -539,9 +539,10 @@ public sealed class StartupPresentationTests
             About = new(External);
         }
 
-        public MainViewModel CreateMain(IWinGetService? service = null)
+        public MainViewModel CreateMain(IWinGetService? service = null, IHistoryService? history = null,
+            IProgramInventoryService? inventory = null)
         {
-            var history = new FakeHistoryService();
+            history ??= new FakeHistoryService();
             var winGet = service ?? new OfflineWinGet();
             var updates = service is null ? new UpdatesViewModel(winGet, history) :
                 new UpdatesViewModel(winGet, history, Settings, WinGetOperationTests.ReviewStore(Settings, () => Boot));
@@ -551,7 +552,7 @@ public sealed class StartupPresentationTests
             var activation = new WindowsActivationViewModel(new TestWindowsActivationService(), essentialNavigation);
             var dashboard = new DashboardViewModel(winGet, history, updates, maintenance, historyPage, activation);
             var planner = new UninstallPlanner();
-            var uninstallers = new UninstallersViewModel(new FakeProgramInventory(), planner,
+            var uninstallers = new UninstallersViewModel(inventory ?? new FakeProgramInventory(), planner,
                 new UninstallBatchRunner(planner, new FakeUninstallExecutor(), history), new FakeResidueAnalysisService());
             var features = new WindowsFeaturesFixture(history);
             var hardware = new HardwareViewModel(new HardwareTestInventory(), new HardwareTestScheduler());

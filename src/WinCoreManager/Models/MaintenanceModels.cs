@@ -1,4 +1,5 @@
 using System.IO;
+using WinCoreManager.Localization;
 
 namespace WinCoreManager.Models;
 
@@ -40,6 +41,28 @@ public sealed class MaintenanceToolDef
     }
 
     public string Key { get; }
+
+    public string Glyph => Key switch
+    {
+        "flushdns" => "\uE968",
+        "chkdsk_scan" => "\uEDA2",
+        "dism_restorehealth" or "sfc_scannow" => "\uE90F",
+        _ => "\uE73E",
+    };
+
+    public string ActionLabel => LocalizationService.Source(Key switch
+    {
+        "dism_restorehealth" or "sfc_scannow" => "Maintenance.StartRepair",
+        "flushdns" => "Maintenance.FlushDns",
+        _ => "Maintenance.RunCheck",
+    });
+
+    public string CardDescription => Key switch
+    {
+        "sfc_verifyonly" => LocalizationService.Source("Maintenance.VerifyDescription"),
+        "dism_restorehealth" => LocalizationService.Source("Maintenance.RepairDescription"),
+        _ => Description,
+    };
 
     public string DisplayName { get; }
 

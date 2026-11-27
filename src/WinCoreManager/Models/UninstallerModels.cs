@@ -6,6 +6,7 @@
  */
 
 using WinCoreManager.Localization;
+using WinCoreManager.Services.Uninstaller;
 
 namespace WinCoreManager.Models;
 
@@ -79,9 +80,14 @@ public sealed class InstalledProgram
     public Guid MsiProductCode { get; init; }
     public ProgramKind Kind { get; init; }
 
+    internal string? OptionalPackageFamily { get; init; }
+    public string? OptionalPackageFullName { get; internal init; }
+
     public bool HasUninstallString => UninstallString.Length > 0;
     public bool HasQuietUninstall => QuietUninstallString.Length > 0;
     public bool IsMsi => Kind == ProgramKind.Msi;
+    public string InstallationScope => LocalizationService.Source(MachineUninstallPolicy.IsMachine(this)
+        ? "Uninstaller.ScopeMachine" : "Uninstaller.ScopeUser");
 
     public string KindLabel => Kind switch
     {
@@ -108,6 +114,7 @@ public enum UninstallMethod
     Msi = 1,
     /// <summary>Nenhum caminho seguro nesta versão — apenas listar.</summary>
     NotSupported = 2,
+    CurrentUserAppx = 3,
 }
 
 /// <summary>Plano de desinstalação de um programa: como executar e quais avisos apresentar.</summary>
@@ -123,12 +130,17 @@ public sealed class UninstallPlan
     /// <summary>Motivo pelo qual o plano não pode ser executado por esta versão (null quando executável).</summary>
     public string? NotExecutableReason { get; init; }
 
+    internal bool OptionalWin32 { get; set; }
     internal bool ReviewConfirmed { get; set; }
+    internal bool PreparedForConsent { get; set; }
+    internal bool ConsentGranted { get; set; }
+    internal UninstallImage? ApprovedImage { get; set; }
 
     public bool IsExecutable => Method != UninstallMethod.NotSupported && NotExecutableReason is null;
 
     public string DescribeCommand() => Method switch
     {
+        UninstallMethod.CurrentUserAppx => $"Remove-AppxPackage -Package {Program.OptionalPackageFullName}",
         UninstallMethod.Msi => $"{ExecutablePath} {Arguments}".Trim(),
         UninstallMethod.Executable => $"{ExecutablePath} {Arguments}".Trim(),
         _ => NotExecutableReason ?? LocalizationService.Source("Message.Unsupported"),

@@ -9,11 +9,13 @@ internal sealed class WindowsStorageProvider(IHardwareWmi wmi) : IStorageProvide
     internal const string DiskColumns = "Number,Model,Manufacturer,FirmwareVersion,Size,BusType,HealthStatus,UniqueId,UniqueIdFormat,SerialNumber";
     internal const string LegacyColumns = "Index,Model,Manufacturer,FirmwareRevision,Size,InterfaceType";
 
-    public HardwareSection Read(CancellationToken token)
+    public HardwareSection Read(CancellationToken token) => Read(token, out _);
+
+    internal HardwareSection Read(CancellationToken token, out WmiResult modern)
     {
         var time = DateTimeOffset.Now;
         var legacy = wmi.Read(HardwareWmi.Cim, "Win32_DiskDrive", LegacyColumns, token);
-        var modern = wmi.Read(HardwareWmi.Storage, "MSFT_Disk", DiskColumns, token);
+        modern = wmi.Read(HardwareWmi.Storage, "MSFT_Disk", DiskColumns, token);
         var media = wmi.Read(HardwareWmi.Storage, "MSFT_PhysicalDisk", "UniqueId,UniqueIdFormat,Size,MediaType,SerialNumber,Manufacturer", token);
         var topology = ReadPartitions(token);
         var devices = Assemble(legacy, modern, media, topology, time);
@@ -54,7 +56,7 @@ internal sealed class WindowsStorageProvider(IHardwareWmi wmi) : IStorageProvide
                 .Add(LocalizationService.Source("Message.Manufacturer"), manufacturer ?? Manufacturer(physical?.Text("Manufacturer")) ?? (agree ? Manufacturer(old?.Text("Manufacturer")) : null),
                     manufacturer is not null ? firstSource : Manufacturer(physical?.Text("Manufacturer")) is not null ? PhysicalDisk : agree ? LegacyDisk : firstSource)
                 .Add(LocalizationService.Source("Message.Capacity"), InventoryText.Positive(first.Number("Size")) ?? (agree ? legacySize : null), modernSize is null && agree ? LegacyDisk : firstSource, "B")
-                .Add(LocalizationService.Source("Message.Type"), type ?? LocalizationService.Source("Message.Unknown2"), bus == 17 ? StorageDisk : PhysicalDisk)
+                .Add(LocalizationService.Source("Message.Type"), type ?? LocalizationService.Source("Message.Unknown2"), bus == 17 ? StorageDisk : PhysicalDisk, localizeValue: type is null)
                 .Add(LocalizationService.Source("Message.Presentation"), kind, firstSource)
                 .Add("Interface", Bus(bus) ?? (current is null || agree ? old?.Text("InterfaceType") : null), Bus(bus) is null ? LegacyDisk : StorageDisk)
                 .Add("Firmware", firmware ?? (agree ? old?.Text("FirmwareRevision") : null), firmware is null && agree ? LegacyDisk : firstSource)

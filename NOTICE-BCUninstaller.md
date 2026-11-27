@@ -18,7 +18,7 @@ distribuído sob a **Apache License Version 2.0**.
 | `src/WinCoreManager/Services/Uninstaller/UninstallCommandSplitter.cs` | `source/KlocTools/Tools/ProcessTools.cs` (`SeparateArgsFromCommand`) | Classe dedicada; mensagens pt-BR; método `TrySeparate` |
 | `src/WinCoreManager/Services/Uninstaller/RegistryProgramInventory.cs` | `source/UninstallTools/Factory/RegistryFactory.cs` | Abstração `IUninstallRegistryView` p/ testes; leitura por `RegistryView` (64/32) em vez de `Wow6432Node`; deduplicação; nomes pt-BR |
 | `src/WinCoreManager/Services/Uninstaller/UninstallPlanner.cs` | `source/UninstallTools/Uninstaller/UninstallManager.cs` | Planejamento separado da execução; fallback de shell **removido** (recusa segura); `cmd/cscript/wscript/mshta` recusados; MSI sempre com `REBOOT=ReallySuppress /norestart` |
-| `src/WinCoreManager/Services/Uninstaller/UninstallExecution.cs` | `source/UninstallTools/Uninstaller/UninstallManager.cs` + `BulkUninstallTask` | Execução com `UseShellExecute=false`; cancelamento nunca encerra desinstalador ativo; lote estritamente sequencial; histórico integrado |
+| `src/WinCoreManager/Services/Uninstaller/UninstallExecution.cs` | `source/UninstallTools/Uninstaller/UninstallManager.cs` + `BulkUninstallTask` | Execução direta de EXE. Para HKLM, o WinCore usa o verbo `runas` do Windows com alvo validado e acompanha o handle do processo. Lote sequencial, cancelamento cooperativo, recibo e Histórico do WinCore |
 | `src/WinCoreManager/Services/Uninstaller/ResidueAnalysis.cs` | Conceitos de `source/UninstallTools/Junk` | Estrutura própria; análise somente leitura (pré-visualização) |
 | `src/WinCoreManager/Services/Uninstaller/ResidueDetection.cs` | Conceitos de `UninstallTools/Junk` (`JunkManager`, `ConfidenceGenerators`, `SoftwareRegKeyScanner`, `UninstallerKeySearcher`, `ProgramFilesOrphans`) | Classificação determinística em 4 classes; proteção mais rígida que o BCU; Alta exige local registrado, nome compatível, conteúdo verificado e programa desinstalado; detecção não destrutiva |
 | `src/WinCoreManager/Services/Uninstaller/ResidueSimilarity.cs` | `Klocman/Tools/Sift4.cs`, `Klocman/Tools/StringTools.cs` e `UninstallTools/Junk/Confidence/ConfidenceGenerators.cs` (Sift4: algoritmo de Siderite) | Apenas `SimplestDistance` é portado; nomes e documentação em pt-BR |
@@ -29,7 +29,7 @@ distribuído sob a **Apache License Version 2.0**.
 
 ## Componentes NÃO reutilizados
 
-Interface gráfica do BCU (WPF/ObjectListView), `UninstallerAutomatizer` (automação
+Interface gráfica do BCU (Windows Forms/ObjectListView), `UninstallerAutomatizer` (automação
 UI de desinstaladores), helpers externos (Steam/StoreApp/Oculus/WinUpdate helpers),
 NBug, licenças de terceiros do bundle original. A taxonomia de tipos de
 desinstalador (`UninstallerType`) foi reproduzida de forma simplificada.

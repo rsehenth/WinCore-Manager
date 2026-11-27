@@ -9,15 +9,25 @@ using WinCoreManager.Services;
 namespace WinCoreManager.ViewModels;
 
 public sealed record EssentialAppCard(EssentialApp App, string Name, string Description, string Category,
-    string Origin, string Note, string OpenLabel);
+    string Origin, string Note, string OpenLabel, EssentialDetection Detection)
+{
+    public bool IsInstalled => Detection.State == EssentialState.Installed;
+    public bool IsUnverified => Detection.State == EssentialState.NotVerified;
+    public string Details => IsInstalled ? Detection.Version ?? "" : LocalizationService.Source(
+        App.Id == "directx" ? "Essentials.DirectXUnverified" : "Essentials.CannotVerify");
+}
 
 public partial class EssentialsViewModel : ViewModelBase
 {
     private readonly IEssentialNavigation _navigation;
+    private readonly IEssentialInstallationService _installation;
+    private IReadOnlyDictionary<string, EssentialDetection> _states = new Dictionary<string, EssentialDetection>();
+    [ObservableProperty] private bool _isChecking;
 
-    public EssentialsViewModel(IEssentialNavigation navigation)
+    public EssentialsViewModel(IEssentialNavigation navigation, IEssentialInstallationService? installation = null)
     {
         _navigation = navigation;
+        _installation = installation ?? new EssentialInstallationService();
         Title = LocalizationService.Source("Message.Essentials");
         PropertyChangedEventManager.AddHandler(LocalizationService.Current, OnLanguageChanged, nameof(LocalizationService.Culture));
         UpdateResults();
@@ -47,7 +57,7 @@ public partial class EssentialsViewModel : ViewModelBase
         Results = EssentialAppCatalog.Apps
             .Where(app => Category == AppCategory.All || app.Category == Category)
             .Select(app => new EssentialAppCard(app, app.Name, app.Description, app.CategoryLabel,
-                app.OriginLabel, app.NoteLabel, app.OpenLabel))
+                app.OriginLabel, app.NoteLabel, app.OpenLabel, _states.GetValueOrDefault(app.Id) ?? new(EssentialState.NotVerified)))
             .Where(card => words.All(word => Matches(card.Name, word) || Matches(card.Description, word) || Matches(card.Category, word)))
             .ToArray();
         OnPropertyChanged(nameof(Results));
@@ -56,6 +66,22 @@ public partial class EssentialsViewModel : ViewModelBase
 
         bool Matches(string text, string word) =>
             compareInfo.IndexOf(text, word, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0;
+    }
+
+    [RelayCommand]
+    private async Task RefreshAsync(CancellationToken token)
+    {
+        IsChecking = true;
+        try
+        {
+            _states = await _installation.DetectAsync(token);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        finally
+        {
+            IsChecking = false;
+            UpdateResults();
+        }
     }
 
     [RelayCommand]

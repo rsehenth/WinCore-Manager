@@ -36,7 +36,7 @@
                         MinWidth="110"
                         Margin="0,0,8,0" />
                 <Button x:Name="ConfirmButton"
-                        Content="{loc:Localized ConfirmButtonText}"
+                        Content="{Binding ConfirmButtonText}"
                         Style="{StaticResource PrimaryButton}"
                         MinWidth="110"
                         Click="OnConfirmClick" />
@@ -46,7 +46,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="28,28,28,24">
                 <!-- Título -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <DockPanel Margin="0,0,0,12">
                     <Border Style="{StaticResource IconTile}" Background="{DynamicResource WarningSubtleBrush}" Margin="0,0,14,0">
                         <TextBlock Text="&#xE74D;"
                                    Style="{StaticResource IconText}"
@@ -60,13 +60,30 @@
                                FontWeight="SemiBold"
                                TextWrapping="Wrap"
                                VerticalAlignment="Center" />
-                </StackPanel>
+                </DockPanel>
 
                 <!-- Descrição -->
                 <TextBlock Text="{loc:Localized Description}"
                            Foreground="{DynamicResource TextSecondaryBrush}"
                            TextWrapping="Wrap"
                            Margin="0,0,0,20" />
+
+                <ItemsControl ItemsSource="{Binding Programs}" Margin="0,0,0,16"
+                              AutomationProperties.Name="{loc:Loc Uninstaller.ProgramsToRemove}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,6">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Publisher}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Localized Origin}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{loc:Localized InstallationScope}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding OptionalPackageFullName}" Style="{StaticResource CaptionText}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding RegistryPath}" Style="{StaticResource CaptionText}"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
                 <!-- Comando (apenas 1 programa) -->
                 <StackPanel Margin="0,0,0,20"
@@ -92,7 +109,7 @@
                     <ItemsControl ItemsSource="{Binding Warnings}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <DockPanel Margin="0,3,0,0">
                                     <TextBlock Text="&#xE7BA;"
                                                Style="{StaticResource IconText}"
                                                FontSize="12"
@@ -101,7 +118,7 @@
                                     <TextBlock Text="{loc:Localized .}"
                                                TextWrapping="Wrap"
                                                Foreground="{DynamicResource TextSecondaryBrush}" />
-                                </StackPanel>
+                                </DockPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

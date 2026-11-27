@@ -62,6 +62,15 @@ public sealed class SelfUpdateTests
     }
 
     [Fact]
+    public async Task A_local_build_matching_the_stable_tag_is_not_reported_as_current()
+    {
+        using var client = Fake(release: Release("v0.9.0"));
+        var local = new GitHubReleases(client, Repository, RepositoryId, TimeSpan.FromSeconds(2),
+            TimeSpan.FromSeconds(2), officialBuild: false);
+        Assert.Equal(UpdateState.LocalBuild, (await local.CheckAsync(Installed, default)).State);
+    }
+
+    [Fact]
     public void PacoteExigeAssinaturaDoPublicadorERejeitaAlteracao()
     {
         using var publisher = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -83,7 +92,8 @@ public sealed class SelfUpdateTests
         using var client = new HttpClient(new Handler((_, _) => throw new InvalidOperationException("Unexpected request.")));
         Assert.Equal(UpdateState.NotConfigured, (await Releases(client, null).CheckAsync(Installed, CancellationToken.None)).State);
         Assert.Equal(UpdateState.RepositoryUnavailable, (await Releases(client, "../unknown").CheckAsync(Installed, CancellationToken.None)).State);
-        Assert.Null(GitHubReleases.OfficialRepository);
+        Assert.Equal("rsehenth/WinCore-Manager", GitHubReleases.OfficialRepository);
+        Assert.Equal(1472964599L, GitHubReleases.OfficialRepositoryId);
     }
 
     [Fact]
@@ -94,11 +104,13 @@ public sealed class SelfUpdateTests
         using var none = Fake(releaseStatus: HttpStatusCode.NotFound);
         using var rate = Fake(releaseStatus: HttpStatusCode.Forbidden);
         using var broken = Fake(release: "{");
+        using var unavailable = Fake(releaseStatus: HttpStatusCode.ServiceUnavailable);
         Assert.Equal(UpdateState.RepositoryUnavailable, (await Releases(missing).CheckAsync(Installed, CancellationToken.None)).State);
         Assert.Equal(UpdateState.RepositoryUnavailable, (await Releases(identity).CheckAsync(Installed, CancellationToken.None)).State);
         Assert.Equal(UpdateState.ReleaseUnavailable, (await Releases(none).CheckAsync(Installed, CancellationToken.None)).State);
         Assert.Equal(UpdateState.RateLimited, (await Releases(rate).CheckAsync(Installed, CancellationToken.None)).State);
         Assert.Equal(UpdateState.InvalidResponse, (await Releases(broken).CheckAsync(Installed, CancellationToken.None)).State);
+        Assert.Equal(UpdateState.Network, (await Releases(unavailable).CheckAsync(Installed, CancellationToken.None)).State);
     }
 
     [Fact]
@@ -227,6 +239,17 @@ public sealed class SelfUpdateTests
         var stage = Path.Combine(temp.Path, "incoming");
         Assert.Throws<UpdateException>(() => PortablePackage.Extract(zip, stage, CancellationToken.None));
         Assert.False(Directory.Exists(stage));
+    }
+
+    [Fact]
+    public void MalformedZipDoesNotCreateTheStagingDirectory()
+    {
+        using var temp = new Temp();
+        var archive = Path.Combine(temp.Path, "malformed.zip");
+        var staging = Path.Combine(temp.Path, "staging");
+        File.WriteAllText(archive, "this is not ZIP");
+        Assert.Throws<InvalidDataException>(() => PortablePackage.Extract(archive, staging, default));
+        Assert.False(Directory.Exists(staging));
     }
 
     [Fact]

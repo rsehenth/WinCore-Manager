@@ -8,12 +8,29 @@ switch (args[0])
         Console.WriteLine("Successfully installed");
         Console.Error.WriteLine("fixture stderr");
         return 0;
+    case "success-with-reboot-warning":
+        Console.WriteLine("Restart your PC to finish installation.");
+        Console.WriteLine("Successfully installed");
+        return 0;
     case "stdin":
         Console.WriteLine("waiting for input");
         Console.WriteLine(Console.ReadLine() is null ? "stdin closed" : "stdin available");
         return 0;
     case "exit-code":
         return int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
+    case "update-stages":
+        Console.OutputEncoding = Encoding.UTF8;
+        Console.WriteLine("Downloading synthetic payload");
+        Console.WriteLine("40.0 MB / 200 MB");
+        await Task.Delay(700);
+        Console.WriteLine("85.4 MB / 200 MB");
+        await Task.Delay(650);
+        Console.WriteLine("Successfully verified installer hash");
+        Console.WriteLine("Starting package install...");
+        await Task.Delay(650);
+        var code = int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
+        Console.WriteLine(code == 0 ? "Synthetic installation completed" : $"Installer failed with exit code: {code}");
+        return code;
     case "silent":
         await Task.Delay(TimeSpan.FromSeconds(30));
         return 0;
@@ -24,6 +41,16 @@ switch (args[0])
     case "brief":
         Console.WriteLine("ready");
         await Task.Delay(60);
+        return 0;
+    case "download-progress":
+        Console.OutputEncoding = Encoding.UTF8;
+        Console.WriteLine("Downloading synthetic payload");
+        Console.Write("\r\u001b[32m██▒ 40.0 MB / 200 MB\u001b[0m\r");
+        Console.Out.Flush();
+        await Task.Delay(TimeSpan.FromMilliseconds(700));
+        Console.Write("\r███▒ 85.4 MB / 200 MB\r");
+        Console.Out.Flush();
+        await Task.Delay(TimeSpan.FromSeconds(15));
         return 0;
     case "flood":
         Console.WriteLine("ready");
@@ -81,8 +108,40 @@ switch (args[0])
         return 0;
     case "receipt-worker":
         return await ReceiptWorker.RunAsync(args);
+    case "uninstall-fixture":
+        return await UninstallFixture.RunAsync(args);
     default:
         return 9;
+}
+
+internal static class UninstallFixture
+{
+    internal static async Task<int> RunAsync(string[] args)
+    {
+        var folder = AppContext.BaseDirectory;
+        var installed = Path.Combine(folder, "synthetic-registration");
+        // The test owns this marker. This executable cannot modify a real uninstall key or app.
+        if (!File.Exists(installed)) return 1605;
+        var started = Path.Combine(folder, "synthetic-started");
+        var release = Path.Combine(folder, "synthetic-release");
+        if (args[1] == "delegated")
+        {
+            await Task.Delay(500);
+            FixtureProcess.StartQuiet(started, release, breakaway: false);
+            using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            while (!File.Exists(started)) await Task.Delay(20, deadline.Token);
+            File.Delete(installed);
+            return 0;
+        }
+        if (args[1] == "interactive")
+        {
+            File.WriteAllText(started, Environment.ProcessId.ToString());
+            using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            while (!File.Exists(release)) await Task.Delay(20, deadline.Token);
+        }
+        if (args[1] is "remove" or "interactive") File.Delete(installed);
+        return args[1] switch { "failure" => 23, "reboot" => 3010, "installer-cancel" => 1602, _ => 0 };
+    }
 }
 
 internal static class FixtureProcess

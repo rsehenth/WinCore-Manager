@@ -26,9 +26,11 @@ public partial class ResidueItemRow : ObservableObject
 
     public string CategoryLabel => Item.CategoryLabel;
 
-    public string Location => Item.Location;
+    public string Location => Item.ReviewedLocation;
 
-    public string ConfidenceLabel => Item.ConfidenceLabel;
+    public string ConfidenceLabel => LocalizationService.Source($"ResidueAdvanced.Confidence.{Item.Confidence}");
+    public string? DetailedValue => Item.ValueName is null ? null : $"{Item.ValueName} · {Item.ValueType ?? "—"}";
+    public string ValueDetails => DetailedValue ?? "—";
 
     public Brush ConfidenceBrush => Item.Confidence switch
     {
@@ -102,6 +104,7 @@ public partial class ResidueScanViewModel : ViewModelBase
     private readonly SynchronizationContext _ui;
     private CancellationTokenSource? _cts;
     private ICollectionView? _filteredView;
+    private bool? registryTab;
     private ResidueScanResult? _lastScan;
 
     public ResidueScanViewModel(
@@ -195,7 +198,7 @@ public partial class ResidueScanViewModel : ViewModelBase
     /// <summary>Somente itens elegíveis são marcados (nunca ambíguos, protegidos ou de baixa confiança).</summary>
     public bool SelectAllEligible
     {
-        get => SelectedCount > 0 && VisibleEligibleRows.All(row => row.IsSelected);
+        get => VisibleEligibleRows.Any() && VisibleEligibleRows.All(row => row.IsSelected);
         set => SelectEligible(value);
     }
 
@@ -243,7 +246,7 @@ public partial class ResidueScanViewModel : ViewModelBase
     private void RefreshFilter()
     {
         _filteredView?.Refresh();
-        foreach (var row in Rows.Where(row => row.IsSelected && !IsVisible(row)))
+        foreach (var row in Rows.Where(row => row.IsSelected && !MatchesFilters(row)))
         {
             row.IsSelected = false;
         }
@@ -254,19 +257,26 @@ public partial class ResidueScanViewModel : ViewModelBase
     private bool IsVisible(ResidueItemRow row) => _filteredView?.Filter?.Invoke(row) ?? FilterRow(row);
 
     private IEnumerable<ResidueItemRow> VisibleEligibleRows => Rows.Where(row => row.CanSelect && IsVisible(row));
+    private IEnumerable<ResidueItemRow> SelectedEligibleRows => registryTab is null
+        ? VisibleEligibleRows.Where(row => row.IsSelected)
+        : Rows.Where(row => row.IsSelected && row.CanSelect && MatchesFilters(row));
 
-    internal bool FilterRow(object item)
+    internal void ShowRegistryTab(bool registry)
     {
-        if (item is not ResidueItemRow row)
-        {
-            return true;
-        }
+        registryTab = registry;
+        RefreshFilter();
+    }
 
+    internal bool FilterRow(object item) => item is not ResidueItemRow row ||
+        (registryTab is null || row.Item.IsRegistry == registryTab) && MatchesFilters(row);
+
+    private bool MatchesFilters(ResidueItemRow row)
+    {
         var categoryMatch = SelectedCategory switch
         {
             var label when label == CategoryOptions[1] => row.Category == ResidueCategory.File,
             var label when label == CategoryOptions[2] => row.Category == ResidueCategory.Folder,
-            var label when label == CategoryOptions[3] => row.Category == ResidueCategory.RegistryKey,
+            var label when label == CategoryOptions[3] => row.Item.IsRegistry,
             _ => true,
         };
 
@@ -295,7 +305,7 @@ public partial class ResidueScanViewModel : ViewModelBase
 
     private void RecountSelected()
     {
-        SelectedCount = VisibleEligibleRows.Count(row => row.IsSelected);
+        SelectedCount = SelectedEligibleRows.Count();
         OnPropertyChanged(nameof(SelectAllEligible));
     }
 
@@ -394,7 +404,7 @@ public partial class ResidueScanViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanCleanupSelected))]
     private async Task CleanupSelectedAsync()
     {
-        var selected = VisibleEligibleRows.Where(row => row.IsSelected).Select(row => row.Item).ToList();
+        var selected = SelectedEligibleRows.Select(row => row.Item).ToList();
         if (selected.Count == 0 || IsScanning || IsCleaning)
         {
             return;
@@ -450,6 +460,7 @@ public partial class ResidueScanViewModel : ViewModelBase
 
             var completed = 0;
             // Fora da thread de UI: a janela continua responsiva e o botão Cancelar funciona.
+            plan.RegistryConsentGranted = true;
             var report = await Task.Run(() => _executor.ExecuteAsync(
                 plan,
                 onItemCompleted: result => Post(() =>
@@ -458,7 +469,7 @@ public partial class ResidueScanViewModel : ViewModelBase
                     Progress = completed * 100.0 / plan.Approved.Count;
                     CurrentOperation = $"{result.Item.CategoryLabel}: {result.Outcome switch
                     {
-                        ResidueCleanupItemOutcome.Success => "removido",
+                        ResidueCleanupItemOutcome.Success => LocalizationService.Source("Message.RemovedAfterBackup"),
                         ResidueCleanupItemOutcome.BackupFailed => LocalizationService.Source("Message.KeptBackupFailed"),
                         ResidueCleanupItemOutcome.Failed => LocalizationService.Source("Message.Failed2"),
                         ResidueCleanupItemOutcome.SkippedInvalid => LocalizationService.Source("Message.Blocked"),
@@ -548,7 +559,7 @@ public partial class ResidueScanViewModel : ViewModelBase
         QuarantineEntries.Clear();
         foreach (var entry in entries.OrderByDescending(e => e.Timestamp))
         {
-            QuarantineEntries.Add(new QuarantineEntryRow(entry, _quarantine.CanRestoreRegistry));
+            QuarantineEntries.Add(new QuarantineEntryRow(entry, _quarantine.CanRestoreRegistryEntry(entry)));
         }
 
         OnPropertyChanged(nameof(HasQuarantineEntries));

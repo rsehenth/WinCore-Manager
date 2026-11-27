@@ -35,8 +35,6 @@ public partial class SettingsViewModel : ViewModelBase
         _selectedLanguageOption = Languages.First(o => o.Code == LocalizationService.Current.CultureName);
         _portableMode = settings.Settings.PortableMode;
         _retentionDaysText = settings.Settings.HistoryRetentionDays.ToString();
-        _winGetInactivitySeconds = Math.Clamp(settings.Settings.WinGetInactivitySeconds, 1, 600);
-        WinGetInactivityOptions = new[] { 30, 60, 120, 300, 600 }.Append(_winGetInactivitySeconds).Distinct().Order().ToArray();
         _suppressSave = false;
 
         AppVersionText = SelfUpdate.InstalledVersion;
@@ -69,23 +67,6 @@ public partial class SettingsViewModel : ViewModelBase
         new(LocalizationService.Portuguese, "Português (Brasil)"),
         new(LocalizationService.English, "English (United States)"),
     ];
-
-    public IReadOnlyList<int> WinGetInactivityOptions { get; }
-
-    [ObservableProperty]
-    private int _winGetInactivitySeconds;
-
-    partial void OnWinGetInactivitySecondsChanged(int oldValue, int newValue)
-    {
-        if (_suppressSave || !WinGetInactivityOptions.Contains(newValue)) return;
-        var previous = _settings.Settings.WinGetInactivitySeconds;
-        _settings.Settings.WinGetInactivitySeconds = newValue;
-        if (SaveWithNote(LocalizationService.Source("UpdateOperation.InactivitySaved"))) return;
-        _settings.Settings.WinGetInactivitySeconds = previous;
-        _suppressSave = true;
-        WinGetInactivitySeconds = oldValue;
-        _suppressSave = false;
-    }
 
     [ObservableProperty]
     private LanguageOption _selectedLanguageOption;

@@ -46,7 +46,7 @@ internal sealed class WindowsStartupFileMove : IStartupFileMove
     {
         private readonly Dictionary<string, SafeFileHandle> _directories = new(StringComparer.OrdinalIgnoreCase);
 
-        public void Pin(string path, bool create = false)
+        public void Pin(string path, bool create = false, bool forCleanup = false)
         {
             if (!StartupPaths.TryLocalPath(path, out var normalized))
                 throw new IOException(LocalizationService.Source("Message.TheFolderIsNotOnALocalFixed"));
@@ -58,11 +58,25 @@ internal sealed class WindowsStartupFileMove : IStartupFileMove
                 if (_directories.ContainsKey(parent)) continue;
                 if (create && Path.GetDirectoryName(parent) is not null)
                     Directory.CreateDirectory(parent);
-                var directory = Open(parent, 0x80, 3, 3, OpenReparsePoint | BackupSemantics); // READ_ATTRIBUTES, no delete sharing.
+                var directory = forCleanup ? PinCleanupDirectory(parent)
+                    : Open(parent, 0x80, 3, 3, OpenReparsePoint | BackupSemantics); // READ_ATTRIBUTES, no delete sharing.
                 _directories.Add(parent, directory);
-                if (!HasType(directory, directory: true))
+                if (!forCleanup && !HasType(directory, directory: true))
                     throw new IOException(LocalizationService.Source("Message.TheStartupOrBackupFolderUsesAnIndirect"));
             }
+        }
+
+        // Callers keep ancestors pinned while a descendant is enumerated.
+        internal static SafeFileHandle PinCleanupDirectory(string path)
+        {
+            const uint openNoRecall = 0x00100000;
+            var directory = Open(path, 0x80, 1, 3, OpenReparsePoint | BackupSemantics | openNoRecall);
+            if (GetFileInformationByHandleEx(directory, 9, out var info, 8)
+                && (info.Attributes & (FileAttributes.Directory | WindowsFeatures.CleanupFiles.IndirectAttributes))
+                    == FileAttributes.Directory)
+                return directory;
+            directory.Dispose();
+            throw new IOException(LocalizationService.Source("Message.TheStartupOrBackupFolderUsesAnIndirect"));
         }
 
         public void Dispose()
