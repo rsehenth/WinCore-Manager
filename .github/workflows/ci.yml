@@ -18,5 +18,7 @@ jobs:
           global-json-file: global.json
       - run: dotnet restore WinCoreManager.sln
       - run: dotnet build WinCoreManager.sln -c Release --no-restore
+      - name: Report Windows runner privilege
+        run: Write-Host "Windows runner IsPrivilegedProcess=$([Environment]::IsPrivilegedProcess)"
       # Cross-volume tests skip themselves; nothing is installed or maintained on the runner.
       - run: dotnet test WinCoreManager.sln -c Release --no-build -- xUnit.ParallelizeTestCollections=false

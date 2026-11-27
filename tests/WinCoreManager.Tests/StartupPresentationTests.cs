@@ -325,7 +325,8 @@ public sealed partial class StartupPresentationTests
                 token, operation, false);
             return observation;
         };
-        var vm = new ScreenFixture().CreateMain(service);
+        var inventoryReady = new TaskCompletionSource<IReadOnlyList<InstalledProgram>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var vm = new ScreenFixture().CreateMain(service, inventory: new PendingProgramInventory(inventoryReady.Task));
         var window = new MainWindow(vm) { ShowActivated = false, ShowInTaskbar = false, Opacity = 0, Width = 840, Height = 520 };
         Task? run = null;
         try
@@ -365,8 +366,18 @@ public sealed partial class StartupPresentationTests
                 Assert.False(run.IsCompleted);
                 if (rendered is UninstallersPage)
                 {
+                    var load = Assert.IsAssignableFrom<Task>(vm.Uninstallers.LoadCommand.ExecutionTask);
+                    Assert.True(vm.Uninstallers.IsScanning && vm.Uninstallers.IsBusy);
+                    Assert.False(vm.Uninstallers.RefreshCommand.CanExecute(null));
+                    inventoryReady.SetResult([UninstallerSelectionTests.SyntheticMsi("Synthetic application")]);
+                    await load;
+                    Assert.False(vm.Uninstallers.IsScanning || vm.Uninstallers.IsBusy);
+                    Assert.False(run.IsCompleted);
                     Assert.True(vm.Uninstallers.RefreshCommand.CanExecute(null));
                     await vm.Uninstallers.RefreshCommand.ExecuteAsync(null);
+                    vm.Uninstallers.AllSelected = true;
+                    Assert.Equal(1, vm.Uninstallers.SelectedCount);
+                    Assert.True(vm.Uninstallers.ApplicationBusy);
                     Assert.False(vm.Uninstallers.UninstallSelectedCommand.CanExecute(null));
                 }
                 if (rendered is HardwarePage hardware)
@@ -390,14 +401,17 @@ public sealed partial class StartupPresentationTests
             Assert.True(window.IsVisible && vm.Updates.IsCancelRequested);
             Assert.True(vm.Updates.CanCloseWithoutWaiting);
 
-            _ = Dispatcher.CurrentDispatcher.BeginInvoke(() =>
-            {
-                var dialog = Assert.Single(window.OwnedWindows.OfType<LocalizedDialog>());
-                Assert.IsType<Button>(dialog.FindName("AcceptButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            });
             Assert.Equal("A atualização pode estar instalando arquivos neste momento. Forçar o encerramento pode deixar o aplicativo parcialmente atualizado. Deseja continuar?",
                 LocalizationService.Source("UpdateOperation.ForceWarning"));
-            Assert.True(vm.Updates.ConfirmForce(window));
+            var confirmForce = Dispatcher.CurrentDispatcher.InvokeAsync(() =>
+            {
+                var dialog = Assert.Single(window.OwnedWindows.OfType<LocalizedDialog>());
+                try { Assert.IsType<Button>(dialog.FindName("AcceptButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); }
+                finally { if (dialog.IsVisible) dialog.DialogResult = false; }
+            });
+            var forceConfirmed = vm.Updates.ConfirmForce(window);
+            await confirmForce.Task;
+            Assert.True(forceConfirmed);
             await run;
             Assert.True(window.CanCloseNormally);
             var result = Assert.IsType<ProcessRunResult>(observation);
@@ -421,16 +435,24 @@ public sealed partial class StartupPresentationTests
         }
         finally
         {
-            if (run is { IsCompleted: false })
+            try
             {
-                vm.Updates.CancelUpdateCommand.Execute(null);
-                await WinGetCancellationTests.WaitUntilAsync(() => vm.Updates.ShowForce || run.IsCompleted);
-                if (!run.IsCompleted) control?.RequestForce();
-                await run;
+                inventoryReady.TrySetResult([]);
+                await (vm.Uninstallers.LoadCommand.ExecutionTask ?? Task.CompletedTask);
+                if (run is { IsCompleted: false })
+                {
+                    vm.Updates.CancelUpdateCommand.Execute(null);
+                    await WinGetCancellationTests.WaitUntilAsync(() => vm.Updates.ShowForce || run.IsCompleted);
+                    if (!run.IsCompleted) control?.RequestForce();
+                }
+                await (run ?? Task.CompletedTask);
             }
-            window.Close();
-            locale.Apply(previous);
-            ThemeResources.Install(Application.Current.Resources, AppTheme.Dark);
+            finally
+            {
+                window.Close();
+                locale.Apply(previous);
+                ThemeResources.Install(Application.Current.Resources, AppTheme.Dark);
+            }
         }
     });
 
@@ -518,6 +540,12 @@ public sealed partial class StartupPresentationTests
             if (child is T result) yield return result;
             foreach (var resultChild in Descendants<T>(child)) yield return resultChild;
         }
+    }
+
+    private sealed class PendingProgramInventory(Task<IReadOnlyList<InstalledProgram>> ready) : IProgramInventoryService
+    {
+        public Task<IReadOnlyList<InstalledProgram>> GetInstalledProgramsAsync(CancellationToken cancellationToken = default) =>
+            ready.WaitAsync(cancellationToken);
     }
 
     private sealed class ScreenFixture

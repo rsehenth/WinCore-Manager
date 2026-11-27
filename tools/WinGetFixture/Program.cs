@@ -126,9 +126,10 @@ internal static class UninstallFixture
         var release = Path.Combine(folder, "synthetic-release");
         if (args[1] == "delegated")
         {
-            await Task.Delay(500);
-            FixtureProcess.StartQuiet(started, release, breakaway: false);
+            var supervisorReady = Path.Combine(folder, "synthetic-supervisor-ready");
             using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            while (!File.Exists(supervisorReady)) await Task.Delay(20, deadline.Token);
+            FixtureProcess.StartQuiet(started, release, breakaway: false);
             while (!File.Exists(started)) await Task.Delay(20, deadline.Token);
             File.Delete(installed);
             return 0;

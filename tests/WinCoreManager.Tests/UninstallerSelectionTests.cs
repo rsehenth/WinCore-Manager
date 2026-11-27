@@ -140,11 +140,14 @@ public class UninstallerSelectionTests
             var checkbox = CheckboxFor(grid, row);
             var cell = (DataGridCell)VisualParent<DataGridCell>(checkbox);
             var keyboard = Keyboard.PrimaryDevice;
-            cell.RaiseEvent(new KeyEventArgs(keyboard, PresentationSource.FromVisual(cell), 0, Key.Space)
+            var key = new KeyEventArgs(keyboard, PresentationSource.FromVisual(cell), 0, Key.Space)
             {
                 RoutedEvent = Keyboard.PreviewKeyDownEvent,
-            });
-            Assert.True(row.IsSelected);
+            };
+            cell.RaiseEvent(key);
+            Assert.True(row.IsSelected, $"Handled={key.Handled}, Modifiers={keyboard.Modifiers}, " +
+                $"Source={key.OriginalSource?.GetType().Name}, CurrentColumn={grid.CurrentColumn?.DisplayIndex}, " +
+                $"CurrentItemMatches={ReferenceEquals(row, grid.CurrentItem)}, CanSelect={row.CanSelect}.");
             Assert.Equal(1, model.SelectedCount);
             Assert.True(checkbox.IsChecked);
             Assert.True(checkbox.Focusable && checkbox.IsTabStop);

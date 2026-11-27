@@ -18,6 +18,22 @@ namespace WinCoreManager.Tests;
 public sealed class Rc3CarbonAuditTests
 {
     [Fact]
+    public void Registry_mutation_rejects_real_handles_in_the_lab_and_respects_the_real_process_privilege()
+    {
+        using var environment = new ResidueTestEnvironment("rc3-carbon-boundary");
+        const string path = @"SOFTWARE\Contoso\WidgetPro";
+        using var userSoftware = Registry.CurrentUser.OpenSubKey("SOFTWARE")!;
+        using var machineSoftware = Registry.LocalMachine.OpenSubKey("SOFTWARE")!;
+        var production = new ResidueRegistryMutation(environment.Rules);
+        Assert.Equal(!Environment.IsPrivilegedProcess, production.CanWrite(ResidueRegistryHive.CurrentUser, path));
+        Assert.False(production.CanWrite(ResidueRegistryHive.LocalMachine, path));
+        Assert.False(new ResidueRegistryMutation(environment.Rules, userSoftware.Handle)
+            .CanWrite(ResidueRegistryHive.CurrentUser, path));
+        Assert.False(new ResidueRegistryMutation(environment.Rules, machineSoftware.Handle)
+            .CanWrite(ResidueRegistryHive.CurrentUser, path));
+    }
+
+    [Fact]
     public async Task Hkcu_fallback_removes_and_restores_verified_tree_when_ktm_returns_6801_and_reports_non_atomic_mode()
     {
         using var environment = new ResidueTestEnvironment("rc3-carbon-6801");
@@ -46,6 +62,11 @@ public sealed class Rc3CarbonAuditTests
                 Directory.Delete(installDir, recursive: true);
 
                 using var hiveAdapter = new IsolatedHiveRegistry(handle, environment.Rules);
+                Assert.True(hiveAdapter.Mutation.CanWrite(ResidueRegistryHive.CurrentUser, parentPath),
+                    $"Application hive blocked with IsPrivilegedProcess={Environment.IsPrivilegedProcess}.");
+                Assert.False(hiveAdapter.Mutation.CanWrite(ResidueRegistryHive.LocalMachine, parentPath));
+                Assert.False(hiveAdapter.Mutation.CanWrite(ResidueRegistryHive.CurrentUser, @"SOFTWARE\Classes\CLSID"));
+                Assert.False(hiveAdapter.Mutation.CanWrite(ResidueRegistryHive.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"));
                 var quarantineRoot = Path.Combine(environment.Root, "quarantine");
                 var quarantine = new ResidueQuarantineService(quarantineRoot, hiveAdapter, hiveAdapter, environment.Rules);
                 var history = new FakeHistoryService();

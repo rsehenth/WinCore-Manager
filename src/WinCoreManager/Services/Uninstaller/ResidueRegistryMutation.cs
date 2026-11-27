@@ -47,11 +47,21 @@ internal sealed class ResidueRegistryMutation(ResiduePathRules rules, SafeRegist
 
     internal bool CanWrite(ResidueRegistryHive hive, string path)
     {
-        if (hive != ResidueRegistryHive.CurrentUser || Environment.IsPrivilegedProcess || path.Length > 255 ||
+        if (hive != ResidueRegistryHive.CurrentUser || path.Length > 255 ||
             path.Split('\\').Any(part => part.Length == 0 || part.Any(ch => char.IsControl(ch) || ch is '[' or ']')))
+            return false;
+        if (isolatedHive is null ? Environment.IsPrivilegedProcess : GetIsolatedHivePath() is null)
             return false;
         var fullPath = @"HKEY_CURRENT_USER\" + path;
         return rules.DescribeRegistryProtection(fullPath, ResiduePathRules.IsUninstallEntryPath(fullPath) ? [fullPath] : []) is null;
+    }
+
+    private string? GetIsolatedHivePath()
+    {
+        if (isolatedHive is null || isolatedHive.IsClosed || isolatedHive.IsInvalid)
+            return null;
+        var path = WindowsStartupRunRegistry.KeyPath(isolatedHive);
+        return path?.StartsWith(@"\REGISTRY\A\", StringComparison.OrdinalIgnoreCase) == true ? path : null;
     }
 
     internal bool DeleteVerified(ResidueRegistryHive hive, string path, bool is64Bit, RegistryKeyData snapshot,
@@ -83,8 +93,8 @@ internal sealed class ResidueRegistryMutation(ResiduePathRules rules, SafeRegist
             var rootHandle = isolatedHive ?? root!.Handle;
             var rootPath = isolatedHive is null
                 ? $@"\REGISTRY\USER\{identity.User?.Value ?? throw new InvalidOperationException()}"
-                : WindowsStartupRunRegistry.KeyPath(isolatedHive);
-            if (rootPath is null || isolatedHive is not null && !rootPath.StartsWith(@"\REGISTRY\A\", StringComparison.OrdinalIgnoreCase))
+                : GetIsolatedHivePath();
+            if (rootPath is null)
                 return new(false, RegistryMutationMode.None, 0, total, LocalizationService.Source("ResidueAdvanced.TransactionUnavailable"));
 
             var view = isolatedHive is null && Environment.Is64BitOperatingSystem ? is64Bit ? 0x0100 : 0x0200 : 0;
@@ -159,8 +169,8 @@ internal sealed class ResidueRegistryMutation(ResiduePathRules rules, SafeRegist
             var rootHandle = isolatedHive ?? root!.Handle;
             var rootPath = isolatedHive is null
                 ? $@"\REGISTRY\USER\{identity.User?.Value ?? throw new InvalidOperationException()}"
-                : WindowsStartupRunRegistry.KeyPath(isolatedHive);
-            if (rootPath is null || isolatedHive is not null && !rootPath.StartsWith(@"\REGISTRY\A\", StringComparison.OrdinalIgnoreCase))
+                : GetIsolatedHivePath();
+            if (rootPath is null)
                 return new(false, RegistryMutationMode.None, false, LocalizationService.Source("ResidueAdvanced.TransactionUnavailable"));
 
             var view = isolatedHive is null && Environment.Is64BitOperatingSystem ? is64Bit ? 0x0100 : 0x0200 : 0;

@@ -51,7 +51,7 @@ public class MachineUninstallTests
             model.AllSelected = true;
             Assert.Equal(1, model.SelectedCount);
             var confirmed = false;
-            model.ConfirmHandler = request =>
+            model.ConfirmHandler = async request =>
             {
                 Assert.Empty(lab.History.Records);
                 Assert.True(File.Exists(lab.Installed));
@@ -66,7 +66,8 @@ public class MachineUninstallTests
                     finally { if (dialog.IsVisible) dialog.DialogResult = false; }
                 }, DispatcherPriority.ApplicationIdle);
                 confirmed = dialog.ShowDialog() == true;
-                return Task.FromResult(confirmed && click.Task.IsCompletedSuccessfully);
+                await click.Task;
+                return confirmed;
             };
 
             await model.UninstallSelectedCommand.ExecuteAsync(null);
@@ -95,6 +96,46 @@ public class MachineUninstallTests
         Assert.False(lab.Store.HasReceipt);
     });
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public Task Elevated_session_blocks_fixture_before_consent_or_launch(bool machine) => WpfTestThread.Run(async () =>
+    {
+        using var lab = new Lab(machine: machine, isPrivileged: true);
+        var plan = new UninstallPlanner().CreatePlan(lab.Product, silentPreferred: false);
+        var reason = LocalizationService.Source("Message.Uninstaller.ElevatedSession");
+        Assert.True(plan.IsExecutable, plan.NotExecutableReason);
+        Assert.Equal(reason, lab.Executor.PrepareForConsent(plan));
+        Assert.False(plan.PreparedForConsent);
+        var model = await lab.LoadAsync();
+        Assert.False(Assert.Single(model.Catalog).CanSelect);
+        Assert.Equal(0, lab.UacRequests);
+        Assert.True(File.Exists(lab.Installed));
+        Assert.False(lab.Store.HasReceipt);
+    });
+
+    [Fact]
+    public void Fixture_rejects_other_executables_and_appx_while_production_checks_the_actual_session()
+    {
+        using var lab = new Lab(machine: false);
+        var plan = new UninstallPlanner().CreatePlan(lab.Product, silentPreferred: false);
+        Assert.Null(lab.Executor.GetLaunchRestriction(plan));
+        Assert.NotNull(lab.Executor.GetLaunchRestriction(new UninstallPlan
+        {
+            Program = lab.Product,
+            Method = UninstallMethod.Executable,
+            ExecutablePath = Path.Combine(Environment.SystemDirectory, "msiexec.exe"),
+        }));
+        Assert.NotNull(lab.Executor.GetLaunchRestriction(new UninstallPlan
+        {
+            Program = lab.Product,
+            Method = UninstallMethod.CurrentUserAppx,
+            ExecutablePath = lab.Image,
+        }));
+        Assert.Equal(Environment.IsPrivilegedProcess ? LocalizationService.Source("Message.Uninstaller.ElevatedSession") : null,
+            new ProcessUninstallExecutor().GetLaunchRestriction(plan));
+    }
+
     [Fact]
     public Task Uac_refusal_records_cancellation_and_releases_the_modules() => WpfTestThread.Run(async () =>
     {
@@ -120,14 +161,18 @@ public class MachineUninstallTests
         var run = model.UninstallSelectedCommand.ExecuteAsync(null);
         try
         {
-            await lab.UacRequested.Task.WaitAsync(TimeSpan.FromSeconds(8));
+            await Task.WhenAny(lab.UacRequested.Task, run).WaitAsync(TimeSpan.FromSeconds(8));
+            Assert.True(lab.UacRequested.Task.IsCompletedSuccessfully, "Uninstall finished before requesting UAC.");
             model.CancelUninstallCommand.Execute(null);
             Assert.False(run.IsCompleted);
             Assert.True(lab.Store.HasReceipt);
             Assert.Equal(0, lab.Releases);
         }
-        finally { response.Set(); }
-        await run;
+        finally
+        {
+            response.Set();
+            await run;
+        }
         Assert.False(lab.Store.HasReceipt);
         Assert.Equal(HistoryStatus.Cancelled, Assert.Single(lab.History.Records).Status);
     });
@@ -209,8 +254,9 @@ public class MachineUninstallTests
             try
             {
                 using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(8));
-                while (!File.Exists(lab.Started) || new FileInfo(lab.Started).Length == 0)
+                while (!lab.TryGetStartedProcessId(out _) && !run.IsCompleted)
                     await Task.Delay(20, deadline.Token);
+                Assert.True(lab.TryGetStartedProcessId(out var pid), "Uninstall finished before the fixture reported readiness.");
                 Assert.True(model.IsUninstalling && lab.Store.HasReceipt);
                 Assert.False(run.IsCompleted);
                 if (cancel)
@@ -220,12 +266,16 @@ public class MachineUninstallTests
                     await run.WaitAsync(deadline.Token);
                     Assert.True(lab.Store.HasReceipt);
                     Assert.Equal(HistoryStatus.Interrupted, Assert.Single(lab.History.Records).Status);
-                    using var child = Process.GetProcessById(int.Parse(File.ReadAllText(lab.Started)));
+                    using var child = Process.GetProcessById(pid);
                     Assert.False(child.HasExited);
                 }
             }
-            finally { File.WriteAllText(lab.Release, "continue"); }
-            await run;
+            finally
+            {
+                File.WriteAllText(lab.Release, "continue");
+                await run;
+                await lab.WaitForStartedProcessExitAsync();
+            }
             if (!cancel)
             {
                 Assert.Equal(HistoryStatus.Success, Assert.Single(lab.History.Records).Status);
@@ -233,12 +283,6 @@ public class MachineUninstallTests
             }
             else
             {
-                try
-                {
-                    using var child = Process.GetProcessById(int.Parse(File.ReadAllText(lab.Started)));
-                    await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
-                }
-                catch (ArgumentException) { } // Already exited after the release marker.
                 using var receipt = lab.Store.Open();
                 Assert.Equal(DelegatedProcessState.KnownActive, receipt.Outcome?.Delegation);
                 Assert.True(PackageChangeReview.CanReviewWithoutRestart(receipt, receipt.Boot,
@@ -256,16 +300,18 @@ public class MachineUninstallTests
         var scanned = new List<InstalledProgram>();
         model.OfferResidueScanHandler = name => { offered.Add(name); return true; };
         model.ShowResidueScanHandler = program => { scanned.Add(program); return Task.CompletedTask; };
+        model.AllSelected = true;
+        model.ConfirmHandler = _ => Task.FromResult(true);
+        var run = model.UninstallSelectedCommand.ExecuteAsync(null);
         try
         {
-            model.AllSelected = true;
-            model.ConfirmHandler = _ => Task.FromResult(true);
-            await model.UninstallSelectedCommand.ExecuteAsync(null).WaitAsync(TimeSpan.FromSeconds(15));
+            await run.WaitAsync(TimeSpan.FromSeconds(15));
             var record = Assert.Single(lab.History.Records);
             Assert.Equal(HistoryStatus.Success, record.Status);
             Assert.Contains(LocalizationService.Source("Message.Uninstaller.Lingering", lab.Product.Name), record.Message);
             Assert.False(lab.Store.HasReceipt);
-            using var child = Process.GetProcessById(int.Parse(File.ReadAllText(lab.Started)));
+            Assert.True(lab.TryGetStartedProcessId(out var pid));
+            using var child = Process.GetProcessById(pid);
             Assert.False(child.HasExited); // reported, never killed
             Assert.Equal(new[] { lab.Product.Name }, offered);
             Assert.Equal(new[] { lab.Product }, scanned);
@@ -274,12 +320,8 @@ public class MachineUninstallTests
         finally
         {
             File.WriteAllText(lab.Release, "continue");
-            try
-            {
-                using var child = Process.GetProcessById(int.Parse(File.ReadAllText(lab.Started)));
-                await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
-            }
-            catch (ArgumentException) { } // Already exited after the release marker.
+            await run;
+            await lab.WaitForStartedProcessExitAsync();
         }
     });
 
@@ -339,9 +381,10 @@ public class MachineUninstallTests
         private readonly UninstallersViewModel _model;
         internal string Image { get; }
         internal string Installed => Path.Combine(_directory, "synthetic-registration");
-        internal string Started => Path.Combine(_directory, "synthetic-started");
+        private string Started => Path.Combine(_directory, "synthetic-started");
         internal string Release => Path.Combine(_directory, "synthetic-release");
         internal InstalledProgram Product { get; }
+        internal ProcessUninstallExecutor Executor { get; }
         internal readonly FakeHistoryService History = new();
         internal ISettingsService Settings { get; }
         internal WinGetInterruptionStore Store { get; }
@@ -354,7 +397,7 @@ public class MachineUninstallTests
         internal bool RegistrationMatches { get; set; } = true;
 
         internal Lab(ProgramKind kind = ProgramKind.InnoSetup, bool machine = true, string behavior = "remove",
-            bool persistentHistory = false)
+            bool persistentHistory = false, bool isPrivileged = false)
         {
             _behavior = behavior;
             foreach (var file in Directory.EnumerateFiles(Path.Combine(AppContext.BaseDirectory, "WinGetFixture")))
@@ -381,12 +424,12 @@ public class MachineUninstallTests
             var boot = DateTime.UtcNow.AddDays(-1).Ticks.ToString(CultureInfo.InvariantCulture);
             Store = new WinGetInterruptionStore(Settings.DataDirectory, () => boot);
             var planner = new UninstallPlanner();
-            var executor = new ProcessUninstallExecutor(
+            Executor = new ProcessUninstallExecutor(Image, FixtureArguments, isPrivileged,
                 plan => RegistrationMatches && (plan.Method == UninstallMethod.Msi ||
                     MachineUninstallPolicy.IsExplicitCommand(Product.UninstallString, plan.ExecutablePath, plan.Arguments)),
-                path => path == Image, StartWithSimulatedUac, program => File.Exists(Installed));
+                SimulateUac, _ => File.Exists(Installed));
             IHistoryService history = persistentHistory ? new HistoryService(Settings) : History;
-            _model = new UninstallersViewModel(this, planner, new(planner, executor, history), new FakeResidueAnalysisService())
+            _model = new UninstallersViewModel(this, planner, new(planner, Executor, history), new FakeResidueAnalysisService())
             {
                 TryReservePackageChange = Reserve,
             };
@@ -394,7 +437,7 @@ public class MachineUninstallTests
 
         private string FixtureArguments => $"uninstall-fixture {_behavior}";
 
-        private Process? StartWithSimulatedUac(ProcessStartInfo start)
+        private void SimulateUac(ProcessStartInfo start)
         {
             UacRequests++;
             Assert.True(start.UseShellExecute);
@@ -406,14 +449,12 @@ public class MachineUninstallTests
             {
                 Assert.Equal(Path.Combine(Environment.SystemDirectory, "msiexec.exe"), start.FileName);
                 Assert.Equal($"/x{Product.MsiProductCode:B} REBOOT=ReallySuppress /norestart", start.Arguments);
-                start.FileName = Image;
-                start.Arguments = FixtureArguments;
-                start.WorkingDirectory = _directory;
             }
-            Assert.Equal(Image, start.FileName);
-            start.Verb = "open"; // Actual ShellExecute process handle, with the UAC decision simulated.
-            start.WindowStyle = ProcessWindowStyle.Hidden;
-            return Process.Start(start);
+            else
+            {
+                Assert.Equal(Image, start.FileName);
+                Assert.Equal(FixtureArguments, start.Arguments);
+            }
         }
 
         internal TimeSpan? SettleWindow { get; init; }
@@ -422,7 +463,35 @@ public class MachineUninstallTests
         {
             reservation = new PackageChangeReservation(Store.BeginExternal(kind, target), () => Releases++);
             if (SettleWindow is { } window) reservation.Control.DelegateSettleWindow = window;
+            if (_behavior == "delegated")
+            {
+                var persistRoot = reservation.Control.PersistRoot;
+                reservation.Control.PersistRoot = identity =>
+                {
+                    persistRoot?.Invoke(identity);
+                    File.WriteAllText(Path.Combine(_directory, "synthetic-supervisor-ready"), "ready");
+                };
+            }
             return true;
+        }
+
+        internal bool TryGetStartedProcessId(out int pid)
+        {
+            pid = 0;
+            if (!File.Exists(Started)) return false;
+            using var reader = new StreamReader(File.Open(Started, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            return int.TryParse(reader.ReadToEnd(), out pid);
+        }
+
+        internal async Task WaitForStartedProcessExitAsync()
+        {
+            if (!TryGetStartedProcessId(out var pid)) return;
+            try
+            {
+                using var process = Process.GetProcessById(pid);
+                await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            catch (ArgumentException) { } // Already exited after the release marker.
         }
 
         internal async Task<UninstallersViewModel> LoadAsync()

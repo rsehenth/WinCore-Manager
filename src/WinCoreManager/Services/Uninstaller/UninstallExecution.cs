@@ -31,17 +31,36 @@ public sealed class ProcessUninstallExecutor : IUninstallExecutor
     private readonly Func<string, bool> _protectedImagePath;
     private readonly Func<ProcessStartInfo, Process?> _startElevated;
     private readonly Func<InstalledProgram, bool?> _entryExists;
+    private readonly (string Image, bool IsPrivileged)? _fixture;
 
     public ProcessUninstallExecutor() : this(MachineUninstallPolicy.MatchesRegistration,
         MachineUninstallPolicy.IsProtectedImagePath, Process.Start, MachineUninstallPolicy.EntryExists) { }
 
-    internal ProcessUninstallExecutor(Func<UninstallPlan, bool> matchesRegistration, Func<string, bool> protectedImagePath,
+    private ProcessUninstallExecutor(Func<UninstallPlan, bool> matchesRegistration, Func<string, bool> protectedImagePath,
         Func<ProcessStartInfo, Process?> startElevated, Func<InstalledProgram, bool?> entryExists)
     {
         _matchesRegistration = matchesRegistration;
         _protectedImagePath = protectedImagePath;
         _startElevated = startElevated;
         _entryExists = entryExists;
+    }
+
+    internal ProcessUninstallExecutor(string fixtureImage, string fixtureArguments, bool isPrivileged,
+        Func<UninstallPlan, bool> matchesRegistration, Action<ProcessStartInfo> requestElevation,
+        Func<InstalledProgram, bool?> entryExists)
+        : this(matchesRegistration, path => path == fixtureImage, request =>
+        {
+            requestElevation(request);
+            return Process.Start(new ProcessStartInfo(fixtureImage, fixtureArguments)
+            {
+                UseShellExecute = true,
+                Verb = "open",
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = Path.GetDirectoryName(fixtureImage)!,
+            });
+        }, entryExists)
+    {
+        _fixture = (fixtureImage, isPrivileged);
     }
 
     public Task<UninstallExecutionResult> ExecuteAsync(UninstallPlan plan, Action<string>? onOutputLine, CancellationToken cancellationToken) =>
@@ -236,8 +255,13 @@ public sealed class ProcessUninstallExecutor : IUninstallExecutor
 
     internal string? GetLaunchRestriction(UninstallPlan plan)
     {
-        if (Environment.IsPrivilegedProcess)
+        if (_fixture?.IsPrivileged ?? Environment.IsPrivilegedProcess)
             return LocalizationService.Source("Message.Uninstaller.ElevatedSession");
+        // The fixture substitutes its image for machine MSI and uses only that image for executable plans.
+        if (_fixture is { } fixture &&
+            !(plan.Method == UninstallMethod.Executable && plan.ExecutablePath == fixture.Image ||
+              plan.Method == UninstallMethod.Msi && MachineUninstallPolicy.IsMachine(plan.Program)))
+            return LocalizationService.Source("Message.UninstallIsUnsupportedForThisEntry");
         if (!MachineUninstallPolicy.IsMachine(plan.Program)) return null;
         try
         {
